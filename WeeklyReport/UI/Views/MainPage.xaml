@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:OutlookWeeklyReport.UI.ViewModels"
+             xmlns:conv="clr-namespace:OutlookWeeklyReport.UI.Converters"
+             x:Class="OutlookWeeklyReport.UI.Views.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Weekly Report">
+
+    <ContentPage.Resources>
+        <conv:InvertBoolConverter x:Key="InvertBool" />
+        <conv:BoolToColorConverter x:Key="AuthStatusColor"
+                                   TrueColor="#16a34a"
+                                   FalseColor="#64748b" />
+    </ContentPage.Resources>
+
+    <ScrollView BackgroundColor="{StaticResource Background}">
+        <VerticalStackLayout Padding="20,24,20,32" Spacing="0">
+
+            <!-- ── Intestazione ──────────────────────────────────────────── -->
+            <Label Text="📅  Weekly Report"
+                   Style="{StaticResource HeadingLabel}"
+                   FontSize="22"
+                   Margin="0,0,0,4" />
+            <Label Text="Esporta i tuoi meeting Outlook in CSV settimanale"
+                   Style="{StaticResource SubtitleLabel}"
+                   Margin="0,0,0,24" />
+
+            <!-- ── Card: Account Microsoft ───────────────────────────────── -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="🔐  ACCOUNT MICROSOFT"
+                           Style="{StaticResource SectionTitle}" />
+
+                    <!-- Stato autenticazione -->
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                 Fill="{Binding IsAuthenticated, Converter={StaticResource AuthStatusColor}}" />
+                        <Label Text="{Binding UserDisplayName}"
+                               Style="{StaticResource SubtitleLabel}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <!-- Device Code Message (headless fallback) -->
+                    <Frame IsVisible="{Binding HasDeviceCode}"
+                           BackgroundColor="#1c3448"
+                           BorderColor="#0284c7"
+                           CornerRadius="8"
+                           Padding="12">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Autenticazione via codice dispositivo:"
+                                   Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding DeviceCodeMessage}"
+                                   TextColor="{StaticResource PrimaryLight}"
+                                   FontSize="12"
+                                   LineBreakMode="WordWrap" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Pulsanti Login / Logout -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                          IsVisible="{Binding IsBusy, Converter={StaticResource InvertBool}}">
+                        <Button Grid.Column="0"
+                                Text="Accedi con Microsoft"
+                                Style="{StaticResource PrimaryBtn}"
+                                Command="{Binding LoginCommand}"
+                                IsVisible="{Binding IsNotAuthenticated}" />
+                        <Button Grid.Column="0"
+                                Text="✓  Autenticato"
+                                Style="{StaticResource PrimaryBtn}"
+                                BackgroundColor="{StaticResource Success}"
+                                IsEnabled="False"
+                                IsVisible="{Binding IsAuthenticated}" />
+                        <Button Grid.Column="1"
+                                Text="Esci"
+                                Style="{StaticResource DangerBtn}"
+                                Command="{Binding LogoutCommand}"
+                                IsVisible="{Binding IsAuthenticated}" />
+                    </Grid>
+
+                    <!-- Spinner login -->
+                    <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                       IsVisible="{Binding IsBusy}"
+                                       Color="{StaticResource Primary}"
+                                       HeightRequest="32" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ── Card: Impostazioni Report ─────────────────────────────── -->
+            <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="12">
+
+                    <Label Text="⚙️  IMPOSTAZIONI REPORT"
+                           Style="{StaticResource SectionTitle}" />
+
+                    <!-- Toggle settimana -->
+                    <Label Text="Settimana" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Grid.Column="0"
+                                Text="Questa settimana"
+                                Command="{Binding SelectThisWeekCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsThisWeekSelected}"
+                                             Value="True">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleSelected}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsThisWeekSelected}"
+                                             Value="False">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleUnselected}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Text="Settimana scorsa"
+                                Command="{Binding SelectLastWeekCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsLastWeekSelected}"
+                                             Value="True">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleSelected}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsLastWeekSelected}"
+                                             Value="False">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleUnselected}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+
+                    <!-- Preview range date -->
+                    <Label Text="{Binding WeekRangeDisplay}"
+                           Style="{StaticResource SubtitleLabel}"
+                           TextColor="{StaticResource PrimaryLight}" />
+
+                    <!-- Cartella di output -->
+                    <Label Text="Cartella di output" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Entry Grid.Column="0"
+                               Text="{Binding OutputFolder}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="Seleziona o digita il percorso…"
+                               FontSize="13" />
+                        <Button Grid.Column="1"
+                                Text="📁"
+                                Style="{StaticResource SecondaryBtn}"
+                                WidthRequest="44"
+                                Command="{Binding SelectFolderCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ── Pulsante Genera Report ─────────────────────────────────── -->
+            <Button Text="▶  Genera Report CSV"
+                    Style="{StaticResource PrimaryBtn}"
+                    FontSize="16"
+                    HeightRequest="52"
+                    Command="{Binding GenerateReportCommand}"
+                    Margin="0,0,0,12" />
+
+            <!-- ── Status bar ─────────────────────────────────────────────── -->
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="{Binding StatusColor}"
+                   FontSize="13"
+                   Margin="0,0,0,12"
+                   IsVisible="{Binding HasStatusMessage}" />
+
+            <!-- ── Card: Risultato ───────────────────────────────────────── -->
+            <Frame Style="{StaticResource Card}"
+                   IsVisible="{Binding ShowResult}">
+                <VerticalStackLayout Spacing="12">
+
+                    <Label Text="✅  REPORT GENERATO"
+                           Style="{StaticResource SectionTitle}"
+                           TextColor="{StaticResource Success}" />
+
+                    <!-- Statistiche -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding MeetingCount}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Meeting"
+                                   Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="{Binding TotalHours, StringFormat='{0:F1}h'}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Ore totali"
+                                   Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="2">
+                            <Label Text="{Binding WeekNumber, StringFormat='W{0}'}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Settimana"
+                                   Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <BoxView HeightRequest="1"
+                             BackgroundColor="{StaticResource SurfaceVariant}"
+                             Margin="0,4" />
+
+                    <!-- Percorsi file -->
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="📄" FontSize="14" VerticalOptions="Center" />
+                        <Label Text="{Binding DetailCsvPath}"
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center"
+                               HorizontalOptions="FillAndExpand" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="📊" FontSize="14" VerticalOptions="Center" />
+                        <Label Text="{Binding SummaryCsvPath}"
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center"
+                               HorizontalOptions="FillAndExpand" />
+                    </HorizontalStackLayout>
+
+                    <!-- Apri cartella -->
+                    <Button Text="📂  Apri cartella"
+                            Style="{StaticResource SecondaryBtn}"
+                            Command="{Binding OpenResultFolderCommand}"
+                            HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

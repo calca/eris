@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ── Sfondo (dark slate) ─────────────────────────────── -->
+    <Color x:Key="Background">#0f172a</Color>
+    <Color x:Key="Surface">#1e293b</Color>
+    <Color x:Key="SurfaceVariant">#334155</Color>
+    <Color x:Key="SurfaceBorder">#475569</Color>
+
+    <!-- ── Testo ────────────────────────────────────────────── -->
+    <Color x:Key="OnBackground">#f1f5f9</Color>
+    <Color x:Key="OnSurface">#cbd5e1</Color>
+    <Color x:Key="OnSurfaceMuted">#94a3b8</Color>
+
+    <!-- ── Accent (sky blue) ────────────────────────────────── -->
+    <Color x:Key="Primary">#0284c7</Color>
+    <Color x:Key="PrimaryDark">#0369a1</Color>
+    <Color x:Key="PrimaryLight">#38bdf8</Color>
+
+    <!-- ── Status ───────────────────────────────────────────── -->
+    <Color x:Key="Success">#16a34a</Color>
+    <Color x:Key="Error">#dc2626</Color>
+    <Color x:Key="Warning">#d97706</Color>
+    <Color x:Key="Info">#0284c7</Color>
+
+</ResourceDictionary>
