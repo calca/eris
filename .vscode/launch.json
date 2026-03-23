@@ -6,27 +6,28 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build-cli",
-            "program": "${workspaceFolder}/WeeklyReport/CLI/bin/Debug/net8.0/owreport.dll",
+            "program": "${workspaceFolder}/WeeklyReport/CLI/bin/Debug/net10.0/owreport.dll",
             "args": [],
             "cwd": "${workspaceFolder}/WeeklyReport/CLI",
             "console": "integratedTerminal",
             "stopAtEntry": false,
             "env": {
-                "PATH": "/usr/local/share/dotnet:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+                "PATH": "/Users/gianluigi.calcaterra/.dotnet-local:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+                "DOTNET_ROOT": "/Users/gianluigi.calcaterra/.dotnet-local"
             }
         },
         {
             "name": "UI (Mac Catalyst)",
-            "type": "coreclr",
+            "type": "node",
             "request": "launch",
-            "preLaunchTask": "build-ui",
-            "program": "${workspaceFolder}/WeeklyReport/UI/bin/Debug/net8.0-maccatalyst/UI.dll",
-            "args": [],
+            "noDebug": true,
+            "runtimeExecutable": "/Users/gianluigi.calcaterra/.dotnet-local/dotnet",
+            "runtimeArgs": ["run", "--project"],
+            "program": "${workspaceFolder}/WeeklyReport/UI/UI.csproj",
+            "args": ["-f", "net8.0-maccatalyst"],
             "cwd": "${workspaceFolder}/WeeklyReport/UI",
             "console": "integratedTerminal",
-            "stopAtEntry": false,
             "env": {
-                "PATH": "/Users/gianluigi.calcaterra/.dotnet-local:/usr/local/share/dotnet:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
                 "DOTNET_ROOT": "/Users/gianluigi.calcaterra/.dotnet-local"
             }
         }

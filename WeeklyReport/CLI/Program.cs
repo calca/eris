@@ -5,7 +5,7 @@ using Spectre.Console;
 
 // ── Banner ─────────────────────────────────────────────────────────────────────
 AnsiConsole.Write(new FigletText("OWReport").Color(Color.SkyBlue1));
-AnsiConsole.MarkupLine("[bold sky1]Outlook Weekly Meeting Report[/]\n");
+AnsiConsole.MarkupLine("[bold skyblue1]Outlook Weekly Meeting Report[/]\n");
 
 // ── Root command ───────────────────────────────────────────────────────────────
 var rootCommand = new RootCommand("Outlook Weekly Meeting Report — esporta i meeting accettati in CSV settimanale");
@@ -44,8 +44,8 @@ generateCmd.SetHandler(async (string week, string output, string? config) =>
 
     await AnsiConsole.Status()
         .Spinner(Spinner.Known.Dots)
-        .SpinnerStyle(Style.Parse("sky1"))
-        .StartAsync("[sky1]Generazione report in corso…[/]", async ctx =>
+        .SpinnerStyle(Style.Parse("skyblue1"))
+        .StartAsync("[skyblue1]Generazione report in corso…[/]", async ctx =>
         {
             result = await orchestrator.GenerateAsync(period, output, msg =>
             {
