@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "setup-maui-local",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/install-dotnet-local.sh",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "echo": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "build-cli",
+            "type": "shell",
+            "command": "/usr/local/share/dotnet/dotnet build '${workspaceFolder}/WeeklyReport/CLI/CLI.csproj' --configuration Debug",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-ui",
+            "type": "shell",
+            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" build '${workspaceFolder}/WeeklyReport/UI/UI.csproj' --configuration Debug -f net8.0-maccatalyst",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-ui",
+            "type": "shell",
+            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" run --project '${workspaceFolder}/WeeklyReport/UI/UI.csproj' -f net8.0-maccatalyst",
+            "problemMatcher": []
+        }
+    ]
+}

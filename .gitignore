@@ -38,9 +38,6 @@ msal_token_cache.bin
 *.sln.docstates
 *.VC.db
 *.VC.opendb
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
 
 ## ── Rider / JetBrains ────────────────────────────────────────────
 .idea/
