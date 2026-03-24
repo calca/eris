@@ -19,8 +19,8 @@ public sealed class XlsxExportService : IExportService
         var filePath = Path.Combine(outputFolder, "report.xlsx");
 
         using var wb = new XLWorkbook();
-        WriteDetail(wb, events);
         WriteSummary(wb, events);
+        WriteDetail(wb, events);
         wb.SaveAs(filePath);
 
         return (filePath, filePath);
