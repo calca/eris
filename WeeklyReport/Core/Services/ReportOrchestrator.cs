@@ -24,13 +24,11 @@ public sealed class ReportOrchestrator
 
     /// <param name="period">Settimana corrente o precedente.</param>
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
-    /// <param name="deviceCodeCallback">Chiamato se non è disponibile un browser (headless).</param>
     public async Task<ReportResult> GenerateAsync(
         WeekPeriod       period,
-        string           outputBaseDir,
-        Action<string>?  deviceCodeCallback = null)
+        string           outputBaseDir)
     {
-        var token           = await _auth.GetAccessTokenAsync(deviceCodeCallback);
+        var token           = await _auth.GetAccessTokenAsync();
         var calendarService = new CalendarService(token);
         var week            = WeekRange.FromPeriod(period);
 

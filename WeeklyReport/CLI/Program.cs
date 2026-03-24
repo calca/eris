@@ -1,4 +1,5 @@
 using System.CommandLine;
+using Microsoft.Identity.Client;
 using OutlookWeeklyReport.Core.Models;
 using OutlookWeeklyReport.Core.Services;
 using Spectre.Console;
@@ -34,7 +35,12 @@ generateCmd.AddOption(configOpt);
 generateCmd.SetHandler(async (string week, string output, string? config) =>
 {
     var appConfig   = ConfigLoader.Load(config);
-    var auth        = new GraphAuthService(appConfig);
+    var pca = PublicClientApplicationBuilder
+        .Create(appConfig.ClientId)
+        .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+        .WithRedirectUri("http://localhost")
+        .Build();
+    var auth        = new GraphAuthService(pca, appConfig.Scopes);
     var orchestrator = new ReportOrchestrator(auth);
     var period      = week.Equals("last", StringComparison.OrdinalIgnoreCase)
                         ? WeekPeriod.LastWeek
@@ -47,11 +53,7 @@ generateCmd.SetHandler(async (string week, string output, string? config) =>
         .SpinnerStyle(Style.Parse("skyblue1"))
         .StartAsync("[skyblue1]Generazione report in corso…[/]", async ctx =>
         {
-            result = await orchestrator.GenerateAsync(period, output, msg =>
-            {
-                ctx.Status($"[yellow]{Markup.Escape(msg)}[/]");
-                AnsiConsole.MarkupLine($"\n[yellow]{Markup.Escape(msg)}[/]");
-            });
+            result = await orchestrator.GenerateAsync(period, output);
         });
 
     var table = new Table()

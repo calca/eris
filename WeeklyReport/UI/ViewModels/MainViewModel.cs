@@ -8,7 +8,7 @@ namespace OutlookWeeklyReport.UI.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private GraphAuthService? _authService;
+    private readonly GraphAuthService _authService;
 
     // ── Autenticazione ────────────────────────────────────────────────────────
 
@@ -83,7 +83,11 @@ public partial class MainViewModel : ObservableObject
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    public MainViewModel() => UpdateWeekDisplay();
+    public MainViewModel(GraphAuthService authService)
+    {
+        _authService = authService;
+        UpdateWeekDisplay();
+    }
 
     partial void OnIsThisWeekSelectedChanged(bool value) => UpdateWeekDisplay();
 
@@ -105,14 +109,10 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var config = ConfigLoader.Load();
-            _authService = new GraphAuthService(config);
-
-            await _authService.GetAccessTokenAsync(msg => DeviceCodeMessage = msg);
+            await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
 
             UserDisplayName  = await _authService.GetUserDisplayNameAsync();
             IsAuthenticated  = true;
-            DeviceCodeMessage = null;
             SetStatus($"Connesso come {UserDisplayName}", "#16a34a");
         }
         catch (Exception ex)
@@ -166,8 +166,6 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanGenerate))]
     private async Task GenerateReportAsync()
     {
-        if (_authService == null) return;
-
         IsBusy     = true;
         ShowResult = false;
         SetStatus("Generazione report in corso…", "#0284c7");
@@ -229,5 +227,28 @@ public partial class MainViewModel : ObservableObject
     {
         StatusMessage = message;
         StatusColor   = Color.FromArgb(hexColor);
+    }
+
+    /// <summary>
+    /// Restituisce la parent window/VC per presentare la UI di autenticazione MSAL.
+    /// </summary>
+    private static object? GetPlatformParentWindow()
+    {
+#if MACCATALYST || IOS
+        // Ottiene il UIViewController root dalla finestra corrente MAUI
+        var window = Application.Current?.Windows.FirstOrDefault();
+        var platformWindow = window?.Handler?.PlatformView as UIKit.UIWindow;
+        return platformWindow?.RootViewController;
+#elif WINDOWS
+        var window = Application.Current?.Windows.FirstOrDefault();
+        if (window?.Handler?.PlatformView is Microsoft.UI.Xaml.Window winUiWindow)
+        {
+            var handle = WinRT.Interop.WindowNative.GetWindowHandle(winUiWindow);
+            return handle;
+        }
+        return null;
+#else
+        return null;
+#endif
     }
 }

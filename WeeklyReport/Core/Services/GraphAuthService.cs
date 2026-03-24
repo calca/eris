@@ -1,35 +1,34 @@
 using Microsoft.Identity.Client;
-using OutlookWeeklyReport.Core.Models;
 
 namespace OutlookWeeklyReport.Core.Services;
 
 /// <summary>
 /// Gestisce l'autenticazione MSAL per Microsoft Graph.
-/// Strategia: cache silenzioso → browser interattivo → device code flow (fallback headless).
+/// L'istanza di IPublicClientApplication viene iniettata dal layer UI
+/// (che opera nel TFM platform-specific e può configurare ASWebAuthenticationSession, WAM, ecc.).
 /// </summary>
 public sealed class GraphAuthService
 {
     private readonly IPublicClientApplication _app;
     private readonly string[] _scopes;
 
-    public GraphAuthService(AppConfig config)
+    public GraphAuthService(IPublicClientApplication app, string[] scopes)
     {
-        _scopes = config.Scopes;
-
-        _app = PublicClientApplicationBuilder
-            .Create(config.ClientId)
-            .WithAuthority(AzureCloudInstance.AzurePublic, config.TenantId)
-            .WithDefaultRedirectUri()
-            .Build();
+        _app = app;
+        _scopes = scopes;
 
         TokenCacheHelper.EnableSerialization(_app.UserTokenCache);
     }
 
     /// <summary>
     /// Restituisce un access token valido.
-    /// <paramref name="deviceCodeCallback"/> viene invocato se non è disponibile un browser (es. SSH/headless).
+    /// Tenta prima il cache silenzioso, poi il flusso interattivo.
     /// </summary>
-    public async Task<string> GetAccessTokenAsync(Action<string>? deviceCodeCallback = null)
+    /// <param name="parentWindow">
+    /// Su iOS/Mac Catalyst: il UIViewController corrente.
+    /// Su Windows: l'HWND della finestra. Null per CLI (usa system browser).
+    /// </param>
+    public async Task<string> GetAccessTokenAsync(object? parentWindow = null)
     {
         // 1. Tentativo silenzioso (token cache)
         var accounts = (await _app.GetAccountsAsync()).ToList();
@@ -43,46 +42,16 @@ public sealed class GraphAuthService
             catch (MsalUiRequiredException) { /* continua con il flusso interattivo */ }
         }
 
-        // 2. Browser interattivo (sistema, non embedded webview)
-        try
-        {
-            var interactive = await _app
-                .AcquireTokenInteractive(_scopes)
-                .WithPrompt(Prompt.SelectAccount)
-                .WithUseEmbeddedWebView(false)
-                .ExecuteAsync();
-            return interactive.AccessToken;
-        }
-        catch (OperationCanceledException)
-        {
-            throw; // L'utente ha annullato esplicitamente
-        }
-        catch (MsalClientException)
-        {
-            // Browser non disponibile → device code
-        }
-        catch (MsalServiceException)
-        {
-            // Errore di servizio → device code
-        }
-        catch (Exception)
-        {
-            // Catch-all → device code
-        }
+        // 2. Flusso interattivo
+        var request = _app
+            .AcquireTokenInteractive(_scopes)
+            .WithPrompt(Prompt.SelectAccount);
 
-        // 3. Device code flow (headless / SSH)
-        var dcr = await _app
-            .AcquireTokenWithDeviceCode(_scopes, result =>
-            {
-                var msg = result.Message;
-                deviceCodeCallback?.Invoke(msg);
-                if (deviceCodeCallback == null)
-                    Console.WriteLine(msg);
-                return Task.CompletedTask;
-            })
-            .ExecuteAsync();
+        if (parentWindow != null)
+            request.WithParentActivityOrWindow(parentWindow);
 
-        return dcr.AccessToken;
+        var interactive = await request.ExecuteAsync();
+        return interactive.AccessToken;
     }
 
     /// <summary>Restituisce lo username dell'account autenticato (o stringa vuota).</summary>
