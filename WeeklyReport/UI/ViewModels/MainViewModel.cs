@@ -63,6 +63,16 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private string _outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
+    // ── Formato ───────────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCsvFormat))]
+    [NotifyPropertyChangedFor(nameof(IsXlsxFormat))]
+    private bool _isXlsxSelected = true;
+
+    public bool IsXlsxFormat => IsXlsxSelected;
+    public bool IsCsvFormat  => !IsXlsxSelected;
+
     // ── Stato elaborazione ────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -91,10 +101,10 @@ public partial class MainViewModel : ObservableObject
     private double _totalHours;
 
     [ObservableProperty]
-    private string _detailCsvPath = string.Empty;
+    private string _detailPath = string.Empty;
 
     [ObservableProperty]
-    private string _summaryCsvPath = string.Empty;
+    private string _summaryPath = string.Empty;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -177,6 +187,12 @@ public partial class MainViewModel : ObservableObject
         Preferences.Default.Set("SourceGraph", false);
     }
 
+    [RelayCommand]
+    private void SelectFormatXlsx() => IsXlsxSelected = true;
+
+    [RelayCommand]
+    private void SelectFormatCsv() => IsXlsxSelected = false;
+
     [RelayCommand(CanExecute = nameof(CanSelectFolder))]
     private async Task SelectFolderAsync()
     {
@@ -223,13 +239,14 @@ public partial class MainViewModel : ObservableObject
 
             var orchestrator = new ReportOrchestrator(calendarSource);
             var period       = IsThisWeekSelected ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek;
-            var result       = await orchestrator.GenerateAsync(period, OutputFolder);
+            var format       = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
+            var result       = await orchestrator.GenerateAsync(period, OutputFolder, format);
 
-            MeetingCount   = result.EventCount;
-            TotalHours     = result.TotalHours;
-            WeekNumber     = result.Week.WeekNumber;
-            DetailCsvPath  = result.DetailCsvPath;
-            SummaryCsvPath = result.SummaryCsvPath;
+            MeetingCount = result.EventCount;
+            TotalHours   = result.TotalHours;
+            WeekNumber   = result.Week.WeekNumber;
+            DetailPath   = result.DetailPath;
+            SummaryPath  = result.SummaryPath;
             ShowResult     = true;
             SetStatus("Report generato con successo!", "#16a34a");
         }
@@ -249,8 +266,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenResultFolder()
     {
-        if (string.IsNullOrEmpty(DetailCsvPath)) return;
-        var folder = Path.GetDirectoryName(DetailCsvPath);
+        if (string.IsNullOrEmpty(DetailPath)) return;
+        var folder = Path.GetDirectoryName(DetailPath);
         if (string.IsNullOrEmpty(folder)) return;
 
         try

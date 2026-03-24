@@ -3,6 +3,9 @@ namespace OutlookWeeklyReport.Core.Models;
 /// <summary>Tipo di sorgente calendario.</summary>
 public enum ReportSourceType { Graph, Ics }
 
+/// <summary>Formato di esportazione del report.</summary>
+public enum ExportFormat { Csv, Xlsx }
+
 /// <summary>
 /// Configura ClientId, TenantId e Scopes per Microsoft Graph,
 /// e la sorgente dati (Graph o ICS).

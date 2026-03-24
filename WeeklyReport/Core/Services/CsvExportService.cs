@@ -9,7 +9,7 @@ namespace OutlookWeeklyReport.Core.Services;
 /// Scrive detail.csv e summary.csv nella cartella di output.
 /// Separatore ";", encoding UTF-8 con BOM (compatibile con Excel in locale italiano).
 /// </summary>
-public sealed class CsvExportService
+public sealed class CsvExportService : IExportService
 {
     private static readonly CsvConfiguration SemicolonConfig =
         new(System.Globalization.CultureInfo.InvariantCulture)

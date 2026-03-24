@@ -36,17 +36,23 @@ var icsUrlOpt = new Option<string?>(
     "--ics-url",
     description: "URL del file .ics (usato con --source ics)");
 
+var formatOpt = new Option<string>(
+    "--format",
+    getDefaultValue: () => "xlsx",
+    description: "Formato di esportazione: 'csv' o 'xlsx' (default: xlsx)");
+
 generateCmd.AddOption(weekOpt);
 generateCmd.AddOption(outputOpt);
 generateCmd.AddOption(configOpt);
 generateCmd.AddOption(sourceOpt);
 generateCmd.AddOption(icsUrlOpt);
+generateCmd.AddOption(formatOpt);
 
-generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl) =>
+generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl, string format) =>
 {
-    await RunGenerateAsync(week, output, config, source, icsUrl);
+    await RunGenerateAsync(week, output, config, source, icsUrl, format);
 
-}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt);
+}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt, formatOpt);
 
 // ── whoami ─────────────────────────────────────────────────────────────────────
 var whoamiCmd = new Command("whoami", "Mostra l'account Microsoft attualmente autenticato");
@@ -162,9 +168,15 @@ async Task<int> RunInteractiveAsync()
                         }
                     }
 
+                    var formatChoice = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("Formato di esportazione")
+                            .AddChoices("XLSX", "CSV"));
+
                     await RunGenerateAsync(week, output, configPath,
                         sourceChoice.StartsWith("ICS") ? "ics" : "graph",
-                        icsUrlInteractive);
+                        icsUrlInteractive,
+                        formatChoice);
                     break;
 
                 case "Mostra account":
@@ -205,7 +217,7 @@ async Task<int> RunInteractiveAsync()
     }
 }
 
-async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null)
+async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null, string format = "xlsx")
 {
     var appConfig = ConfigLoader.Load(config);
 
@@ -255,6 +267,10 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
         ? WeekPeriod.LastWeek
         : WeekPeriod.ThisWeek;
 
+    var exportFormat = format.Equals("csv", StringComparison.OrdinalIgnoreCase)
+        ? ExportFormat.Csv
+        : ExportFormat.Xlsx;
+
     ReportResult result = null!;
 
     await AnsiConsole.Status()
@@ -262,7 +278,7 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
         .SpinnerStyle(Style.Parse("skyblue1"))
         .StartAsync("[skyblue1]Generazione report in corso…[/]", async _ =>
         {
-            result = await orchestrator.GenerateAsync(period, output);
+            result = await orchestrator.GenerateAsync(period, output, exportFormat);
         });
 
     var table = new Table()
@@ -273,10 +289,11 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
 
     table.AddRow("Settimana", Markup.Escape(result.Week.DisplayName));
     table.AddRow("Sorgente", sourceType.ToString());
+    table.AddRow("Formato", exportFormat.ToString().ToUpper());
     table.AddRow("Meeting", result.EventCount.ToString());
     table.AddRow("Ore totali", $"{result.TotalHours:F1} h");
-    table.AddRow("Detail CSV", Markup.Escape(result.DetailCsvPath));
-    table.AddRow("Summary CSV", Markup.Escape(result.SummaryCsvPath));
+    table.AddRow("Detail", Markup.Escape(result.DetailPath));
+    table.AddRow("Summary", Markup.Escape(result.SummaryPath));
 
     AnsiConsole.Write(table);
     AnsiConsole.MarkupLine("\n[bold green]✓ Report generato con successo![/]");
