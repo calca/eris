@@ -17,15 +17,6 @@
             }
         },
         {
-            "name": "UI (Mac Catalyst) – Run",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "run-ui",
-            "program": "",
-            "args": [],
-            "cwd": "${workspaceFolder}/WeeklyReport/UI"
-        },
-        {
             "name": "UI (Mac Catalyst) – Attach",
             "type": "coreclr",
             "request": "attach",

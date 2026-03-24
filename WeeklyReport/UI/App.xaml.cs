@@ -4,9 +4,14 @@ namespace OutlookWeeklyReport.UI;
 
 public partial class App : Application
 {
-    public App(MainPage mainPage)
+    public App()
     {
         InitializeComponent();
-        MainPage = new NavigationPage(mainPage);
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        var mainPage = Handler!.MauiContext!.Services.GetRequiredService<MainPage>();
+        return new Window(new NavigationPage(mainPage));
     }
 }

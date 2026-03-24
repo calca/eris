@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFrameworks>net10.0-maccatalyst;net10.0-windows10.0.19041.0</TargetFrameworks>
     <RootNamespace>OutlookWeeklyReport.UI</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -18,7 +19,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
 
     <!-- Platform min versions -->
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
@@ -30,6 +31,7 @@
   <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
     <CodesignKey>-</CodesignKey>
     <CodesignProvision></CodesignProvision>
+    <ValidateXcodeVersion>false</ValidateXcodeVersion>
   </PropertyGroup>
 
   <!-- Mac Catalyst Debug: interprete invece di AOT, nessun linker (più veloce, meno RAM) -->
