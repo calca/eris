@@ -10,6 +10,20 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly GraphAuthService _authService;
 
+    // ── Tab ───────────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfigTab))]
+    private bool _isGenerateTab = true;
+
+    public bool IsConfigTab => !IsGenerateTab;
+
+    [RelayCommand]
+    private void SelectTabGenerate() => IsGenerateTab = true;
+
+    [RelayCommand]
+    private void SelectTabConfig() => IsGenerateTab = false;
+
     // ── Sorgente ──────────────────────────────────────────────────────────
 
     [ObservableProperty]
