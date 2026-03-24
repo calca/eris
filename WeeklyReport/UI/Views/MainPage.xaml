@@ -164,11 +164,25 @@
                     Margin="0,0,0,12" />
 
             <!-- ── Status bar ─────────────────────────────────────────────── -->
-            <Label Text="{Binding StatusMessage}"
-                   TextColor="{Binding StatusColor}"
-                   FontSize="13"
-                   Margin="0,0,0,12"
-                   IsVisible="{Binding HasStatusMessage}" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"
+                  Margin="0,0,0,12"
+                  IsVisible="{Binding HasStatusMessage}">
+                <Label Grid.Column="0"
+                       Text="{Binding StatusMessage}"
+                       TextColor="{Binding StatusColor}"
+                       FontSize="13"
+                       VerticalOptions="Center"
+                       LineBreakMode="WordWrap" />
+                <Button Grid.Column="1"
+                        Text="📋"
+                        FontSize="12"
+                        WidthRequest="36" HeightRequest="36"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        Command="{Binding CopyStatusCommand}"
+                        VerticalOptions="Center"
+                        ToolTipProperties.Text="Copia messaggio" />
+            </Grid>
 
             <!-- ── Card: Risultato ───────────────────────────────────────── -->
             <Frame Style="{StaticResource Card}"

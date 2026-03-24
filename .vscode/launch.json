@@ -17,10 +17,11 @@
             }
         },
         {
-            "name": "UI (Mac Catalyst) – Attach",
+            "name": "UI (Mac Catalyst)",
             "type": "coreclr",
             "request": "attach",
-            "processName": "UI"
+            "processName": "UI",
+            "preLaunchTask": "run-ui"
         }
     ]
 }

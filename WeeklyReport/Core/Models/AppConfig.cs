@@ -7,6 +7,6 @@ namespace OutlookWeeklyReport.Core.Models;
 public class AppConfig
 {
     public string ClientId { get; set; } = "04b07795-8542-4c4c-9b00-4c4c9b00c4c4";
-    public string TenantId { get; set; } = "common";
+    public string TenantId { get; set; } = "organizations";
     public string[] Scopes  { get; set; } = ["Calendars.Read", "User.Read"];
 }

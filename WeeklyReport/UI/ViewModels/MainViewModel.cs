@@ -218,6 +218,13 @@ public partial class MainViewModel : ObservableObject
 
     // ── Helper ────────────────────────────────────────────────────────────────
 
+    [RelayCommand]
+    private async Task CopyStatusAsync()
+    {
+        if (!string.IsNullOrEmpty(StatusMessage))
+            await Clipboard.Default.SetTextAsync(StatusMessage);
+    }
+
     private void SetStatus(string message, string hexColor)
     {
         StatusMessage = message;
