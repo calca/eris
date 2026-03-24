@@ -43,25 +43,24 @@ public sealed class CsvExportService
 
         // Intestazione
         csv.WriteField("Categoria");
-        csv.WriteField("Nome Evento");
-        csv.WriteField("Durata (ore)");
         csv.WriteField("Cliente");
         csv.WriteField("Progetto");
         csv.WriteField("Topic");
+        csv.WriteField("Ore");
         csv.NextRecord();
 
-        // Righe ordinate: prima per categoria, poi per nome
         foreach (var e in events
             .OrderBy(e => e.Category ?? "\uFFFF")
-            .ThenBy(e => e.Subject))
+            .ThenBy(e => e.Client ?? "\uFFFF")
+            .ThenBy(e => e.Project ?? "\uFFFF")
+            .ThenBy(e => e.Topic ?? e.Subject))
         {
             csv.WriteField(e.Category ?? string.Empty);
-            csv.WriteField(e.Subject);
-            csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2",
-                System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(e.Client ?? string.Empty);
             csv.WriteField(e.Project ?? string.Empty);
-            csv.WriteField(e.Topic ?? string.Empty);
+            csv.WriteField(e.Topic ?? e.Subject);
+            csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2",
+                System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
         }
     }
@@ -72,100 +71,63 @@ public sealed class CsvExportService
     {
         double total = events.Sum(e => e.DurationHours);
 
-        var rows = new List<CategorySummary>();
-
-        // Raggruppamento per Client > Project (eventi strutturati)
-        var structured = events.Where(e => e.Client != null).ToList();
-        if (structured.Count > 0)
-        {
-            var byClient = structured
-                .GroupBy(e => e.Client!)
-                .OrderByDescending(g => g.Sum(e => e.DurationHours));
-
-            foreach (var clientGroup in byClient)
+        // Raggruppa ogni evento per la chiave di aggregazione:
+        //   1. Category (se presente)
+        //   2. Project  (se presente)
+        //   3. Topic / Subject (fallback)
+        var rows = events
+            .GroupBy(e => new
             {
-                // Riga cliente
-                var clientHours = Math.Round(clientGroup.Sum(e => e.DurationHours), 2);
-                rows.Add(new CategorySummary
+                Cat     = e.Category ?? string.Empty,
+                Client  = e.Client   ?? string.Empty,
+                Project = e.Project  ?? string.Empty,
+                Topic   = e.Category != null ? string.Empty     // aggregato per cat → topic vuoto
+                        : e.Project  != null ? string.Empty     // aggregato per progetto → topic vuoto
+                        : e.Topic    ?? e.Subject,              // fallback: aggrega per topic/subject
+            })
+            .Select(g =>
+            {
+                var hours = Math.Round(g.Sum(e => e.DurationHours), 2);
+                return new CategorySummary
                 {
-                    Label      = clientGroup.Key,
-                    TotalHours = clientHours,
-                    Percentage = FormatPercent(clientHours, total),
-                });
-
-                // Sub-righe progetto
-                foreach (var projGroup in clientGroup
-                    .GroupBy(e => e.Project ?? "(nessun progetto)")
-                    .OrderByDescending(g => g.Sum(e => e.DurationHours)))
-                {
-                    var projHours = Math.Round(projGroup.Sum(e => e.DurationHours), 2);
-                    rows.Add(new CategorySummary
-                    {
-                        Label      = $"  {clientGroup.Key} > {projGroup.Key}",
-                        TotalHours = projHours,
-                        Percentage = FormatPercent(projHours, total),
-                    });
-
-                    // Sub-sub-righe topic
-                    foreach (var topicGroup in projGroup
-                        .Where(e => e.Topic != null)
-                        .GroupBy(e => e.Topic!)
-                        .OrderByDescending(g => g.Sum(e => e.DurationHours)))
-                    {
-                        var topicHours = Math.Round(topicGroup.Sum(e => e.DurationHours), 2);
-                        rows.Add(new CategorySummary
-                        {
-                            Label      = $"    {clientGroup.Key} > {projGroup.Key} > {topicGroup.Key}",
-                            TotalHours = topicHours,
-                            Percentage = FormatPercent(topicHours, total),
-                        });
-                    }
-                }
-            }
-        }
-
-        // Fallback: raggruppamento per categoria (eventi non strutturati)
-        var unstructured = events.Where(e => e.Client == null).ToList();
-
-        var categorized = unstructured
-            .Where(e => e.Category != null)
-            .GroupBy(e => e.Category!)
-            .Select(g => new CategorySummary
-            {
-                Label      = g.Key,
-                TotalHours = Math.Round(g.Sum(e => e.DurationHours), 2),
-                Percentage = FormatPercent(g.Sum(e => e.DurationHours), total),
-            });
-
-        var uncategorized = unstructured
-            .Where(e => e.Category == null)
-            .Select(e => new CategorySummary
-            {
-                Label      = e.Subject,
-                TotalHours = Math.Round(e.DurationHours, 2),
-                Percentage = FormatPercent(e.DurationHours, total),
-            });
-
-        rows.AddRange(categorized.Concat(uncategorized).OrderByDescending(r => r.TotalHours));
+                    Category   = g.Key.Cat,
+                    Client     = g.Key.Client,
+                    Project    = g.Key.Project,
+                    Topic      = g.Key.Topic,
+                    TotalHours = hours,
+                    Percentage = FormatPercent(hours, total),
+                };
+            })
+            .OrderByDescending(r => r.TotalHours)
+            .ToList();
 
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         using var csv = new CsvWriter(sw, SemicolonConfig);
 
         // Intestazione
-        csv.WriteField("Categoria / Evento");
-        csv.WriteField("Ore totali");
-        csv.WriteField("% sul totale");
+        csv.WriteField("Categoria");
+        csv.WriteField("Cliente");
+        csv.WriteField("Progetto");
+        csv.WriteField("Topic");
+        csv.WriteField("Ore");
+        csv.WriteField("%");
         csv.NextRecord();
 
         foreach (var row in rows)
         {
-            csv.WriteField(row.Label);
+            csv.WriteField(row.Category);
+            csv.WriteField(row.Client);
+            csv.WriteField(row.Project);
+            csv.WriteField(row.Topic);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.Percentage);
             csv.NextRecord();
         }
 
         // Riga TOTALE
+        csv.WriteField(string.Empty);
+        csv.WriteField(string.Empty);
+        csv.WriteField(string.Empty);
         csv.WriteField("TOTALE");
         csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.WriteField("100%");
