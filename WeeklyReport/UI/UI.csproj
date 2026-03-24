@@ -26,6 +26,21 @@
     <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 
+  <!-- Mac Catalyst: firma ad-hoc per esecuzione locale senza certificato -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+    <CodesignKey>-</CodesignKey>
+    <CodesignProvision></CodesignProvision>
+  </PropertyGroup>
+
+  <!-- Mac Catalyst Debug: interprete invece di AOT, nessun linker (più veloce, meno RAM) -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' and '$(Configuration)' == 'Debug'">
+    <UseInterpreter>true</UseInterpreter>
+    <MtouchLink>None</MtouchLink>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <Optimize>false</Optimize>
+    <MtouchExtraArgs>--interpreter</MtouchExtraArgs>
+  </PropertyGroup>
+
   <ItemGroup>
     <MauiIcon Include="Resources/AppIcon/appicon.svg" Color="#1e293b" />
     <MauiSplashScreen Include="Resources/Splash/splash.svg" Color="#1e293b" BaseSize="128,128" />
@@ -34,8 +49,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-    <PackageReference Include="CommunityToolkit.Maui" Version="10.1.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
 
   <ItemGroup>

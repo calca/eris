@@ -1,6 +1,6 @@
 # 📅 Outlook Weekly Report
 
-Applicazione .NET 8 multipiattaforma (Windows / macOS) per esportare i meeting Outlook accettati in CSV settimanale, con autenticazione Microsoft Graph tramite browser.
+Applicazione .NET 10 multipiattaforma (Windows / macOS) per esportare i meeting Outlook accettati in CSV settimanale, con autenticazione Microsoft Graph tramite browser.
 
 ---
 
@@ -20,7 +20,7 @@ OutlookWeeklyReport/
 
 ### Prerequisiti
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10)
 - Per la UI MAUI: `dotnet workload install maui`
 - Account Microsoft con Outlook Calendar attivo
 
@@ -37,14 +37,14 @@ dotnet run -- whoami
 
 ```bash
 cd OutlookWeeklyReport/UI
-dotnet run -f net8.0-maccatalyst
+dotnet run -f net10.0-maccatalyst
 ```
 
 ### UI MAUI (Windows)
 
 ```powershell
 cd OutlookWeeklyReport\UI
-dotnet run -f net8.0-windows10.0.19041.0
+dotnet run -f net10.0-windows10.0.19041.0
 ```
 
 ---

@@ -3,6 +3,5 @@
     "**/bin": true,
     "**/obj": true
   },
-  "dotnet.dotnetPath": "/Users/gianluigi.calcaterra/.dotnet-local/dotnet",
   "omnisharp.dotNetCliPaths": ["/Users/gianluigi.calcaterra/.dotnet-local"]
 }

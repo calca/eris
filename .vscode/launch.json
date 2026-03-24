@@ -17,19 +17,19 @@
             }
         },
         {
-            "name": "UI (Mac Catalyst)",
-            "type": "node",
+            "name": "UI (Mac Catalyst) – Run",
+            "type": "coreclr",
             "request": "launch",
-            "noDebug": true,
-            "runtimeExecutable": "/Users/gianluigi.calcaterra/.dotnet-local/dotnet",
-            "runtimeArgs": ["run", "--project"],
-            "program": "${workspaceFolder}/WeeklyReport/UI/UI.csproj",
-            "args": ["-f", "net8.0-maccatalyst"],
-            "cwd": "${workspaceFolder}/WeeklyReport/UI",
-            "console": "integratedTerminal",
-            "env": {
-                "DOTNET_ROOT": "/Users/gianluigi.calcaterra/.dotnet-local"
-            }
+            "preLaunchTask": "run-ui",
+            "program": "",
+            "args": [],
+            "cwd": "${workspaceFolder}/WeeklyReport/UI"
+        },
+        {
+            "name": "UI (Mac Catalyst) – Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "UI"
         }
     ]
 }
