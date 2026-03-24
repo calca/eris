@@ -26,8 +26,73 @@
                    Style="{StaticResource SubtitleLabel}"
                    Margin="0,0,0,24" />
 
-            <!-- ── Card: Account Microsoft ───────────────────────────────── -->
+            <!-- ── Card: Sorgente Calendario ────────────────────────────── -->
             <Frame Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="📡  SORGENTE CALENDARIO"
+                           Style="{StaticResource SectionTitle}" />
+
+                    <Label Text="Sorgente dati" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Grid.Column="0"
+                                Text="File ICS"
+                                Command="{Binding SelectSourceIcsCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsIcsSource}"
+                                             Value="True">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleSelected}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsIcsSource}"
+                                             Value="False">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleUnselected}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Text="Outlook Graph"
+                                Command="{Binding SelectSourceGraphCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsGraphSource}"
+                                             Value="True">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleSelected}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsGraphSource}"
+                                             Value="False">
+                                    <Setter Property="Style" Value="{StaticResource WeekToggleUnselected}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ── Card: URL ICS (visibile solo con sorgente ICS) ────────── -->
+            <Frame Style="{StaticResource Card}"
+                   IsVisible="{Binding IsIcsSource}">
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="🔗  FILE ICS"
+                           Style="{StaticResource SectionTitle}" />
+
+                    <Label Text="URL del file .ics" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding IcsUrl}"
+                           TextColor="{StaticResource OnSurface}"
+                           BackgroundColor="{StaticResource SurfaceVariant}"
+                           PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                           Placeholder="https://example.com/calendar.ics"
+                           Keyboard="Url"
+                           FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- ── Card: Account Microsoft (visibile solo con Graph) ─────── -->
+            <Frame Style="{StaticResource Card}"
+                   IsVisible="{Binding IsGraphSource}">
                 <VerticalStackLayout Spacing="10">
 
                     <Label Text="🔐  ACCOUNT MICROSOFT"

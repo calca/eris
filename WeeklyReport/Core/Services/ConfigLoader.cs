@@ -44,6 +44,16 @@ public static class ConfigLoader
         if (scopes.Length > 0)
             appConfig.Scopes = scopes;
 
+        // ── Source ────────────────────────────────────────────────────────────
+        if (config["Source:Type"] is { } sourceType && !string.IsNullOrWhiteSpace(sourceType))
+        {
+            if (Enum.TryParse<ReportSourceType>(sourceType, ignoreCase: true, out var parsed))
+                appConfig.SourceType = parsed;
+        }
+
+        if (config["Source:IcsUrl"] is { } icsUrl && !string.IsNullOrWhiteSpace(icsUrl))
+            appConfig.IcsUrl = icsUrl;
+
         return appConfig;
     }
 }

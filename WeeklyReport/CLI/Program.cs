@@ -28,15 +28,25 @@ var configOpt = new Option<string?>(
     "--config",
     description: "Percorso opzionale di un appsettings.json personalizzato");
 
+var sourceOpt = new Option<string?>(
+    "--source",
+    description: "Sorgente calendario: 'graph' o 'ics' (default da config)");
+
+var icsUrlOpt = new Option<string?>(
+    "--ics-url",
+    description: "URL del file .ics (usato con --source ics)");
+
 generateCmd.AddOption(weekOpt);
 generateCmd.AddOption(outputOpt);
 generateCmd.AddOption(configOpt);
+generateCmd.AddOption(sourceOpt);
+generateCmd.AddOption(icsUrlOpt);
 
-generateCmd.SetHandler(async (string week, string output, string? config) =>
+generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl) =>
 {
-    await RunGenerateAsync(week, output, config);
+    await RunGenerateAsync(week, output, config, source, icsUrl);
 
-}, weekOpt, outputOpt, configOpt);
+}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt);
 
 // ── whoami ─────────────────────────────────────────────────────────────────────
 var whoamiCmd = new Command("whoami", "Mostra l'account Microsoft attualmente autenticato");
@@ -111,6 +121,17 @@ async Task<int> RunInteractiveAsync()
             switch (action)
             {
                 case "Genera report":
+                    var sourceChoice = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title("Sorgente calendario")
+                            .AddChoices("ICS (file .ics)", "Graph (Microsoft Outlook)"));
+
+                    string? icsUrlInteractive = null;
+                    if (sourceChoice.StartsWith("ICS"))
+                    {
+                        icsUrlInteractive = AnsiConsole.Ask<string>("URL del file .ics");
+                    }
+
                     var week = AnsiConsole.Prompt(
                         new SelectionPrompt<string>()
                             .Title("Settimana da esportare")
@@ -141,7 +162,9 @@ async Task<int> RunInteractiveAsync()
                         }
                     }
 
-                    await RunGenerateAsync(week, output, configPath);
+                    await RunGenerateAsync(week, output, configPath,
+                        sourceChoice.StartsWith("ICS") ? "ics" : "graph",
+                        icsUrlInteractive);
                     break;
 
                 case "Mostra account":
@@ -182,10 +205,52 @@ async Task<int> RunInteractiveAsync()
     }
 }
 
-async Task RunGenerateAsync(string week, string output, string? config)
+async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null)
 {
-    var (_, auth) = BuildAuthService(config);
-    var orchestrator = new ReportOrchestrator(auth);
+    var appConfig = ConfigLoader.Load(config);
+
+    // Determina la sorgente: argomento CLI > config
+    var sourceType = appConfig.SourceType;
+    if (!string.IsNullOrWhiteSpace(source))
+        sourceType = source.Equals("ics", StringComparison.OrdinalIgnoreCase)
+            ? ReportSourceType.Ics
+            : ReportSourceType.Graph;
+
+    var effectiveIcsUrl = icsUrl ?? appConfig.IcsUrl;
+
+    ICalendarSource calendarSource;
+
+    if (sourceType == ReportSourceType.Ics)
+    {
+        if (string.IsNullOrWhiteSpace(effectiveIcsUrl))
+        {
+            AnsiConsole.MarkupLine("[red]Errore: URL ICS non specificato. Usa --ics-url o configura Source:IcsUrl in appsettings.json.[/]");
+            return;
+        }
+
+        var downloader = new IcsDownloadService();
+        string localPath;
+
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .SpinnerStyle(Style.Parse("skyblue1"))
+            .StartAsync("[skyblue1]Download file ICS…[/]", async _ =>
+            {
+                localPath = await downloader.DownloadAsync(effectiveIcsUrl);
+            });
+
+        var finalPath = await downloader.DownloadAsync(effectiveIcsUrl);
+        AnsiConsole.MarkupLine($"[grey]File ICS: {Markup.Escape(finalPath)}[/]");
+        calendarSource = new IcsCalendarService(finalPath);
+    }
+    else
+    {
+        var (_, auth) = BuildAuthService(config);
+        var token = await auth.GetAccessTokenAsync();
+        calendarSource = new CalendarService(token);
+    }
+
+    var orchestrator = new ReportOrchestrator(calendarSource);
     var period = week.Equals("last", StringComparison.OrdinalIgnoreCase)
         ? WeekPeriod.LastWeek
         : WeekPeriod.ThisWeek;
@@ -207,6 +272,7 @@ async Task RunGenerateAsync(string week, string output, string? config)
         .AddColumn("[white]Valore[/]");
 
     table.AddRow("Settimana", Markup.Escape(result.Week.DisplayName));
+    table.AddRow("Sorgente", sourceType.ToString());
     table.AddRow("Meeting", result.EventCount.ToString());
     table.AddRow("Ore totali", $"{result.TotalHours:F1} h");
     table.AddRow("Detail CSV", Markup.Escape(result.DetailCsvPath));

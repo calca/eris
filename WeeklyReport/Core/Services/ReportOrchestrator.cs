@@ -13,14 +13,14 @@ public sealed class ReportResult
 }
 
 /// <summary>
-/// Punto di ingresso unico per CLI e UI: autentica, recupera eventi, esporta CSV.
+/// Punto di ingresso unico per CLI e UI: recupera eventi dalla sorgente, esporta CSV.
 /// </summary>
 public sealed class ReportOrchestrator
 {
-    private readonly GraphAuthService  _auth;
+    private readonly ICalendarSource   _source;
     private readonly CsvExportService  _csv = new();
 
-    public ReportOrchestrator(GraphAuthService auth) => _auth = auth;
+    public ReportOrchestrator(ICalendarSource source) => _source = source;
 
     /// <param name="period">Settimana corrente o precedente.</param>
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
@@ -28,11 +28,8 @@ public sealed class ReportOrchestrator
         WeekPeriod       period,
         string           outputBaseDir)
     {
-        var token           = await _auth.GetAccessTokenAsync();
-        var calendarService = new CalendarService(token);
-        var week            = WeekRange.FromPeriod(period);
-
-        var events      = await calendarService.GetAcceptedEventsAsync(week);
+        var week    = WeekRange.FromPeriod(period);
+        var events  = await _source.GetEventsAsync(week);
         var reportDir   = Path.Combine(outputBaseDir, week.FolderName);
         var (detail, summary) = _csv.Export(events, reportDir, week);
 

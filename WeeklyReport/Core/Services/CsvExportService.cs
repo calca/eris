@@ -45,6 +45,9 @@ public sealed class CsvExportService
         csv.WriteField("Categoria");
         csv.WriteField("Nome Evento");
         csv.WriteField("Durata (ore)");
+        csv.WriteField("Cliente");
+        csv.WriteField("Progetto");
+        csv.WriteField("Topic");
         csv.NextRecord();
 
         // Righe ordinate: prima per categoria, poi per nome
@@ -56,6 +59,9 @@ public sealed class CsvExportService
             csv.WriteField(e.Subject);
             csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2",
                 System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(e.Client ?? string.Empty);
+            csv.WriteField(e.Project ?? string.Empty);
+            csv.WriteField(e.Topic ?? string.Empty);
             csv.NextRecord();
         }
     }
@@ -66,8 +72,47 @@ public sealed class CsvExportService
     {
         double total = events.Sum(e => e.DurationHours);
 
-        // Righe categorizzate: aggrega per categoria
-        var categorized = events
+        var rows = new List<CategorySummary>();
+
+        // Raggruppamento per Client > Project (eventi strutturati)
+        var structured = events.Where(e => e.Client != null).ToList();
+        if (structured.Count > 0)
+        {
+            var byClient = structured
+                .GroupBy(e => e.Client!)
+                .OrderByDescending(g => g.Sum(e => e.DurationHours));
+
+            foreach (var clientGroup in byClient)
+            {
+                // Riga cliente
+                var clientHours = Math.Round(clientGroup.Sum(e => e.DurationHours), 2);
+                rows.Add(new CategorySummary
+                {
+                    Label      = clientGroup.Key,
+                    TotalHours = clientHours,
+                    Percentage = FormatPercent(clientHours, total),
+                });
+
+                // Sub-righe progetto
+                foreach (var projGroup in clientGroup
+                    .GroupBy(e => e.Project ?? "(nessun progetto)")
+                    .OrderByDescending(g => g.Sum(e => e.DurationHours)))
+                {
+                    var projHours = Math.Round(projGroup.Sum(e => e.DurationHours), 2);
+                    rows.Add(new CategorySummary
+                    {
+                        Label      = $"  {clientGroup.Key} > {projGroup.Key}",
+                        TotalHours = projHours,
+                        Percentage = FormatPercent(projHours, total),
+                    });
+                }
+            }
+        }
+
+        // Fallback: raggruppamento per categoria (eventi non strutturati)
+        var unstructured = events.Where(e => e.Client == null).ToList();
+
+        var categorized = unstructured
             .Where(e => e.Category != null)
             .GroupBy(e => e.Category!)
             .Select(g => new CategorySummary
@@ -77,8 +122,7 @@ public sealed class CsvExportService
                 Percentage = FormatPercent(g.Sum(e => e.DurationHours), total),
             });
 
-        // Righe non categorizzate: una riga per evento
-        var uncategorized = events
+        var uncategorized = unstructured
             .Where(e => e.Category == null)
             .Select(e => new CategorySummary
             {
@@ -87,10 +131,7 @@ public sealed class CsvExportService
                 Percentage = FormatPercent(e.DurationHours, total),
             });
 
-        var rows = categorized
-            .Concat(uncategorized)
-            .OrderByDescending(r => r.TotalHours)
-            .ToList();
+        rows.AddRange(categorized.Concat(uncategorized).OrderByDescending(r => r.TotalHours));
 
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         using var csv = new CsvWriter(sw, SemicolonConfig);

@@ -9,7 +9,7 @@ namespace OutlookWeeklyReport.Core.Services;
 /// Recupera gli eventi del calendario tramite Microsoft Graph (calendarView).
 /// Gestisce la paginazione automatica e filtra solo gli eventi accettati / organizzati dall'utente.
 /// </summary>
-public sealed class CalendarService
+public sealed class CalendarService : ICalendarSource
 {
     private readonly GraphServiceClient _client;
 
@@ -18,6 +18,8 @@ public sealed class CalendarService
         var auth    = new BaseBearerTokenAuthenticationProvider(new StaticTokenProvider(accessToken));
         _client = new GraphServiceClient(auth);
     }
+
+    public Task<List<CalendarEvent>> GetEventsAsync(WeekRange week) => GetAcceptedEventsAsync(week);
 
     public async Task<List<CalendarEvent>> GetAcceptedEventsAsync(WeekRange week)
     {
@@ -62,12 +64,14 @@ public sealed class CalendarService
     private static CalendarEvent MapToCalendarEvent(Event e)
     {
         var duration = CalculateDurationHours(e.Start, e.End);
-        return new CalendarEvent
+        var evt = new CalendarEvent
         {
             Subject       = e.Subject ?? string.Empty,
             Category      = e.Categories?.FirstOrDefault(),
             DurationHours = duration,
         };
+        CalendarEvent.ParseStructuredSubject(evt);
+        return evt;
     }
 
     private static double CalculateDurationHours(DateTimeTimeZone? start, DateTimeTimeZone? end)

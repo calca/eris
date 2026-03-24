@@ -24,13 +24,9 @@ public static class MauiProgram
             .Create(config.ClientId)
             .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs);
 
-#if MACCATALYST
-        // Mac Catalyst: usa lo schema msal{clientId}://auth che attiva
-        // ASWebAuthenticationSession (login nativo Apple SSO).
-        pcaBuilder.WithRedirectUri($"msal{config.ClientId}://auth");
-#else
+        // Per il system browser di MSAL .NET usare sempre una loopback redirect URI.
+        // La stessa URI deve essere registrata anche nell'app registration Azure AD.
         pcaBuilder.WithRedirectUri("http://localhost");
-#endif
 
         var pca = pcaBuilder.Build();
 

@@ -10,6 +10,21 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly GraphAuthService _authService;
 
+    // ── Sorgente ──────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsIcsSource))]
+    [NotifyPropertyChangedFor(nameof(IsGraphSource))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
+    private bool _isGraphSelected;
+
+    public bool IsGraphSource => IsGraphSelected;
+    public bool IsIcsSource   => !IsGraphSelected;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
+    private string _icsUrl = string.Empty;
+
     // ── Autenticazione ────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -86,6 +101,8 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(GraphAuthService authService)
     {
         _authService = authService;
+        _icsUrl = Preferences.Default.Get("IcsUrl", string.Empty);
+        _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         UpdateWeekDisplay();
     }
 
@@ -146,6 +163,20 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SelectLastWeek() => IsThisWeekSelected = false;
 
+    [RelayCommand]
+    private void SelectSourceGraph()
+    {
+        IsGraphSelected = true;
+        Preferences.Default.Set("SourceGraph", true);
+    }
+
+    [RelayCommand]
+    private void SelectSourceIcs()
+    {
+        IsGraphSelected = false;
+        Preferences.Default.Set("SourceGraph", false);
+    }
+
     [RelayCommand(CanExecute = nameof(CanSelectFolder))]
     private async Task SelectFolderAsync()
     {
@@ -172,7 +203,25 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var orchestrator = new ReportOrchestrator(_authService);
+            ICalendarSource calendarSource;
+
+            if (IsGraphSelected)
+            {
+                var token = await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
+                calendarSource = new CalendarService(token);
+            }
+            else
+            {
+                // Persist URL for next launch
+                Preferences.Default.Set("IcsUrl", IcsUrl);
+                Preferences.Default.Set("SourceGraph", false);
+
+                var downloader = new IcsDownloadService();
+                var localPath  = await downloader.DownloadAsync(IcsUrl);
+                calendarSource = new IcsCalendarService(localPath);
+            }
+
+            var orchestrator = new ReportOrchestrator(calendarSource);
             var period       = IsThisWeekSelected ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek;
             var result       = await orchestrator.GenerateAsync(period, OutputFolder);
 
@@ -194,7 +243,8 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool CanGenerate() => IsAuthenticated && !IsBusy && !string.IsNullOrWhiteSpace(OutputFolder);
+    private bool CanGenerate() => !IsBusy && !string.IsNullOrWhiteSpace(OutputFolder)
+        && (IsGraphSelected ? IsAuthenticated : !string.IsNullOrWhiteSpace(IcsUrl));
 
     [RelayCommand]
     private void OpenResultFolder()
