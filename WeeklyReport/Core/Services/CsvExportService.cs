@@ -105,6 +105,21 @@ public sealed class CsvExportService
                         TotalHours = projHours,
                         Percentage = FormatPercent(projHours, total),
                     });
+
+                    // Sub-sub-righe topic
+                    foreach (var topicGroup in projGroup
+                        .Where(e => e.Topic != null)
+                        .GroupBy(e => e.Topic!)
+                        .OrderByDescending(g => g.Sum(e => e.DurationHours)))
+                    {
+                        var topicHours = Math.Round(topicGroup.Sum(e => e.DurationHours), 2);
+                        rows.Add(new CategorySummary
+                        {
+                            Label      = $"    {clientGroup.Key} > {projGroup.Key} > {topicGroup.Key}",
+                            TotalHours = topicHours,
+                            Percentage = FormatPercent(topicHours, total),
+                        });
+                    }
                 }
             }
         }
