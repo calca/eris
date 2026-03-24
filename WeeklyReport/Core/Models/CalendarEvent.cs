@@ -20,8 +20,11 @@ public class CalendarEvent
     public string? Topic   { get; set; }
 
     /// <summary>
-    /// Se il Subject segue esattamente il formato "CLIENT | PROJECT | TOPIC", popola i tre campi.
-    /// Subject con formato diverso (nessun separatore, o meno di 3 segmenti) vengono ignorati.
+    /// Parsa il Subject strutturato nei campi Client, Project, Topic.
+    /// Formati supportati:
+    ///   "CLIENT | PROJECT | TOPIC" → tutti e tre popolati
+    ///   "CLIENT | TOPIC"           → Client e Topic popolati, Project null
+    /// Subject senza separatore " | " vengono ignorati (campi restano null).
     /// </summary>
     public static void ParseStructuredSubject(CalendarEvent evt)
     {
@@ -33,6 +36,11 @@ public class CalendarEvent
             evt.Client  = parts[0].Trim();
             evt.Project = parts[1].Trim();
             evt.Topic   = string.Join(" | ", parts.Skip(3).Prepend(parts[2])).Trim();
+        }
+        else if (parts.Length == 2)
+        {
+            evt.Client = parts[0].Trim();
+            evt.Topic  = parts[1].Trim();
         }
     }
 }
