@@ -203,21 +203,31 @@
                 </Grid>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
-                <Button Text="▶  Genera Report"
-                        Style="{StaticResource PrimaryBtn}"
-                        FontSize="15"
-                        HeightRequest="52"
-                        Command="{Binding GenerateReportCommand}"
-                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                        HorizontalOptions="FillAndExpand"
-                        Margin="0,0,0,12" />
-
-                <!-- ── Progress (lavorazione in corso) ───────────────────── -->
-                <ActivityIndicator IsRunning="{Binding IsBusy}"
-                                   IsVisible="{Binding IsBusy}"
-                                   Color="{StaticResource Primary}"
-                                   HorizontalOptions="Center"
-                                   Margin="0,0,0,12" />
+                <Grid HeightRequest="52"
+                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                      Margin="0,0,0,12">
+                    <Button Style="{StaticResource PrimaryBtn}"
+                            FontSize="15"
+                            HeightRequest="52"
+                            Command="{Binding GenerateReportCommand}"
+                            HorizontalOptions="FillAndExpand">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="False">
+                                <Setter Property="Text" Value="▶  Genera Report" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
+                                <Setter Property="Text" Value="" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                       IsVisible="{Binding IsBusy}"
+                                       Color="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       HeightRequest="26"
+                                       WidthRequest="26" />
+                </Grid>
 
                 <!-- ── Errore ─────────────────────────────────────────────── -->
                 <Label Text="{Binding ErrorMessage}"
