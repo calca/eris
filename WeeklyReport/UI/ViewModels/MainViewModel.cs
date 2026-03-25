@@ -314,6 +314,13 @@ public partial class MainViewModel : ObservableObject
         && (!IsCustomPeriodSelected || CustomEndDate >= CustomStartDate);
 
     [RelayCommand]
+    private void NuovoReport()
+    {
+        ShowResult   = false;
+        ErrorMessage = string.Empty;
+    }
+
+    [RelayCommand]
     private void OpenResult()
     {
         if (string.IsNullOrEmpty(DetailPath)) return;

@@ -25,7 +25,7 @@
                    VerticalOptions="Center">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="True">
-                        <Setter Property="Text" Value="⚙️" />
+                        <Setter Property="Text" Value="⚙️ Configurazione" />
                     </DataTrigger>
                     <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="False">
                         <Setter Property="Text" Value="" />
@@ -39,7 +39,7 @@
                     Padding="14,8">
                 <Button.Triggers>
                     <DataTrigger TargetType="Button" Binding="{Binding IsConfigTab}" Value="False">
-                        <Setter Property="Text" Value="⚙️  Configurazione" />
+                        <Setter Property="Text" Value="⚙️" />
                         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceVariant}" />
                         <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
                     </DataTrigger>
@@ -203,9 +203,11 @@
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
                 <Button Text="▶  Genera Report"
                         Style="{StaticResource PrimaryBtn}"
-                        FontSize="16"
+                        FontSize="15"
                         HeightRequest="52"
                         Command="{Binding GenerateReportCommand}"
+                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                        HorizontalOptions="FillAndExpand"
                         Margin="0,0,0,12" />
 
                 <!-- ── Progress (lavorazione in corso) ───────────────────── -->
@@ -259,12 +261,21 @@
 
                 </Grid>
 
-                <!-- Bottone apri -->
-                <Button Text="Apri Report"
-                        IsVisible="{Binding ShowResult}"
-                        Style="{StaticResource PrimaryBtn}"
-                        Command="{Binding OpenResultCommand}"
-                        Margin="0,0,0,12" />
+                <!-- Bottoni post-risultato -->
+                <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,0,0,12">
+                    <Button Text="Nuovo Report"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="52"
+                            FontSize="15"
+                            HorizontalOptions="FillAndExpand"
+                            Command="{Binding NuovoReportCommand}" />
+                    <Button Text="Apri Report"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="52"
+                            FontSize="15"
+                            HorizontalOptions="FillAndExpand"
+                            Command="{Binding OpenResultCommand}" />
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>

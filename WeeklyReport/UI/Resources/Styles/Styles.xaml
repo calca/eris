@@ -53,11 +53,13 @@
     </Style>
 
     <Style x:Key="SecondaryBtn" TargetType="Button">
-        <Setter Property="BackgroundColor"  Value="{StaticResource SurfaceVariant}" />
+        <Setter Property="BackgroundColor"  Value="Transparent" />
         <Setter Property="TextColor"        Value="{StaticResource OnBackground}" />
         <Setter Property="CornerRadius"     Value="10" />
         <Setter Property="HeightRequest"    Value="40" />
         <Setter Property="Padding"          Value="12,0" />
+        <Setter Property="BorderColor"      Value="{StaticResource SurfaceVariant}" />
+        <Setter Property="BorderWidth"      Value="1.5" />
     </Style>
 
     <Style x:Key="DangerBtn" TargetType="Button">
