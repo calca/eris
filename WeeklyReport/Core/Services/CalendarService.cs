@@ -57,6 +57,7 @@ public sealed class CalendarService : ICalendarSource
 
     private static bool IsAcceptedOrOrganizer(Event e)
     {
+        if (e.IsAllDay == true) return false;
         var status = e.ResponseStatus?.Response;
         return status == ResponseType.Accepted || status == ResponseType.Organizer;
     }

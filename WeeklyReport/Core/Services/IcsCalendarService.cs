@@ -35,6 +35,10 @@ public sealed class IcsCalendarService : ICalendarSource
             if (IsTentative(evt))
                 continue;
 
+            // Escludi eventi full-day
+            if (IsAllDay(evt))
+                continue;
+
             // Espandi ricorrenze nel range
             var occurrences = evt.GetOccurrences(
                 new CalDateTime(start),
@@ -68,5 +72,17 @@ public sealed class IcsCalendarService : ICalendarSource
 
         return busyStatus != null &&
                string.Equals(busyStatus.Value?.ToString(), "TENTATIVE", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsAllDay(IcsEvent evt)
+    {
+        // Ical.Net: IsAllDay è true quando DTSTART è di tipo DATE (senza ora)
+        if (evt.IsAllDay) return true;
+
+        // Fallback Microsoft: X-MICROSOFT-CDO-ALLDAYEVENT:TRUE
+        var prop = evt.Properties
+            .FirstOrDefault(p => string.Equals(p.Name, "X-MICROSOFT-CDO-ALLDAYEVENT", StringComparison.OrdinalIgnoreCase));
+        return prop != null &&
+               string.Equals(prop.Value?.ToString(), "TRUE", StringComparison.OrdinalIgnoreCase);
     }
 }
