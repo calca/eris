@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:eris.UI.ViewModels"
              xmlns:conv="clr-namespace:eris.UI.Converters"
+             xmlns:views="clr-namespace:eris.UI.Views"
              x:Class="eris.UI.Views.MainPage"
              x:DataType="vm:MainViewModel"
              Title="eris - weekly report">
@@ -65,7 +66,7 @@
                        Margin="0,0,0,16" />
 
                 <!-- Intestazione -->
-                <Label Text="Esporta i tuoi meeting in report settimanale"
+                <Label Text="Esporta i tuoi meeting in un report"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="{StaticResource OnBackground}"
@@ -74,7 +75,8 @@
                        Margin="0,12,0,24" />
 
                 <!-- ── Periodo ───────────────────────────────────────────── -->
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,12">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,12"
+                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
 
                     <!-- Questa settimana -->
                     <Frame Grid.Column="0" Padding="10,10" CornerRadius="10"
@@ -228,38 +230,23 @@
                        LineBreakMode="WordWrap"
                        Margin="0,0,0,12" />
 
-                <!-- ── Risultato: 4 card ──────────────────────────────────── -->
-                <Grid IsVisible="{Binding ShowResult}"
-                      ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,8">
+                <!-- ── Risultato: cerchi statistiche ──────────────────────────── -->
+                <HorizontalStackLayout IsVisible="{Binding ShowResult}"
+                                       HorizontalOptions="Center"
+                                       Spacing="20"
+                                       Margin="0,0,0,8">
 
-                    <!-- Settimana -->
-                    <Frame Grid.Column="0" Style="{StaticResource Card}" Margin="0">
-                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding WeekNumber, StringFormat='W{0}'}"
-                                   Style="{StaticResource StatNumber}" />
-                            <Label Text="Settimana" Style="{StaticResource StatCaption}" />
-                        </VerticalStackLayout>
-                    </Frame>
+                    <views:CircularStatView Icon="⏱"
+                                            StatLabel="Ore"
+                                            Value="{Binding TotalHours, StringFormat='{0:F1}h'}"
+                                            Progress="0.85" />
 
-                    <!-- Ore totali -->
-                    <Frame Grid.Column="1" Style="{StaticResource Card}" Margin="0">
-                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding TotalHours, StringFormat='{0:F1}h'}"
-                                   Style="{StaticResource StatNumber}" />
-                            <Label Text="Ore totali" Style="{StaticResource StatCaption}" />
-                        </VerticalStackLayout>
-                    </Frame>
+                    <views:CircularStatView Icon="📊"
+                                            StatLabel="Meeting"
+                                            Value="{Binding MeetingCount, StringFormat='{0}'}"
+                                            Progress="0.85" />
 
-                    <!-- Meeting -->
-                    <Frame Grid.Column="2" Style="{StaticResource Card}" Margin="0">
-                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding MeetingCount}"
-                                   Style="{StaticResource StatNumber}" />
-                            <Label Text="Meeting" Style="{StaticResource StatCaption}" />
-                        </VerticalStackLayout>
-                    </Frame>
-
-                </Grid>
+                </HorizontalStackLayout>
 
                 <!-- Bottoni post-risultato -->
                 <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,0,0,12">
