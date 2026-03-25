@@ -75,7 +75,7 @@
                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
                        Margin="0,12,0,24" />
 
-                <Label Text="Ecco il tuo report 🚀"
+                <Label Text="Ecco il tuo report"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="{StaticResource OnBackground}"
@@ -291,7 +291,7 @@
                 </HorizontalStackLayout>
 
                 <!-- Bottoni post-risultato -->
-                <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,32,0,12">
+                <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,12,0,12">
                     <Button Text="Nuovo Report"
                             Style="{StaticResource SecondaryBtn}"
                             HeightRequest="52"
