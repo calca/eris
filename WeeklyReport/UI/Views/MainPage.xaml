@@ -25,7 +25,7 @@
                    VerticalOptions="Center">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="True">
-                        <Setter Property="Text" Value="⚙️  Configurazione" />
+                        <Setter Property="Text" Value="⚙️" />
                     </DataTrigger>
                     <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="False">
                         <Setter Property="Text" Value="" />
