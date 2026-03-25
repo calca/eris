@@ -24,6 +24,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SelectTabConfig() => IsGenerateTab = false;
 
+    [RelayCommand]
+    private void ToggleConfig() => IsGenerateTab = !IsGenerateTab;
+
     // ── Sorgente ──────────────────────────────────────────────────────────
 
     [ObservableProperty]

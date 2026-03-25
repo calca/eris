@@ -16,39 +16,28 @@
 
     <Grid RowDefinitions="Auto,*" BackgroundColor="{StaticResource Background}">
 
-        <!-- ── Tab Bar ───────────────────────────────────────────────────── -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="0"
-              BackgroundColor="{StaticResource Surface}" Padding="0">
-            <Button Text="📅  Genera"
-                    Command="{Binding SelectTabGenerateCommand}"
-                    FontSize="14" FontAttributes="Bold"
-                    CornerRadius="0" BorderWidth="0"
-                    Padding="12,14">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button" Binding="{Binding IsGenerateTab}" Value="True">
-                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                        <Setter Property="TextColor" Value="White" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Button" Binding="{Binding IsGenerateTab}" Value="False">
-                        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
-                        <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
+        <!-- ── Header Bar ─────────────────────────────────────────────────── -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto"
+              BackgroundColor="{StaticResource Surface}" Padding="16,10">
+            <Label Text="📅  Weekly Report"
+                   FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource OnSurface}"
+                   VerticalOptions="Center" />
             <Button Grid.Column="1"
-                    Text="⚙️  Configurazione"
-                    Command="{Binding SelectTabConfigCommand}"
-                    FontSize="14" FontAttributes="Bold"
-                    CornerRadius="0" BorderWidth="0"
-                    Padding="12,14">
+                    Command="{Binding ToggleConfigCommand}"
+                    FontSize="13" FontAttributes="Bold"
+                    CornerRadius="8" BorderWidth="0"
+                    Padding="14,8">
                 <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsConfigTab}" Value="False">
+                        <Setter Property="Text" Value="⚙️  Configurazione" />
+                        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceVariant}" />
+                        <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                    </DataTrigger>
                     <DataTrigger TargetType="Button" Binding="{Binding IsConfigTab}" Value="True">
+                        <Setter Property="Text" Value="✕  Chiudi" />
                         <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
                         <Setter Property="TextColor" Value="White" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Button" Binding="{Binding IsConfigTab}" Value="False">
-                        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
-                        <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
                     </DataTrigger>
                 </Button.Triggers>
             </Button>
