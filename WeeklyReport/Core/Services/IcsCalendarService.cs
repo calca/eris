@@ -46,6 +46,9 @@ public sealed class IcsCalendarService : ICalendarSource
 
             foreach (var occurrence in occurrences)
             {
+                var evtStart = occurrence.Period.StartTime?.AsDateTimeOffset.LocalDateTime;
+                var evtEnd   = occurrence.Period.EndTime?.AsDateTimeOffset.LocalDateTime;
+
                 var duration = occurrence.Period.Duration.TotalHours;
                 if (duration <= 0 && occurrence.Period.StartTime != null && occurrence.Period.EndTime != null)
                     duration = (occurrence.Period.EndTime.AsUtc - occurrence.Period.StartTime.AsUtc).TotalHours;
@@ -55,6 +58,8 @@ public sealed class IcsCalendarService : ICalendarSource
                     Subject       = evt.Summary ?? string.Empty,
                     Category      = evt.Categories?.FirstOrDefault(),
                     DurationHours = Math.Max(0, duration),
+                    StartTime     = evtStart,
+                    EndTime       = evtEnd,
                 };
                 CalendarEvent.ParseStructuredSubject(calEvent);
                 events.Add(calEvent);

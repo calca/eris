@@ -65,11 +65,23 @@ public sealed class CalendarService : ICalendarSource
     private static CalendarEvent MapToCalendarEvent(Event e)
     {
         var duration = CalculateDurationHours(e.Start, e.End);
+        DateTime? startTime = null, endTime = null;
+        if (e.Start?.DateTime != null &&
+            DateTime.TryParse(e.Start.DateTime, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var s))
+            startTime = s;
+        if (e.End?.DateTime != null &&
+            DateTime.TryParse(e.End.DateTime, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var en))
+            endTime = en;
+
         var evt = new CalendarEvent
         {
             Subject       = e.Subject ?? string.Empty,
             Category      = e.Categories?.FirstOrDefault(),
             DurationHours = duration,
+            StartTime     = startTime,
+            EndTime       = endTime,
         };
         CalendarEvent.ParseStructuredSubject(evt);
         return evt;

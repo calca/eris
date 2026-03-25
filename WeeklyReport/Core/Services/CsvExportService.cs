@@ -25,8 +25,9 @@ public sealed class CsvExportService : IExportService
     {
         Directory.CreateDirectory(outputFolder);
 
-        var detailPath  = Path.Combine(outputFolder, "detail.csv");
-        var summaryPath = Path.Combine(outputFolder, "summary.csv");
+        var ts          = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var detailPath  = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-detail.csv");
+        var summaryPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary.csv");
 
         WriteDetail(events, detailPath);
         WriteSummary(events, summaryPath);
@@ -42,6 +43,9 @@ public sealed class CsvExportService : IExportService
         using var csv = new CsvWriter(sw, SemicolonConfig);
 
         // Intestazione
+        csv.WriteField("Data");
+        csv.WriteField("Inizio");
+        csv.WriteField("Fine");
         csv.WriteField("Categoria");
         csv.WriteField("Cliente");
         csv.WriteField("Progetto");
@@ -50,11 +54,15 @@ public sealed class CsvExportService : IExportService
         csv.NextRecord();
 
         foreach (var e in events
-            .OrderBy(e => e.Category ?? "\uFFFF")
+            .OrderBy(e => e.StartTime)
+            .ThenBy(e => e.Category ?? "\uFFFF")
             .ThenBy(e => e.Client ?? "\uFFFF")
             .ThenBy(e => e.Project ?? "\uFFFF")
             .ThenBy(e => e.Topic ?? e.Subject))
         {
+            csv.WriteField(e.StartTime?.ToString("dd/MM/yyyy") ?? string.Empty);
+            csv.WriteField(e.StartTime?.ToString("HH:mm") ?? string.Empty);
+            csv.WriteField(e.EndTime?.ToString("HH:mm") ?? string.Empty);
             csv.WriteField(e.Category ?? string.Empty);
             csv.WriteField(e.Client ?? string.Empty);
             csv.WriteField(e.Project ?? string.Empty);

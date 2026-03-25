@@ -12,6 +12,12 @@ public class CalendarEvent
     /// <summary>Durata in ore (calcolata da start/end UTC restituiti da Graph o DTSTART/DTEND ICS).</summary>
     public double DurationHours { get; set; }
 
+    /// <summary>Data e ora di inizio (locale).</summary>
+    public DateTime? StartTime { get; set; }
+
+    /// <summary>Data e ora di fine (locale).</summary>
+    public DateTime? EndTime { get; set; }
+
     /// <summary>Cliente estratto dal subject strutturato "CLIENT | PROJECT | TOPIC".</summary>
     public string? Client  { get; set; }
     /// <summary>Progetto estratto dal subject strutturato.</summary>
