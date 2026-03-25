@@ -22,7 +22,16 @@
             <Label Text="eris"
                    FontSize="17" FontAttributes="Bold"
                    TextColor="{StaticResource OnSurface}"
-                   VerticalOptions="Center" />
+                   VerticalOptions="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="True">
+                        <Setter Property="Text" Value="⚙️  Configurazione" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="False">
+                        <Setter Property="Text" Value="eris" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
             <Button Grid.Column="1"
                     Command="{Binding ToggleConfigCommand}"
                     FontSize="13" FontAttributes="Bold"
@@ -50,10 +59,6 @@
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
                 <!-- Intestazione -->
-                <Label Text="eris"
-                       Style="{StaticResource HeadingLabel}"
-                       FontSize="22"
-                       Margin="0,0,0,4" />
                 <Label Text="Esporta i tuoi meeting in report settimanale"
                        Style="{StaticResource SubtitleLabel}"
                        Margin="0,0,0,20" />
@@ -194,11 +199,6 @@
         <!-- ════════════════════════════════════════════════════════════════ -->
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
-
-                <Label Text="⚙️  Configurazione"
-                       Style="{StaticResource HeadingLabel}"
-                       FontSize="22"
-                       Margin="0,0,0,20" />
 
                 <!-- ── Card: Sorgente Calendario ─────────────────────────── -->
                 <Frame Style="{StaticResource Card}">
