@@ -28,7 +28,7 @@
                         <Setter Property="Text" Value="⚙️  Configurazione" />
                     </DataTrigger>
                     <DataTrigger TargetType="Label" Binding="{Binding IsConfigTab}" Value="False">
-                        <Setter Property="Text" Value="eris" />
+                        <Setter Property="Text" Value="" />
                     </DataTrigger>
                 </Label.Triggers>
             </Label>
@@ -57,6 +57,12 @@
         <!-- ════════════════════════════════════════════════════════════════ -->
         <ScrollView Grid.Row="1" IsVisible="{Binding IsGenerateTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
+
+                <!-- Logo -->
+                <Image Source="eris_logo.png"
+                       HeightRequest="240"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,16" />
 
                 <!-- Intestazione -->
                 <Label Text="Esporta i tuoi meeting in report settimanale"
