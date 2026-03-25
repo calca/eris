@@ -59,6 +59,18 @@ internal sealed class RingDrawable : IDrawable
         float p = Math.Clamp(Progress, 0f, 1f);
         if (p <= 0f) return;
 
+        canvas.StrokeColor   = ArcColor;
+        canvas.StrokeSize    = sw;
+        canvas.StrokeLineCap = LineCap.Round;
+
+        // When full, AddArc start==end (both map to 12 o'clock) → draws nothing.
+        // Use DrawCircle directly instead.
+        if (p >= 1f)
+        {
+            canvas.DrawCircle(cx, cy, radius);
+            return;
+        }
+
         // Foreground arc — starts at 12 o'clock, goes clockwise
         float startAngle = -90f;
         float endAngle   = startAngle + 360f * p;
@@ -66,10 +78,6 @@ internal sealed class RingDrawable : IDrawable
         var path = new PathF();
         path.AddArc(cx - radius, cy - radius, cx + radius, cy + radius,
                     startAngle, endAngle, clockwise: true);
-
-        canvas.StrokeColor   = ArcColor;
-        canvas.StrokeSize    = sw;
-        canvas.StrokeLineCap = LineCap.Round;
         canvas.DrawPath(path);
     }
 }

@@ -135,17 +135,17 @@ public partial class MainViewModel : ObservableObject
     private bool _showResult;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HoursProgress))]
+    [NotifyPropertyChangedFor(nameof(MeetingProgress))]
     private int _meetingCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HoursProgress))]
-    [NotifyPropertyChangedFor(nameof(MeetingProgress))]
     private double _totalHours;
 
     // Ore lavorative settimanali di riferimento: 5 gg * 8h = 40h
     private const double MaxWorkHours = 40.0;
 
+    // Arco pieno = settimana piena (occupazione massima).
     public float HoursProgress   => (float)Math.Clamp(TotalHours / MaxWorkHours, 0.0, 1.0);
     // Max meeting stimato: 0.5 meeting/h * 40h = 20
     public float MeetingProgress => (float)Math.Clamp(MeetingCount / (0.5 * MaxWorkHours), 0.0, 1.0);
