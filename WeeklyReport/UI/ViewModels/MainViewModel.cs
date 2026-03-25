@@ -66,6 +66,7 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsThisWeekSelected))]
     [NotifyPropertyChangedFor(nameof(IsLastWeekSelected))]
     [NotifyPropertyChangedFor(nameof(IsCustomPeriodSelected))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private int _periodSelection = 0; // 0 = Questa settimana  1 = Scorsa  2 = Libero
 
     public bool IsThisWeekSelected     => _periodSelection == 0;
@@ -74,10 +75,12 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private DateTime _customStartDate = DateTime.Today;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private DateTime _customEndDate = DateTime.Today;
 
     public string CustomPeriodDisplay => $"{CustomStartDate:dd/MM/yyyy} \u2013 {CustomEndDate:dd/MM/yyyy}";
@@ -309,8 +312,10 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool CanGenerate() => !IsBusy && !string.IsNullOrWhiteSpace(OutputFolder)
-        && (IsGraphSelected ? IsAuthenticated : !string.IsNullOrWhiteSpace(IcsUrl));
+    private bool CanGenerate() => !IsBusy
+        && !string.IsNullOrWhiteSpace(OutputFolder)
+        && (IsGraphSelected ? IsAuthenticated : !string.IsNullOrWhiteSpace(IcsUrl))
+        && (!IsCustomPeriodSelected || CustomEndDate >= CustomStartDate);
 
     [RelayCommand]
     private void OpenResultFolder()

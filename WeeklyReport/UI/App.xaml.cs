@@ -12,6 +12,18 @@ public partial class App : Application
     protected override Window CreateWindow(IActivationState? activationState)
     {
         var mainPage = Handler!.MauiContext!.Services.GetRequiredService<MainPage>();
-        return new Window(new NavigationPage(mainPage));
+        var window   = new Window(new NavigationPage(mainPage));
+
+        const int windowWidth  = 600;
+        const int windowHeight = 800;
+
+        window.Width         = windowWidth;
+        window.Height        = windowHeight;
+        window.MinimumWidth  = windowWidth;
+        window.MinimumHeight = windowHeight;
+        window.MaximumWidth  = windowWidth;
+        window.MaximumHeight = windowHeight;
+
+        return window;
     }
 }

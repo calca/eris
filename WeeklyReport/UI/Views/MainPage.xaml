@@ -66,146 +66,139 @@
 
                 <!-- Intestazione -->
                 <Label Text="Esporta i tuoi meeting in report settimanale"
-                       Style="{StaticResource SubtitleLabel}"
-                       Margin="0,0,0,20" />
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource OnBackground}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="FillAndExpand"
+                       Margin="0,12,0,24" />
 
-                <!-- ── Card: Periodo ──────────────────────────────────────── -->
-                <Frame Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="12">
+                <!-- ── Periodo ───────────────────────────────────────────── -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,12">
 
-                        <Label Text="PERIODO"
-                               Style="{StaticResource SectionTitle}" />
-
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-
-                            <!-- Questa settimana -->
-                            <Frame Grid.Column="0" Padding="10,10" CornerRadius="10"
-                                   HasShadow="False" BorderColor="Transparent"
-                                   BackgroundColor="{StaticResource SurfaceVariant}">
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding IsThisWeekSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                    <!-- Questa settimana -->
+                    <Frame Grid.Column="0" Padding="10,10" CornerRadius="10"
+                           HasShadow="False" BorderColor="Transparent"
+                           BackgroundColor="{StaticResource SurfaceVariant}">
+                        <Frame.Triggers>
+                            <DataTrigger TargetType="Frame" Binding="{Binding IsThisWeekSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Frame.Triggers>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectThisWeekCommand}" />
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="Questa settimana" FontAttributes="Bold" FontSize="12"
+                                   HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="White" />
                                     </DataTrigger>
-                                </Frame.Triggers>
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectThisWeekCommand}" />
-                                </Frame.GestureRecognizers>
-                                <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
-                                    <Label Text="Questa settimana" FontAttributes="Bold" FontSize="12"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <Label Text="{Binding ThisWeekDisplay}" FontSize="11"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                </VerticalStackLayout>
-                            </Frame>
-
-                            <!-- Settimana scorsa -->
-                            <Frame Grid.Column="1" Padding="10,10" CornerRadius="10"
-                                   HasShadow="False" BorderColor="Transparent"
-                                   BackgroundColor="{StaticResource SurfaceVariant}">
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding IsLastWeekSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
                                     </DataTrigger>
-                                </Frame.Triggers>
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectLastWeekCommand}" />
-                                </Frame.GestureRecognizers>
-                                <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
-                                    <Label Text="Settimana scorsa" FontAttributes="Bold" FontSize="12"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <Label Text="{Binding LastWeekDisplay}" FontSize="11"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                </VerticalStackLayout>
-                            </Frame>
-
-                            <!-- Periodo libero -->
-                            <Frame Grid.Column="2" Padding="10,10" CornerRadius="10"
-                                   HasShadow="False" BorderColor="Transparent"
-                                   BackgroundColor="{StaticResource SurfaceVariant}">
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding IsCustomPeriodSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="{Binding ThisWeekDisplay}" FontSize="11"
+                                   HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="White" />
                                     </DataTrigger>
-                                </Frame.Triggers>
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectCustomPeriodCommand}" />
-                                </Frame.GestureRecognizers>
-                                <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
-                                    <Label Text="Periodo libero" FontAttributes="Bold" FontSize="12"
-                                           HorizontalOptions="Center">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsCustomPeriodSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="White" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsCustomPeriodSelected}" Value="False">
-                                                <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <!-- Non selezionato: mostra il riepilogo date -->
-                                    <Label Text="{Binding CustomPeriodDisplay}" FontSize="11"
-                                           HorizontalOptions="Center"
-                                           IsVisible="{Binding IsCustomPeriodSelected, Converter={StaticResource InvertBool}}"
-                                           TextColor="{StaticResource OnSurfaceMuted}" />
-                                    <!-- Selezionato: picker DA / A impilati -->
-                                    <VerticalStackLayout IsVisible="{Binding IsCustomPeriodSelected}"
-                                                         Spacing="4" Margin="0,6,0,0">
-                                        <Label Text="DA" FontSize="10" FontAttributes="Bold"
-                                               TextColor="White" HorizontalOptions="Center" />
-                                        <DatePicker Date="{Binding CustomStartDate}"
-                                                    Format="dd/MM/yyyy"
-                                                    TextColor="White"
-                                                    HorizontalOptions="FillAndExpand" />
-                                        <Label Text="A" FontSize="10" FontAttributes="Bold"
-                                               TextColor="White" HorizontalOptions="Center" />
-                                        <DatePicker Date="{Binding CustomEndDate}"
-                                                    Format="dd/MM/yyyy"
-                                                    TextColor="White"
-                                                    HorizontalOptions="FillAndExpand" />
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </Frame>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsThisWeekSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                        </Grid>
+                    <!-- Settimana scorsa -->
+                    <Frame Grid.Column="1" Padding="10,10" CornerRadius="10"
+                           HasShadow="False" BorderColor="Transparent"
+                           BackgroundColor="{StaticResource SurfaceVariant}">
+                        <Frame.Triggers>
+                            <DataTrigger TargetType="Frame" Binding="{Binding IsLastWeekSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Frame.Triggers>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectLastWeekCommand}" />
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="Settimana scorsa" FontAttributes="Bold" FontSize="12"
+                                   HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="{Binding LastWeekDisplay}" FontSize="11"
+                                   HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsLastWeekSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    </VerticalStackLayout>
-                </Frame>
+                    <!-- Periodo libero -->
+                    <Frame Grid.Column="2" Padding="10,10" CornerRadius="10"
+                           HasShadow="False" BorderColor="Transparent"
+                           BackgroundColor="{StaticResource SurfaceVariant}">
+                        <Frame.Triggers>
+                            <DataTrigger TargetType="Frame" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Frame.Triggers>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectCustomPeriodCommand}" />
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                            <Label Text="Periodo libero" FontAttributes="Bold" FontSize="12"
+                                   HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsCustomPeriodSelected}" Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="{Binding CustomPeriodDisplay}" FontSize="11"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding IsCustomPeriodSelected, Converter={StaticResource InvertBool}}"
+                                   TextColor="{StaticResource OnSurfaceMuted}" />
+                            <VerticalStackLayout IsVisible="{Binding IsCustomPeriodSelected}"
+                                                 Spacing="4" Margin="0,6,0,0">
+                                <Label Text="DA" FontSize="10" FontAttributes="Bold"
+                                       TextColor="White" HorizontalOptions="Center" />
+                                <DatePicker Date="{Binding CustomStartDate}"
+                                            Format="dd/MM/yyyy"
+                                            TextColor="White"
+                                            HorizontalOptions="FillAndExpand" />
+                                <Label Text="A" FontSize="10" FontAttributes="Bold"
+                                       TextColor="White" HorizontalOptions="Center" />
+                                <DatePicker Date="{Binding CustomEndDate}"
+                                            Format="dd/MM/yyyy"
+                                            TextColor="White"
+                                            HorizontalOptions="FillAndExpand" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </Grid>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
                 <Button Text="▶  Genera Report"
