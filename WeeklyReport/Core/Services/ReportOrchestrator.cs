@@ -50,4 +50,30 @@ public sealed class ReportOrchestrator
             Week        = week,
         };
     }
+
+    public async Task<ReportResult> GenerateAsync(
+        WeekRange    range,
+        string       outputBaseDir,
+        ExportFormat format = ExportFormat.Xlsx)
+    {
+        var events = await _source.GetEventsAsync(range);
+
+        IExportService exporter = format switch
+        {
+            ExportFormat.Xlsx => new XlsxExportService(),
+            _                => new CsvExportService(),
+        };
+
+        var reportDir = Path.Combine(outputBaseDir, range.FolderName);
+        var (detail, summary) = exporter.Export(events, reportDir, range);
+
+        return new ReportResult
+        {
+            EventCount  = events.Count,
+            TotalHours  = Math.Round(events.Sum(e => e.DurationHours), 2),
+            DetailPath  = detail,
+            SummaryPath = summary,
+            Week        = range,
+        };
+    }
 }

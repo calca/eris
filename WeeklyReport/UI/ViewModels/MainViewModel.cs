@@ -60,11 +60,30 @@ public partial class MainViewModel : ObservableObject
 
     public bool IsNotAuthenticated => !IsAuthenticated;
 
-    // ── Settimana ─────────────────────────────────────────────────────────────
+    // ── Periodo ───────────────────────────────────────────────────────────────────
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsThisWeekSelected))]
     [NotifyPropertyChangedFor(nameof(IsLastWeekSelected))]
-    private bool _isThisWeekSelected = true;
+    [NotifyPropertyChangedFor(nameof(IsCustomPeriodSelected))]
+    private int _periodSelection = 0; // 0 = Questa settimana  1 = Scorsa  2 = Libero
+
+    public bool IsThisWeekSelected     => _periodSelection == 0;
+    public bool IsLastWeekSelected     => _periodSelection == 1;
+    public bool IsCustomPeriodSelected => _periodSelection == 2;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
+    private DateTime _customStartDate = DateTime.Today;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
+    private DateTime _customEndDate = DateTime.Today;
+
+    public string CustomPeriodDisplay => $"{CustomStartDate:dd/MM/yyyy} \u2013 {CustomEndDate:dd/MM/yyyy}";
+
+    public string ThisWeekDisplay => GetPeriodShortDisplay(WeekPeriod.ThisWeek);
+    public string LastWeekDisplay => GetPeriodShortDisplay(WeekPeriod.LastWeek);
 
     [ObservableProperty]
     private string _weekRangeDisplay = string.Empty;
@@ -72,7 +91,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _weekNumber;
 
-    public bool IsLastWeekSelected => !IsThisWeekSelected;
+    private static string GetPeriodShortDisplay(WeekPeriod period)
+    {
+        var week = WeekRange.FromPeriod(period);
+        return $"{week.Start:dd/MM} \u2013 {week.End.AddDays(-1):dd/MM}";
+    }
 
     // ── Output ────────────────────────────────────────────────────────────────
 
@@ -133,12 +156,16 @@ public partial class MainViewModel : ObservableObject
         UpdateWeekDisplay();
     }
 
-    partial void OnIsThisWeekSelectedChanged(bool value) => UpdateWeekDisplay();
+    partial void OnPeriodSelectionChanged(int value) => UpdateWeekDisplay();
+
+    partial void OnCustomStartDateChanged(DateTime value) { if (IsCustomPeriodSelected) UpdateWeekDisplay(); }
+    partial void OnCustomEndDateChanged(DateTime value)   { if (IsCustomPeriodSelected) UpdateWeekDisplay(); }
 
     private void UpdateWeekDisplay()
     {
-        var period = IsThisWeekSelected ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek;
-        var week   = WeekRange.FromPeriod(period);
+        var week = _periodSelection == 2
+            ? WeekRange.FromCustom(CustomStartDate, CustomEndDate)
+            : WeekRange.FromPeriod(_periodSelection == 0 ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek);
         WeekRangeDisplay = week.DisplayName;
         WeekNumber       = week.WeekNumber;
     }
@@ -185,10 +212,13 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SelectThisWeek() => IsThisWeekSelected = true;
+    private void SelectThisWeek() => PeriodSelection = 0;
 
     [RelayCommand]
-    private void SelectLastWeek() => IsThisWeekSelected = false;
+    private void SelectLastWeek() => PeriodSelection = 1;
+
+    [RelayCommand]
+    private void SelectCustomPeriod() => PeriodSelection = 2;
 
     [RelayCommand]
     private void SelectSourceGraph()
@@ -255,9 +285,11 @@ public partial class MainViewModel : ObservableObject
             }
 
             var orchestrator = new ReportOrchestrator(calendarSource);
-            var period       = IsThisWeekSelected ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek;
-            var format       = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
-            var result       = await orchestrator.GenerateAsync(period, OutputFolder, format);
+            var range  = _periodSelection == 2
+                ? WeekRange.FromCustom(CustomStartDate, CustomEndDate)
+                : WeekRange.FromPeriod(_periodSelection == 0 ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek);
+            var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
 
             MeetingCount = result.EventCount;
             TotalHours   = result.TotalHours;

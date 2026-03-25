@@ -52,4 +52,25 @@ public sealed class WeekRange
         var start  = new DateTimeOffset(monday, offset);
         return new WeekRange(start, start.AddDays(7));
     }
+
+    public static WeekRange FromCustom(DateTime start, DateTime end)
+    {
+        var offset   = DateTimeOffset.Now.Offset;
+        var startDto = new DateTimeOffset(start.Date, offset);
+        var endDto   = new DateTimeOffset(end.Date.AddDays(1), offset);
+        return new WeekRange(startDto, endDto,
+            folderName:  $"custom-{start:yyyyMMdd}-{end:yyyyMMdd}-report",
+            displayName: $"{start:dd/MM/yyyy} \u2013 {end:dd/MM/yyyy}");
+    }
+
+    private WeekRange(DateTimeOffset start, DateTimeOffset end, string folderName, string displayName)
+    {
+        Start = start;
+        End   = end;
+        var cal    = CultureInfo.InvariantCulture.Calendar;
+        WeekNumber = cal.GetWeekOfYear(start.DateTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+        Year       = GetIsoYear(start.DateTime, WeekNumber);
+        FolderName  = folderName;
+        DisplayName = displayName;
+    }
 }
