@@ -145,7 +145,11 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _summaryPath = string.Empty;
+    [ObservableProperty]
+    private string _resultPeriodStart = string.Empty;
 
+    [ObservableProperty]
+    private string _resultPeriodEnd = string.Empty;
     // ─────────────────────────────────────────────────────────────────────────
 
     public MainViewModel(GraphAuthService authService)
@@ -290,13 +294,15 @@ public partial class MainViewModel : ObservableObject
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
             var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
 
-            MeetingCount = result.EventCount;
-            TotalHours   = result.TotalHours;
-            WeekNumber   = result.Week.WeekNumber;
-            DetailPath   = result.DetailPath;
-            SummaryPath  = result.SummaryPath;
-            ShowResult   = true;
-            ErrorMessage = string.Empty;
+            MeetingCount       = result.EventCount;
+            TotalHours         = result.TotalHours;
+            WeekNumber         = result.Week.WeekNumber;
+            DetailPath         = result.DetailPath;
+            SummaryPath        = result.SummaryPath;
+            ResultPeriodStart  = result.Week.Start.ToString("dd/MM/yyyy");
+            ResultPeriodEnd    = result.Week.End.AddDays(-1).ToString("dd/MM/yyyy");
+            ShowResult         = true;
+            ErrorMessage       = string.Empty;
         }
         catch (Exception ex)
         {
