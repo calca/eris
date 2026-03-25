@@ -281,12 +281,12 @@
                     <views:CircularStatView Icon="⏱"
                                             StatLabel="Ore"
                                             Value="{Binding TotalHours, StringFormat='{0:F1}h'}"
-                                            Progress="0.85" />
+                                            Progress="{Binding HoursProgress}" />
 
                     <views:CircularStatView Icon="📊"
                                             StatLabel="Meeting"
                                             Value="{Binding MeetingCount, StringFormat='{0}'}"
-                                            Progress="0.85" />
+                                            Progress="{Binding MeetingProgress}" />
 
                 </HorizontalStackLayout>
 
