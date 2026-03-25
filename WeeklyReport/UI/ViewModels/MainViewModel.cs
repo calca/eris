@@ -125,12 +125,9 @@ public partial class MainViewModel : ObservableObject
     private bool _isBusy;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
-    private string _statusMessage = string.Empty;
-    public bool HasStatusMessage => !string.IsNullOrEmpty(StatusMessage);
-
-    [ObservableProperty]
-    private Color _statusColor = Colors.Transparent;
+    [NotifyPropertyChangedFor(nameof(HasError))]
+    private string _errorMessage = string.Empty;
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     // ── Risultato ─────────────────────────────────────────────────────────────
 
@@ -179,7 +176,6 @@ public partial class MainViewModel : ObservableObject
     private async Task LoginAsync()
     {
         IsBusy = true;
-        SetStatus("Autenticazione in corso…", "#0284c7");
 
         try
         {
@@ -187,11 +183,11 @@ public partial class MainViewModel : ObservableObject
 
             UserDisplayName  = await _authService.GetUserDisplayNameAsync();
             IsAuthenticated  = true;
-            SetStatus($"Connesso come {UserDisplayName}", "#16a34a");
+            ErrorMessage     = string.Empty;
         }
         catch (Exception ex)
         {
-            SetStatus($"Errore autenticazione: {ex.Message}", "#dc2626");
+            ErrorMessage = $"Errore autenticazione: {ex.Message}";
         }
         finally
         {
@@ -211,7 +207,7 @@ public partial class MainViewModel : ObservableObject
         UserDisplayName   = "Non autenticato";
         DeviceCodeMessage = null;
         ShowResult        = false;
-        SetStatus("Disconnesso", "#64748b");
+        ErrorMessage      = string.Empty;
     }
 
     [RelayCommand]
@@ -265,7 +261,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsBusy     = true;
         ShowResult = false;
-        SetStatus("Generazione report in corso…", "#0284c7");
+        ErrorMessage = string.Empty;
 
         try
         {
@@ -299,12 +295,12 @@ public partial class MainViewModel : ObservableObject
             WeekNumber   = result.Week.WeekNumber;
             DetailPath   = result.DetailPath;
             SummaryPath  = result.SummaryPath;
-            ShowResult     = true;
-            SetStatus("Report generato con successo!", "#16a34a");
+            ShowResult   = true;
+            ErrorMessage = string.Empty;
         }
         catch (Exception ex)
         {
-            SetStatus($"Errore: {ex.Message}", "#dc2626");
+            ErrorMessage = $"Errore: {ex.Message}";
         }
         finally
         {
@@ -318,21 +314,34 @@ public partial class MainViewModel : ObservableObject
         && (!IsCustomPeriodSelected || CustomEndDate >= CustomStartDate);
 
     [RelayCommand]
-    private void OpenResultFolder()
+    private void OpenResult()
     {
         if (string.IsNullOrEmpty(DetailPath)) return;
-        var folder = Path.GetDirectoryName(DetailPath);
-        if (string.IsNullOrEmpty(folder)) return;
 
         try
         {
+            if (IsXlsxSelected)
+            {
+                // Apre direttamente il file xlsx
 #if WINDOWS
-            System.Diagnostics.Process.Start("explorer.exe", $"\"{folder}\"");
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(DetailPath) { UseShellExecute = true });
 #elif MACCATALYST
-            System.Diagnostics.Process.Start("open", $"\"{folder}\"");
+                System.Diagnostics.Process.Start("open", $"\"{DetailPath}\"");
 #endif
+            }
+            else
+            {
+                // CSV: apre la cartella
+                var folder = Path.GetDirectoryName(DetailPath);
+                if (string.IsNullOrEmpty(folder)) return;
+#if WINDOWS
+                System.Diagnostics.Process.Start("explorer.exe", $"\"{folder}\"");
+#elif MACCATALYST
+                System.Diagnostics.Process.Start("open", $"\"{folder}\"");
+#endif
+            }
         }
-        catch { /* Ignora se l'apertura fallisce */ }
+        catch { }
     }
 
     // ── Helper ────────────────────────────────────────────────────────────────
@@ -340,15 +349,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CopyStatusAsync()
     {
-        if (!string.IsNullOrEmpty(StatusMessage))
-            await Clipboard.Default.SetTextAsync(StatusMessage);
+        if (!string.IsNullOrEmpty(ErrorMessage))
+            await Clipboard.Default.SetTextAsync(ErrorMessage);
     }
 
-    private void SetStatus(string message, string hexColor)
-    {
-        StatusMessage = message;
-        StatusColor   = Color.FromArgb(hexColor);
-    }
 
     /// <summary>
     /// Restituisce la parent window/VC per presentare la UI di autenticazione MSAL.

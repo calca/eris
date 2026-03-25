@@ -208,85 +208,63 @@
                         Command="{Binding GenerateReportCommand}"
                         Margin="0,0,0,12" />
 
-                <!-- ── Status bar ─────────────────────────────────────────── -->
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"
-                      Margin="0,0,0,12"
-                      IsVisible="{Binding HasStatusMessage}">
-                    <Label Grid.Column="0"
-                           Text="{Binding StatusMessage}"
-                           TextColor="{Binding StatusColor}"
-                           FontSize="13"
-                           VerticalOptions="Center"
-                           LineBreakMode="WordWrap" />
-                    <Button Grid.Column="1"
-                            Text="📋" FontSize="12"
-                            WidthRequest="36" HeightRequest="36"
-                            Padding="0" BackgroundColor="Transparent"
-                            Command="{Binding CopyStatusCommand}"
-                            VerticalOptions="Center"
-                            ToolTipProperties.Text="Copia messaggio" />
+                <!-- ── Progress (lavorazione in corso) ───────────────────── -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Primary}"
+                                   HorizontalOptions="Center"
+                                   Margin="0,0,0,12" />
+
+                <!-- ── Errore ─────────────────────────────────────────────── -->
+                <Label Text="{Binding ErrorMessage}"
+                       IsVisible="{Binding HasError}"
+                       FontSize="17"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Error}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="FillAndExpand"
+                       LineBreakMode="WordWrap"
+                       Margin="0,0,0,12" />
+
+                <!-- ── Risultato: 4 card ──────────────────────────────────── -->
+                <Grid IsVisible="{Binding ShowResult}"
+                      ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,8">
+
+                    <!-- Settimana -->
+                    <Frame Grid.Column="0" Style="{StaticResource Card}" Margin="0">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="{Binding WeekNumber, StringFormat='W{0}'}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Settimana" Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Ore totali -->
+                    <Frame Grid.Column="1" Style="{StaticResource Card}" Margin="0">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="{Binding TotalHours, StringFormat='{0:F1}h'}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Ore totali" Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Meeting -->
+                    <Frame Grid.Column="2" Style="{StaticResource Card}" Margin="0">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="{Binding MeetingCount}"
+                                   Style="{StaticResource StatNumber}" />
+                            <Label Text="Meeting" Style="{StaticResource StatCaption}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
                 </Grid>
 
-                <!-- ── Card: Risultato ────────────────────────────────────── -->
-                <Frame Style="{StaticResource Card}"
-                       IsVisible="{Binding ShowResult}">
-                    <VerticalStackLayout Spacing="12">
-
-                        <Label Text="✅  REPORT GENERATO"
-                               Style="{StaticResource SectionTitle}"
-                               TextColor="{StaticResource Success}" />
-
-                        <!-- Statistiche -->
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                            <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                <Label Text="{Binding MeetingCount}"
-                                       Style="{StaticResource StatNumber}" />
-                                <Label Text="Meeting"
-                                       Style="{StaticResource StatCaption}" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="{Binding TotalHours, StringFormat='{0:F1}h'}"
-                                       Style="{StaticResource StatNumber}" />
-                                <Label Text="Ore totali"
-                                       Style="{StaticResource StatCaption}" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="2" Spacing="2">
-                                <Label Text="{Binding WeekNumber, StringFormat='W{0}'}"
-                                       Style="{StaticResource StatNumber}" />
-                                <Label Text="Settimana"
-                                       Style="{StaticResource StatCaption}" />
-                            </VerticalStackLayout>
-                        </Grid>
-
-                        <BoxView HeightRequest="1"
-                                 BackgroundColor="{StaticResource SurfaceVariant}"
-                                 Margin="0,4" />
-
-                        <!-- Percorsi file -->
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="📄" FontSize="14" VerticalOptions="Center" />
-                            <Label Text="{Binding DetailPath}"
-                                   Style="{StaticResource MutedLabel}"
-                                   LineBreakMode="TailTruncation"
-                                   VerticalOptions="Center"
-                                   HorizontalOptions="FillAndExpand" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="📊" FontSize="14" VerticalOptions="Center" />
-                            <Label Text="{Binding SummaryPath}"
-                                   Style="{StaticResource MutedLabel}"
-                                   LineBreakMode="TailTruncation"
-                                   VerticalOptions="Center"
-                                   HorizontalOptions="FillAndExpand" />
-                        </HorizontalStackLayout>
-
-                        <!-- Apri cartella -->
-                        <Button Text="📂  Apri cartella"
-                                Style="{StaticResource SecondaryBtn}"
-                                Command="{Binding OpenResultFolderCommand}"
-                                HorizontalOptions="Start" />
-                    </VerticalStackLayout>
-                </Frame>
+                <!-- Bottone apri -->
+                <Button Text="Apri Report"
+                        IsVisible="{Binding ShowResult}"
+                        Style="{StaticResource PrimaryBtn}"
+                        Command="{Binding OpenResultCommand}"
+                        Margin="0,0,0,12" />
 
             </VerticalStackLayout>
         </ScrollView>
