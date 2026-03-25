@@ -1,6 +1,6 @@
 using Microsoft.Identity.Client;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Serializzazione del token cache MSAL su disco.
@@ -10,7 +10,7 @@ internal static class TokenCacheHelper
 {
     private static readonly string CacheFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "OutlookWeeklyReport",
+        "eris",
         "msal_token_cache.bin");
 
     public static void EnableSerialization(ITokenCache tokenCache)

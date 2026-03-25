@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace OutlookWeeklyReport.Core.Models;
+namespace eris.Core.Models;
 
 public enum WeekPeriod { ThisWeek, LastWeek }
 

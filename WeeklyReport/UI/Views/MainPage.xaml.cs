@@ -1,6 +1,6 @@
-using OutlookWeeklyReport.UI.ViewModels;
+using eris.UI.ViewModels;
 
-namespace OutlookWeeklyReport.UI.Views;
+namespace eris.UI.Views;
 
 public partial class MainPage : ContentPage
 {

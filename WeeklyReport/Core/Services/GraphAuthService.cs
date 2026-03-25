@@ -1,6 +1,6 @@
 using Microsoft.Identity.Client;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Gestisce l'autenticazione MSAL per Microsoft Graph.

@@ -1,6 +1,6 @@
-using OutlookWeeklyReport.UI.Views;
+using eris.UI.Views;
 
-namespace OutlookWeeklyReport.UI;
+namespace eris.UI;
 
 public partial class App : Application
 {

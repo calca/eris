@@ -1,7 +1,7 @@
 using Foundation;
 using UIKit;
 
-namespace OutlookWeeklyReport.UI;
+namespace eris.UI;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

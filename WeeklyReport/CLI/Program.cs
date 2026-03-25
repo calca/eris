@@ -1,15 +1,15 @@
 using System.CommandLine;
 using Microsoft.Identity.Client;
-using OutlookWeeklyReport.Core.Models;
-using OutlookWeeklyReport.Core.Services;
+using eris.Core.Models;
+using eris.Core.Services;
 using Spectre.Console;
 
 // ── Banner ─────────────────────────────────────────────────────────────────────
-AnsiConsole.Write(new FigletText("OWReport").Color(Color.SkyBlue1));
-AnsiConsole.MarkupLine("[bold skyblue1]Outlook Weekly Meeting Report[/]\n");
+AnsiConsole.Write(new FigletText("eris").Color(Color.SkyBlue1));
+AnsiConsole.MarkupLine("[bold skyblue1]eris[/]\n");
 
 // ── Root command ───────────────────────────────────────────────────────────────
-var rootCommand = new RootCommand("Outlook Weekly Meeting Report — esporta i meeting accettati in CSV settimanale");
+var rootCommand = new RootCommand("eris — esporta i meeting accettati in CSV settimanale");
 
 // ── generate ───────────────────────────────────────────────────────────────────
 var generateCmd = new Command("generate", "Genera i file detail.csv e summary.csv per la settimana selezionata");

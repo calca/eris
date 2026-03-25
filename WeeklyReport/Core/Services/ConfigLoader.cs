@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
-using OutlookWeeklyReport.Core.Models;
+using eris.Core.Models;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
-/// Carica la configurazione da appsettings.json e/o variabili d'ambiente OWREPORT_*.
+/// Carica la configurazione da appsettings.json e/o variabili d'ambiente ERIS_*.
 /// Funziona senza file di config: in quel caso vengono usati i valori di default (Azure CLI public client).
 /// </summary>
 public static class ConfigLoader
@@ -24,8 +24,8 @@ public static class ConfigLoader
                 builder.AddJsonFile(defaultPath, optional: true);
         }
 
-        // OWREPORT_AzureAd__ClientId, OWREPORT_AzureAd__TenantId, …  
-        builder.AddEnvironmentVariables(prefix: "OWREPORT_");
+        // ERIS_AzureAd__ClientId, ERIS_AzureAd__TenantId, …  
+        builder.AddEnvironmentVariables(prefix: "ERIS_");
 
         var config    = builder.Build();
         var appConfig = new AppConfig();   // valori di default già impostati

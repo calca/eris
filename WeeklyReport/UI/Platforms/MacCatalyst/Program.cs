@@ -1,7 +1,7 @@
 using ObjCRuntime;
 using UIKit;
 
-namespace OutlookWeeklyReport.UI;
+namespace eris.UI;
 
 public class Program
 {

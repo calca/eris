@@ -1,7 +1,7 @@
 using ClosedXML.Excel;
-using OutlookWeeklyReport.Core.Models;
+using eris.Core.Models;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Scrive detail.xlsx e summary.xlsx nella cartella di output.

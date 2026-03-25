@@ -4,8 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>OutlookWeeklyReport.Core</RootNamespace>
-    <AssemblyName>OutlookWeeklyReport.Core</AssemblyName>
+    <RootNamespace>eris.Core</RootNamespace>
+    <AssemblyName>eris.Core</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

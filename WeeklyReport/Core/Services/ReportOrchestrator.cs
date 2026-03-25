@@ -1,6 +1,6 @@
-using OutlookWeeklyReport.Core.Models;
+using eris.Core.Models;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>Risultato della generazione di un report settimanale.</summary>
 public sealed class ReportResult

@@ -1,9 +1,9 @@
 using Ical.Net;
 using Ical.Net.DataTypes;
 using IcsEvent = Ical.Net.CalendarComponents.CalendarEvent;
-using OutlookWeeklyReport.Core.Models;
+using eris.Core.Models;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Sorgente di eventi basata su un file ICS locale (già scaricato).

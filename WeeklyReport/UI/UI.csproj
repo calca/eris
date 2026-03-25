@@ -3,15 +3,15 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net10.0-maccatalyst;net10.0-windows10.0.19041.0</TargetFrameworks>
-    <RootNamespace>OutlookWeeklyReport.UI</RootNamespace>
+    <RootNamespace>eris.UI</RootNamespace>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
     <!-- App info -->
-    <ApplicationTitle>Weekly Report</ApplicationTitle>
-    <ApplicationId>com.outlookweeklyreport.app</ApplicationId>
+    <ApplicationTitle>eris</ApplicationTitle>
+    <ApplicationId>com.eris.app</ApplicationId>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 

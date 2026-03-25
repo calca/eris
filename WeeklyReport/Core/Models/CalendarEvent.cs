@@ -1,4 +1,4 @@
-namespace OutlookWeeklyReport.Core.Models;
+namespace eris.Core.Models;
 
 /// <summary>
 /// Rappresenta un evento di calendario estratto da Microsoft Graph o da un file ICS.

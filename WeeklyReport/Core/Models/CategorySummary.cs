@@ -1,4 +1,4 @@
-namespace OutlookWeeklyReport.Core.Models;
+namespace eris.Core.Models;
 
 /// <summary>Riga del file summary.csv.</summary>
 public class CategorySummary

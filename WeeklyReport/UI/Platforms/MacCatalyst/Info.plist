@@ -26,11 +26,11 @@
     <key>XSAppIconAssets</key>
     <string>Assets.xcassets/appicon.appiconset</string>
     <key>CFBundleName</key>
-    <string>Weekly Report</string>
+    <string>eris</string>
     <key>CFBundleDisplayName</key>
-    <string>Weekly Report</string>
+    <string>eris</string>
     <key>CFBundleIdentifier</key>
-    <string>com.outlookweeklyreport.app</string>
+    <string>com.eris.app</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleShortVersionString</key>

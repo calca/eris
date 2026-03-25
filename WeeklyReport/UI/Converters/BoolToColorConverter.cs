@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace OutlookWeeklyReport.UI.Converters;
+namespace eris.UI.Converters;
 
 /// <summary>
 /// Converte un boolean in un colore.

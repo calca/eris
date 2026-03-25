@@ -1,4 +1,4 @@
-namespace OutlookWeeklyReport.Core.Models;
+namespace eris.Core.Models;
 
 /// <summary>Tipo di sorgente calendario.</summary>
 public enum ReportSourceType { Graph, Ics }

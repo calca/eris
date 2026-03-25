@@ -1,10 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Storage;
-using OutlookWeeklyReport.Core.Models;
-using OutlookWeeklyReport.Core.Services;
+using eris.Core.Models;
+using eris.Core.Services;
 
-namespace OutlookWeeklyReport.UI.ViewModels;
+namespace eris.UI.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {

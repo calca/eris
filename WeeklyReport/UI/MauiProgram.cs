@@ -1,11 +1,11 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
-using OutlookWeeklyReport.Core.Services;
-using OutlookWeeklyReport.UI.ViewModels;
-using OutlookWeeklyReport.UI.Views;
+using eris.Core.Services;
+using eris.UI.ViewModels;
+using eris.UI.Views;
 
-namespace OutlookWeeklyReport.UI;
+namespace eris.UI;
 
 public static class MauiProgram
 {

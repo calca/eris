@@ -1,4 +1,4 @@
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Scarica un file ICS da un URL remoto con cache locale (5 minuti).
@@ -8,7 +8,7 @@ public sealed class IcsDownloadService
     private static readonly HttpClient Http = new();
 
     private static readonly string CacheDir =
-        Path.Combine(Path.GetTempPath(), "owreport");
+        Path.Combine(Path.GetTempPath(), "eris");
 
     private static readonly string CachePath =
         Path.Combine(CacheDir, "calendar.ics");

@@ -1,9 +1,9 @@
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
-using OutlookWeeklyReport.Core.Models;
+using eris.Core.Models;
 
-namespace OutlookWeeklyReport.Core.Services;
+namespace eris.Core.Services;
 
 /// <summary>
 /// Scrive detail.csv e summary.csv nella cartella di output.

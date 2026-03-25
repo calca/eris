@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace OutlookWeeklyReport.UI.Converters;
+namespace eris.UI.Converters;
 
 /// <summary>Inverte un valore boolean.</summary>
 public sealed class InvertBoolConverter : IValueConverter
