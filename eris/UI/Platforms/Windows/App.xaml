@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<winui:Application
+<maui:MauiWinUIApplication
     x:Class="eris.UI.WinUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:winui="using:Microsoft.UI.Xaml"
+    xmlns:maui="using:Microsoft.Maui"
     xmlns:local="using:eris.UI.WinUI">
-</winui:Application>
+</maui:MauiWinUIApplication>
