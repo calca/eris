@@ -274,19 +274,13 @@
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
-                <Label Text="Configura le preferenze dell'app."
-                       FontSize="13"
-                       TextColor="{StaticResource OnSurfaceMuted}"
-                       HorizontalTextAlignment="Start"
-                       HorizontalOptions="FillAndExpand"
-                       LineBreakMode="WordWrap"
-                       Margin="0,0,0,20" />
-
                 <!-- ── Sorgente Calendario ─────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
 
-                        <Label Text="SORGENTE CALENDARIO"
-                               Style="{StaticResource SectionTitle}" />
+                        <Label Text="Scegli da dove leggere i tuoi eventi: un calendario ICS (via URL) oppure il tuo account Outlook."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,0,0,4" />
 
                         <Border BackgroundColor="{StaticResource SurfaceVariant}"
                                 StrokeThickness="0"
@@ -338,9 +332,10 @@
                 <!-- ── URL ICS ─────────────────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12"
                                     IsVisible="{Binding IsIcsSource}">
-                        <Label Text="FILE ICS"
-                               Style="{StaticResource SectionTitle}" />
-                        <Label Text="URL del file .ics" Style="{StaticResource MutedLabel}" />
+                        <Label Text="Inserisci l'URL del file .ics del tuo calendario. Lo trovi nelle impostazioni del tuo provider di calendario."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,0,0,4" />
                         <Entry Text="{Binding IcsUrl}"
                                TextColor="{StaticResource OnSurface}"
                                BackgroundColor="{StaticResource SurfaceVariant}"
@@ -353,8 +348,10 @@
                 <!-- ── Account Microsoft ───────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12"
                                     IsVisible="{Binding IsGraphSource}">
-                        <Label Text="ACCOUNT MICROSOFT"
-                               Style="{StaticResource SectionTitle}" />
+                        <Label Text="Accedi con il tuo account Microsoft 365 per leggere gli eventi dal calendario Outlook."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,0,0,4" />
 
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
@@ -408,8 +405,10 @@
 
                 <!-- ── Cartella di output ──────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
-                        <Label Text="CARTELLA DI OUTPUT"
-                               Style="{StaticResource SectionTitle}" />
+                        <Label Text="I file del report verranno salvati in questa cartella."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,0,0,4" />
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <Border Grid.Column="0"
                                     BackgroundColor="{StaticResource SurfaceVariant}"
@@ -445,8 +444,10 @@
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                             <!-- Formato -->
                             <VerticalStackLayout Grid.Column="0" Spacing="8">
-                                <Label Text="FORMATO ESPORTAZIONE"
-                                       Style="{StaticResource SectionTitle}" />
+                                <Label Text="Formato del file generato: Excel o CSV."
+                                       Style="{StaticResource MutedLabel}"
+                                       LineBreakMode="WordWrap"
+                                       Margin="0,0,0,4" />
                                 <Border BackgroundColor="{StaticResource SurfaceVariant}"
                                         StrokeThickness="0"
                                         HeightRequest="46">
@@ -495,8 +496,10 @@
                             </VerticalStackLayout>
                             <!-- Ore settimanali -->
                             <VerticalStackLayout Grid.Column="1" Spacing="8" WidthRequest="88">
-                                <Label Text="ORE / SETT."
-                                       Style="{StaticResource SectionTitle}" />
+                                <Label Text="Monte ore lavorative settimanali (es. 40)."
+                                       Style="{StaticResource MutedLabel}"
+                                       LineBreakMode="WordWrap"
+                                       Margin="0,0,0,4" />
                                 <Entry Text="{Binding WeeklyWorkingHours}"
                                        TextColor="{StaticResource OnSurface}"
                                        BackgroundColor="{StaticResource SurfaceVariant}"
