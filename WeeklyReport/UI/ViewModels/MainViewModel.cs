@@ -64,14 +64,14 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsThisWeekSelected))]
-    [NotifyPropertyChangedFor(nameof(IsLastWeekSelected))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthSelected))]
     [NotifyPropertyChangedFor(nameof(IsCustomPeriodSelected))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
-    private int _periodSelection = 0; // 0 = Questa settimana  1 = Scorsa  2 = Libero
+    private int _periodSelection = 0; // 0 = Questa settimana  1 = Mese Corrente  2 = Libero
 
-    public bool IsThisWeekSelected     => _periodSelection == 0;
-    public bool IsLastWeekSelected     => _periodSelection == 1;
-    public bool IsCustomPeriodSelected => _periodSelection == 2;
+    public bool IsThisWeekSelected     => PeriodSelection == 0;
+    public bool IsCurrentMonthSelected => PeriodSelection == 1;
+    public bool IsCustomPeriodSelected => PeriodSelection == 2;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
@@ -85,8 +85,16 @@ public partial class MainViewModel : ObservableObject
 
     public string CustomPeriodDisplay => $"{CustomStartDate:dd/MM/yyyy} \u2013 {CustomEndDate:dd/MM/yyyy}";
 
+    [ObservableProperty]
+    private bool _isDatePickerOpen;
+
+    [ObservableProperty]
+    private DateTime _dialogStartDate = DateTime.Today;
+
+    [ObservableProperty]
+    private DateTime _dialogEndDate = DateTime.Today;
+
     public string ThisWeekDisplay => GetPeriodShortDisplay(WeekPeriod.ThisWeek);
-    public string LastWeekDisplay => GetPeriodShortDisplay(WeekPeriod.LastWeek);
 
     [ObservableProperty]
     private string _weekRangeDisplay = string.Empty;
@@ -177,10 +185,14 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateWeekDisplay()
     {
-        var week = _periodSelection == 2
-            ? WeekRange.FromCustom(CustomStartDate, CustomEndDate)
-            : WeekRange.FromPeriod(_periodSelection == 0 ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek);
-        WeekRangeDisplay = week.DisplayName;
+        var today = DateTime.Today;
+        var week  = PeriodSelection switch
+        {
+            1 => WeekRange.FromPeriod(WeekPeriod.LastWeek),
+            2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
+            _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek),
+        };
+        WeekRangeDisplay = $"Dal {week.Start:dd/MM/yyyy} al {week.End.AddDays(-1):dd/MM/yyyy}";
         WeekNumber       = week.WeekNumber;
     }
 
@@ -228,10 +240,27 @@ public partial class MainViewModel : ObservableObject
     private void SelectThisWeek() => PeriodSelection = 0;
 
     [RelayCommand]
-    private void SelectLastWeek() => PeriodSelection = 1;
+    private void SelectCurrentMonth() => PeriodSelection = 1;
 
     [RelayCommand]
-    private void SelectCustomPeriod() => PeriodSelection = 2;
+    private void SelectCustomPeriod()
+    {
+        DialogStartDate  = IsCustomPeriodSelected ? CustomStartDate : DateTime.Today;
+        DialogEndDate    = IsCustomPeriodSelected ? CustomEndDate   : DateTime.Today;
+        IsDatePickerOpen = true;
+    }
+
+    [RelayCommand]
+    private void ConfirmDatePicker()
+    {
+        CustomStartDate  = DialogStartDate;
+        CustomEndDate    = DialogEndDate;
+        PeriodSelection  = 2;
+        IsDatePickerOpen = false;
+    }
+
+    [RelayCommand]
+    private void CancelDatePicker() => IsDatePickerOpen = false;
 
     [RelayCommand]
     private void SelectSourceGraph()
@@ -298,9 +327,13 @@ public partial class MainViewModel : ObservableObject
             }
 
             var orchestrator = new ReportOrchestrator(calendarSource);
-            var range  = _periodSelection == 2
-                ? WeekRange.FromCustom(CustomStartDate, CustomEndDate)
-                : WeekRange.FromPeriod(_periodSelection == 0 ? WeekPeriod.ThisWeek : WeekPeriod.LastWeek);
+            var today = DateTime.Today;
+            var range  = PeriodSelection switch
+            {
+                1 => WeekRange.FromPeriod(WeekPeriod.LastWeek),
+                2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
+                _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek),
+            };
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
             var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
 
