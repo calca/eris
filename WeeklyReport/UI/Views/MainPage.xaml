@@ -252,11 +252,10 @@
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
-                <!-- ── Card: Sorgente Calendario ─────────────────────────── -->
-                <Frame Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="10">
+                <!-- ── Sorgente Calendario ─────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
 
-                        <Label Text="📡  SORGENTE CALENDARIO"
+                        <Label Text="SORGENTE CALENDARIO"
                                Style="{StaticResource SectionTitle}" />
 
                         <Label Text="Sorgente dati" Style="{StaticResource MutedLabel}" />
@@ -286,14 +285,12 @@
                                 </Button.Triggers>
                             </Button>
                         </Grid>
-                    </VerticalStackLayout>
-                </Frame>
+                </VerticalStackLayout>
 
-                <!-- ── Card: URL ICS ─────────────────────────────────────── -->
-                <Frame Style="{StaticResource Card}"
-                       IsVisible="{Binding IsIcsSource}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="🔗  FILE ICS"
+                <!-- ── URL ICS ─────────────────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12"
+                                    IsVisible="{Binding IsIcsSource}">
+                        <Label Text="FILE ICS"
                                Style="{StaticResource SectionTitle}" />
                         <Label Text="URL del file .ics" Style="{StaticResource MutedLabel}" />
                         <Entry Text="{Binding IcsUrl}"
@@ -303,14 +300,12 @@
                                Placeholder="https://example.com/calendar.ics"
                                Keyboard="Url"
                                FontSize="13" />
-                    </VerticalStackLayout>
-                </Frame>
+                </VerticalStackLayout>
 
-                <!-- ── Card: Account Microsoft ───────────────────────────── -->
-                <Frame Style="{StaticResource Card}"
-                       IsVisible="{Binding IsGraphSource}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="🔐  ACCOUNT MICROSOFT"
+                <!-- ── Account Microsoft ───────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12"
+                                    IsVisible="{Binding IsGraphSource}">
+                        <Label Text="ACCOUNT MICROSOFT"
                                Style="{StaticResource SectionTitle}" />
 
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -357,13 +352,11 @@
                                            IsVisible="{Binding IsBusy}"
                                            Color="{StaticResource Primary}"
                                            HeightRequest="32" />
-                    </VerticalStackLayout>
-                </Frame>
+                </VerticalStackLayout>
 
-                <!-- ── Card: Cartella di output ──────────────────────────── -->
-                <Frame Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="📁  CARTELLA DI OUTPUT"
+                <!-- ── Cartella di output ──────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
+                        <Label Text="CARTELLA DI OUTPUT"
                                Style="{StaticResource SectionTitle}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Entry Grid.Column="0"
@@ -379,13 +372,11 @@
                                     WidthRequest="44"
                                     Command="{Binding SelectFolderCommand}" />
                         </Grid>
-                    </VerticalStackLayout>
-                </Frame>
+                </VerticalStackLayout>
 
-                <!-- ── Card: Formato esportazione ────────────────────────── -->
-                <Frame Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="📄  FORMATO ESPORTAZIONE"
+                <!-- ── Formato esportazione ────────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
+                        <Label Text="FORMATO ESPORTAZIONE"
                                Style="{StaticResource SectionTitle}" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                             <Button Grid.Column="0"
@@ -413,8 +404,7 @@
                                 </Button.Triggers>
                             </Button>
                         </Grid>
-                    </VerticalStackLayout>
-                </Frame>
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>
