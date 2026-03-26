@@ -25,7 +25,7 @@ L'output può essere **CSV** o **XLSX** (con fogli _Detail_ e _Summary_).
 
 ---
 
-## 🗂️ Struttura della soluzione
+## Struttura della soluzione
 
 ```
 eris/
@@ -43,7 +43,7 @@ eris/
 
 ---
 
-## 🚀 Avvio rapido
+## Avvio rapido
 
 ### Prerequisiti
 
@@ -91,7 +91,7 @@ dotnet run -f net10.0-windows10.0.19041.0
 
 ---
 
-## 🔐 Autenticazione
+## Autenticazione
 
 L'app usa un Client ID registrato (`14d82eec-...`) con permessi solo `Calendars.Read` e `User.Read`.  
 **Nessuna App Registration richiesta da parte dell'utente.** Funziona con account personali (Outlook.com) e aziendali (M365).
@@ -124,7 +124,7 @@ export OWREPORT_AzureAd__TenantId="yyyy"
 
 ---
 
-## 📁 Output generato
+## Output generato
 
 ### Formato XLSX (default)
 
@@ -157,7 +157,7 @@ Esempio: `Acme | Platform | Code Review`
 
 ---
 
-## ⚙️ Sorgenti calendario
+## Sorgenti calendario
 
 | Sorgente | Descrizione | Configurazione |
 |----------|-------------|----------------|
@@ -168,7 +168,7 @@ La sorgente di default è configurabile in `appsettings.json` tramite `SourceTyp
 
 ---
 
-## 🏗️ CI/CD
+## CI/CD
 
 Il workflow GitHub Actions ([release.yml](.github/workflows/release.yml)) produce:
 
@@ -181,7 +181,7 @@ Su tag `v*.*.*` viene creata automaticamente una **GitHub Release** con entrambi
 
 ---
 
-## 📦 Dipendenze principali
+## Dipendenze principali
 
 | Progetto | Pacchetto | Versione |
 |----------|-----------|----------|
