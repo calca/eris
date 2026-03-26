@@ -54,6 +54,15 @@ public static class ConfigLoader
         if (config["Source:IcsUrl"] is { } icsUrl && !string.IsNullOrWhiteSpace(icsUrl))
             appConfig.IcsUrl = icsUrl;
 
+        // ── WorkingHours ──────────────────────────────────────────────────────
+        if (config["WorkingHours:WeeklyTarget"] is { } weeklyTarget
+            && double.TryParse(weeklyTarget, System.Globalization.NumberStyles.Any,
+                               System.Globalization.CultureInfo.InvariantCulture, out var hours)
+            && hours > 0)
+        {
+            appConfig.WeeklyWorkingHours = hours;
+        }
+
         return appConfig;
     }
 }

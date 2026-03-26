@@ -41,18 +41,23 @@ var formatOpt = new Option<string>(
     getDefaultValue: () => "xlsx",
     description: "Formato di esportazione: 'csv' o 'xlsx' (default: xlsx)");
 
+var weeklyHoursOpt = new Option<double?>(
+    "--weekly-hours",
+    description: "Monte ore lavorative settimanali di riferimento (default da config, es. 40 o 30)");
+
 generateCmd.AddOption(weekOpt);
 generateCmd.AddOption(outputOpt);
 generateCmd.AddOption(configOpt);
 generateCmd.AddOption(sourceOpt);
 generateCmd.AddOption(icsUrlOpt);
 generateCmd.AddOption(formatOpt);
+generateCmd.AddOption(weeklyHoursOpt);
 
-generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl, string format) =>
+generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl, string format, double? weeklyHours) =>
 {
-    await RunGenerateAsync(week, output, config, source, icsUrl, format);
+    await RunGenerateAsync(week, output, config, source, icsUrl, format, weeklyHours);
 
-}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt, formatOpt);
+}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt, formatOpt, weeklyHoursOpt);
 
 // ── whoami ─────────────────────────────────────────────────────────────────────
 var whoamiCmd = new Command("whoami", "Mostra l'account Microsoft attualmente autenticato");
@@ -173,10 +178,17 @@ async Task<int> RunInteractiveAsync()
                             .Title("Formato di esportazione")
                             .AddChoices("XLSX", "CSV"));
 
+                    double? weeklyHoursInteractive = null;
+                    if (AnsiConsole.Confirm("Vuoi specificare le ore lavorative settimanali?", false))
+                    {
+                        weeklyHoursInteractive = AnsiConsole.Ask<double>("Ore settimanali", 40);
+                    }
+
                     await RunGenerateAsync(week, output, configPath,
                         sourceChoice.StartsWith("ICS") ? "ics" : "graph",
                         icsUrlInteractive,
-                        formatChoice);
+                        formatChoice,
+                        weeklyHoursInteractive);
                     break;
 
                 case "Mostra account":
@@ -217,9 +229,18 @@ async Task<int> RunInteractiveAsync()
     }
 }
 
-async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null, string format = "xlsx")
+async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null, string format = "xlsx", double? weeklyHours = null)
 {
     var appConfig = ConfigLoader.Load(config);
+
+    // Argomento CLI --weekly-hours sovrascrive il valore da config
+    if (weeklyHours is { } wh)
+    {
+        if (wh > 0)
+            appConfig.WeeklyWorkingHours = wh;
+        else
+            AnsiConsole.MarkupLine($"[yellow]Avviso: --weekly-hours deve essere un valore positivo. Verrà usato il valore da config ({appConfig.WeeklyWorkingHours:F0} h).[/]");
+    }
 
     // Determina la sorgente: argomento CLI > config
     var sourceType = appConfig.SourceType;
@@ -290,6 +311,7 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
     table.AddRow("Settimana", Markup.Escape(result.Week.DisplayName));
     table.AddRow("Sorgente", sourceType.ToString());
     table.AddRow("Formato", exportFormat.ToString().ToUpper());
+    table.AddRow("Ore settimanali", $"{appConfig.WeeklyWorkingHours:F0} h");
     table.AddRow("Meeting", result.EventCount.ToString());
     table.AddRow("Ore totali", $"{result.TotalHours:F1} h");
     table.AddRow("Detail", Markup.Escape(result.DetailPath));

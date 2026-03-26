@@ -32,6 +32,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<IPublicClientApplication>(pca);
         builder.Services.AddSingleton(new GraphAuthService(pca, config.Scopes));
+        builder.Services.AddSingleton(config);
 
         // ── Pages / ViewModels ────────────────────────────────────────────────
         builder.Services.AddSingleton<MainViewModel>();

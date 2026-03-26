@@ -406,6 +406,21 @@
                         </Grid>
                 </VerticalStackLayout>
 
+                <!-- ── Ore lavorative settimanali ─────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
+                        <Label Text="ORE LAVORATIVE SETTIMANALI"
+                               Style="{StaticResource SectionTitle}" />
+                        <Label Text="Monte ore di riferimento per la settimana (es. 40, 30, 36…)"
+                               Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding WeeklyWorkingHours}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="40"
+                               Keyboard="Numeric"
+                               FontSize="13" />
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
 

@@ -9,7 +9,6 @@ namespace eris.UI.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly GraphAuthService _authService;
-
     // ── Tab ───────────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -160,13 +159,20 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HoursProgress))]
     private double _totalHours;
 
-    // Ore lavorative settimanali di riferimento: 5 gg * 8h = 40h
-    private const double MaxWorkHours = 40.0;
+    // Ore lavorative settimanali di riferimento: configurabile dall'utente (default 40h = 5 gg * 8h)
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HoursProgress))]
+    [NotifyPropertyChangedFor(nameof(MeetingProgress))]
+    private double _weeklyWorkingHours;
 
     // Arco pieno = settimana piena (occupazione massima).
-    public float HoursProgress   => (float)Math.Clamp(TotalHours / MaxWorkHours, 0.0, 1.0);
-    // Max meeting stimato: 0.5 meeting/h * 40h = 20
-    public float MeetingProgress => (float)Math.Clamp(MeetingCount / (0.5 * MaxWorkHours), 0.0, 1.0);
+    public float HoursProgress   => WeeklyWorkingHours > 0
+        ? (float)Math.Clamp(TotalHours / WeeklyWorkingHours, 0.0, 1.0)
+        : 0f;
+    // Max meeting stimato: 0.5 meeting/h * ore settimanali
+    public float MeetingProgress => WeeklyWorkingHours > 0
+        ? (float)Math.Clamp(MeetingCount / (0.5 * WeeklyWorkingHours), 0.0, 1.0)
+        : 0f;
 
     [ObservableProperty]
     private string _detailPath = string.Empty;
@@ -180,12 +186,19 @@ public partial class MainViewModel : ObservableObject
     private string _resultPeriodEnd = string.Empty;
     // ─────────────────────────────────────────────────────────────────────────
 
-    public MainViewModel(GraphAuthService authService)
+    public MainViewModel(GraphAuthService authService, AppConfig appConfig)
     {
         _authService = authService;
         _icsUrl = Preferences.Default.Get("IcsUrl", string.Empty);
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
+        _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
         UpdateWeekDisplay();
+    }
+
+    partial void OnWeeklyWorkingHoursChanged(double value)
+    {
+        if (value > 0 && double.IsFinite(value))
+            Preferences.Default.Set("WeeklyWorkingHours", value);
     }
 
     partial void OnPeriodSelectionChanged(int value) => UpdateWeekDisplay();

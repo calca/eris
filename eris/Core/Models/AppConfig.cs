@@ -22,4 +22,7 @@ public class AppConfig
 
     /// <summary>URL del file .ics (usato solo quando SourceType = Ics).</summary>
     public string? IcsUrl { get; set; }
+
+    /// <summary>Monte ore lavorative settimanali di riferimento (default: 40h = 5 gg × 8h).</summary>
+    public double WeeklyWorkingHours { get; set; } = 40.0;
 }
