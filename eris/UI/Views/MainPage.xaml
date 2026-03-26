@@ -434,14 +434,26 @@
                                            Color="{StaticResource Primary}"
                                            HeightRequest="32" />
 
-                           <Label Text="{Binding AuthErrorMessage}"
-                               IsVisible="{Binding HasAuthError}"
-                               FontSize="14"
-                               FontAttributes="Bold"
-                               TextColor="{StaticResource Error}"
-                               HorizontalTextAlignment="Start"
-                               LineBreakMode="WordWrap"
-                               Margin="0,2,0,0" />
+                           <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="8"
+                              IsVisible="{Binding HasAuthError}"
+                              Margin="0,2,0,0">
+                            <Label Grid.Column="0"
+                                Text="{Binding AuthErrorMessage}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource Error}"
+                                HorizontalTextAlignment="Start"
+                                LineBreakMode="WordWrap"
+                                VerticalOptions="Center" />
+                            <Button Grid.Column="1"
+                                 Text="Copia"
+                                 Style="{StaticResource SecondaryBtn}"
+                                 FontSize="12"
+                                 HeightRequest="36"
+                                 Padding="10,0"
+                                 Command="{Binding CopyStatusCommand}" />
+                           </Grid>
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1"

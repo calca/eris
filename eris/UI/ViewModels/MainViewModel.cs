@@ -481,8 +481,12 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CopyStatusAsync()
     {
-        if (!string.IsNullOrEmpty(ErrorMessage))
-            await Clipboard.Default.SetTextAsync(ErrorMessage);
+        var textToCopy = !string.IsNullOrEmpty(AuthErrorMessage)
+            ? AuthErrorMessage
+            : ErrorMessage;
+
+        if (!string.IsNullOrEmpty(textToCopy))
+            await Clipboard.Default.SetTextAsync(textToCopy);
     }
 
 
