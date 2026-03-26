@@ -28,6 +28,9 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Select Xcode 26.2
+        run: sudo xcode-select --switch /Applications/Xcode_26.2.app
+
       - name: Install MAUI Mac Catalyst workload
         run: dotnet workload install maui-maccatalyst
 
@@ -78,7 +81,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install MAUI Windows workload
-        run: dotnet workload install maui-windows
+        run: dotnet workload install maui-windows maui-maccatalyst
 
       - name: Publish (Windows unpackaged – Release)
         run: >-
