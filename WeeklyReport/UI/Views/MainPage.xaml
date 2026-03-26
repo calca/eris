@@ -28,11 +28,30 @@
         <ScrollView Grid.Row="1" IsVisible="{Binding IsGenerateTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
+                <!-- Banner configurazione mancante -->
+                <Label IsVisible="{Binding IsConfigIncomplete}"
+                       FontSize="16" FontAttributes="Bold"
+                       TextColor="{StaticResource OnSurfaceMuted}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,16">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Configura la sorgente per generare il report  " />
+                            <Span Text="&#x2197;" FontSize="18" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
                 <!-- Logo -->
                 <Image Source="eris_logo.png"
                        HeightRequest="240"
                        HorizontalOptions="Center"
-                       Margin="0,0,0,16" />
+                       Margin="0,12,0,16" />
+
+                <!-- Contenuto principale (nascosto se config incompleta) -->
+                <VerticalStackLayout Spacing="0"
+                                     IsVisible="{Binding IsConfigIncomplete, Converter={StaticResource InvertBool}}">
 
                 <!-- Intestazione -->
                 <Label Text="Esporta i tuoi meeting in un report"
@@ -220,6 +239,9 @@
                             HorizontalOptions="FillAndExpand"
                             Command="{Binding OpenResultCommand}" />
                 </VerticalStackLayout>
+
+                </VerticalStackLayout>
+                <!-- fine: Contenuto principale -->
 
             </VerticalStackLayout>
         </ScrollView>

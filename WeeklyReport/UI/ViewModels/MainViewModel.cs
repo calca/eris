@@ -34,6 +34,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIcsSource))]
     [NotifyPropertyChangedFor(nameof(IsGraphSource))]
+    [NotifyPropertyChangedFor(nameof(IsConfigIncomplete))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private bool _isGraphSelected;
 
@@ -41,6 +42,7 @@ public partial class MainViewModel : ObservableObject
     public bool IsIcsSource   => !IsGraphSelected;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfigIncomplete))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private string _icsUrl = string.Empty;
 
@@ -48,6 +50,7 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotAuthenticated))]
+    [NotifyPropertyChangedFor(nameof(IsConfigIncomplete))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private bool _isAuthenticated;
 
@@ -113,8 +116,13 @@ public partial class MainViewModel : ObservableObject
     // ── Output ────────────────────────────────────────────────────────────────
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfigIncomplete))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private string _outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+    public bool IsConfigIncomplete =>
+        string.IsNullOrWhiteSpace(OutputFolder)
+        || (IsGraphSelected ? !IsAuthenticated : string.IsNullOrWhiteSpace(IcsUrl));
 
     // ── Formato ───────────────────────────────────────────────────────────────
 
