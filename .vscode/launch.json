@@ -20,7 +20,7 @@
             "name": "UI (Mac Catalyst)",
             "type": "coreclr",
             "request": "attach",
-            "processName": "UI",
+            "processName": "Eris",
             "preLaunchTask": "run-ui"
         }
     ]

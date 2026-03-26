@@ -4,14 +4,17 @@ namespace eris.UI;
 
 public partial class App : Application
 {
-    public App()
+    private readonly IServiceProvider _services;
+
+    public App(IServiceProvider services)
     {
         InitializeComponent();
+        _services = services;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var mainPage = Handler!.MauiContext!.Services.GetRequiredService<MainPage>();
+        var mainPage = _services.GetRequiredService<MainPage>();
         var window   = new Window(new NavigationPage(mainPage));
 
         const int windowWidth  = 600;
