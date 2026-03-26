@@ -6,7 +6,7 @@
              xmlns:views="clr-namespace:eris.UI.Views"
              x:Class="eris.UI.Views.MainPage"
              x:DataType="vm:MainViewModel"
-             Title="eris - your reports">
+             Title="{Binding PageTitle}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{Binding ToggleConfigLabel}"
@@ -274,16 +274,10 @@
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
-                <!-- ── Intestazione impostazioni ──────────────────────── -->
-                <Label Text="Impostazioni"
-                       FontSize="22" FontAttributes="Bold"
-                       TextColor="{StaticResource OnBackground}"
-                       HorizontalOptions="Center"
-                       Margin="0,0,0,4" />
-                <Label Text="Configura le preferenze dell'app. Quando hai finito, premi &quot;Chiudi&quot; in alto a destra oppure usa il pulsante in fondo alla pagina per tornare alla schermata principale."
+                <Label Text="Configura le preferenze dell'app."
                        FontSize="13"
                        TextColor="{StaticResource OnSurfaceMuted}"
-                       HorizontalTextAlignment="Center"
+                       HorizontalTextAlignment="Start"
                        HorizontalOptions="FillAndExpand"
                        LineBreakMode="WordWrap"
                        Margin="0,0,0,20" />
@@ -517,7 +511,7 @@
                 </VerticalStackLayout>
 
                 <!-- ── Chiudi ──────────────────────────────────────────── -->
-                <Button Text="✕  Chiudi e torna all'app"
+                <Button Text="Chiudi e torna in home"
                         Style="{StaticResource SecondaryBtn}"
                         HeightRequest="52"
                         FontSize="15"
