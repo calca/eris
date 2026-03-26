@@ -77,6 +77,10 @@ public partial class MainViewModel : ObservableObject
     public bool IsCurrentMonthSelected => PeriodSelection == 1;
     public bool IsCustomPeriodSelected => PeriodSelection == 2;
 
+    /// <summary>Quando abilitato, il range è limitato a Lunedì–Venerdì (settimana lavorativa).</summary>
+    [ObservableProperty]
+    private bool _isWorkWeek;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
@@ -192,6 +196,7 @@ public partial class MainViewModel : ObservableObject
         _icsUrl = Preferences.Default.Get("IcsUrl", string.Empty);
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
+        _isWorkWeek = Preferences.Default.Get("IsWorkWeek", false);
         UpdateWeekDisplay();
     }
 
@@ -201,6 +206,12 @@ public partial class MainViewModel : ObservableObject
             Preferences.Default.Set("WeeklyWorkingHours", value);
     }
 
+    partial void OnIsWorkWeekChanged(bool value)
+    {
+        Preferences.Default.Set("IsWorkWeek", value);
+        UpdateWeekDisplay();
+    }
+
     partial void OnPeriodSelectionChanged(int value) => UpdateWeekDisplay();
 
     partial void OnCustomStartDateChanged(DateTime value) { if (IsCustomPeriodSelected) UpdateWeekDisplay(); }
@@ -208,12 +219,12 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateWeekDisplay()
     {
-        var today = DateTime.Today;
         var week  = PeriodSelection switch
         {
-            1 => WeekRange.FromPeriod(WeekPeriod.LastWeek),
+            1 => WeekRange.FromPeriod(WeekPeriod.LastWeek, IsWorkWeek),
+            // Custom period: user sets exact dates, so IsWorkWeek does not restrict them.
             2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
-            _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek),
+            _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
         };
         WeekRangeDisplay = $"Dal {week.Start:dd/MM/yyyy} al {week.End.AddDays(-1):dd/MM/yyyy}";
         WeekNumber       = week.WeekNumber;
@@ -264,6 +275,9 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void SelectCurrentMonth() => PeriodSelection = 1;
+
+    [RelayCommand]
+    private void ToggleWorkWeek() => IsWorkWeek = !IsWorkWeek;
 
     [RelayCommand]
     private void SelectCustomPeriod()
@@ -353,9 +367,10 @@ public partial class MainViewModel : ObservableObject
             var today = DateTime.Today;
             var range  = PeriodSelection switch
             {
-                1 => WeekRange.FromPeriod(WeekPeriod.LastWeek),
+                1 => WeekRange.FromPeriod(WeekPeriod.LastWeek, IsWorkWeek),
+                // Custom period: user sets exact dates, so IsWorkWeek does not restrict them.
                 2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
-                _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek),
+                _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
             };
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
             var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
