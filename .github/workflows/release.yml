@@ -92,7 +92,7 @@ jobs:
       - name: Create ZIP
         shell: pwsh
         run: |
-          $publishDir = "eris\UI\bin\Release\net10.0-windows10.0.19041.0\publish"
+          $publishDir = "eris\UI\bin\Release\net10.0-windows10.0.19041.0\win-x64\publish"
           if (-not (Test-Path $publishDir)) {
             Write-Error "Directory publish non trovata: $publishDir"
             Get-ChildItem -Recurse "eris\UI\bin\Release" | Select-Object -ExpandProperty FullName
