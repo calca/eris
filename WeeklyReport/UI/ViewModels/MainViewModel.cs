@@ -14,9 +14,11 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsConfigTab))]
+    [NotifyPropertyChangedFor(nameof(ToggleConfigLabel))]
     private bool _isGenerateTab = true;
 
     public bool IsConfigTab => !IsGenerateTab;
+    public string ToggleConfigLabel => IsConfigTab ? "✕  Chiudi" : "⚙️";
 
     [RelayCommand]
     private void SelectTabGenerate() => IsGenerateTab = true;
