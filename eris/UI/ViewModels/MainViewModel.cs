@@ -48,6 +48,19 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private string _icsUrl = string.Empty;
 
+    [RelayCommand]
+    private async Task ShowIcsHelp()
+    {
+        await Application.Current!.Windows[0].Page!.DisplayAlert(
+            "Come ottenere il link ICS da Outlook",
+            "1. Vai su outlook.com e apri il Calendario\n" +
+            "2. Clicca sull'ingranaggio ⚙ → Visualizza tutte le impostazioni\n" +
+            "3. Vai in Calendario → Calendari condivisi\n" +
+            "4. Nella sezione \"Pubblica un calendario\" scegli il calendario e seleziona \"Tutti i dettagli\"\n" +
+            "5. Clicca \"Pubblica\" e copia il link ICS",
+            "OK");
+    }
+
     // ── Autenticazione ────────────────────────────────────────────────────────
 
     [ObservableProperty]

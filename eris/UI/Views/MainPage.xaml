@@ -359,13 +359,26 @@
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
-                        <Entry Text="{Binding IcsUrl}"
-                               TextColor="{StaticResource OnSurface}"
-                               BackgroundColor="{StaticResource SurfaceVariant}"
-                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
-                               Placeholder="https://example.com/calendar.ics"
-                               Keyboard="Default"
-                               FontSize="13" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="Center">
+                            <Entry Grid.Column="0"
+                                   Text="{Binding IcsUrl}"
+                                   TextColor="{StaticResource OnSurface}"
+                                   BackgroundColor="{StaticResource SurfaceVariant}"
+                                   PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                                   Placeholder="https://example.com/calendar.ics"
+                                   Keyboard="Default"
+                                   FontSize="13" />
+                            <Button Grid.Column="1"
+                                    Text="ⓘ"
+                                    FontSize="20"
+                                    WidthRequest="36" HeightRequest="36"
+                                    CornerRadius="18"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource OnSurfaceMuted}"
+                                    Padding="0"
+                                    VerticalOptions="Center"
+                                    Command="{Binding ShowIcsHelpCommand}" />
+                        </Grid>
                 </VerticalStackLayout>
 
                 <!-- ── Account Microsoft ───────────────────────────── -->
