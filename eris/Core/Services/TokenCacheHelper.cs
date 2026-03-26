@@ -1,10 +1,13 @@
 using Microsoft.Identity.Client;
+using System.Security.Cryptography;
 
 namespace eris.Core.Services;
 
 /// <summary>
 /// Serializzazione del token cache MSAL su disco.
 /// Permette il riuso silenzioso del token tra sessioni.
+/// Su Windows il contenuto viene cifrato con DPAPI (utente corrente) per evitare
+/// falsi positivi degli antivirus (es. Windows Defender).
 /// </summary>
 internal static class TokenCacheHelper
 {
@@ -25,11 +28,14 @@ internal static class TokenCacheHelper
         {
             try
             {
-                args.TokenCache.DeserializeMsalV3(File.ReadAllBytes(CacheFilePath));
+                var data = File.ReadAllBytes(CacheFilePath);
+                if (OperatingSystem.IsWindows())
+                    data = ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+                args.TokenCache.DeserializeMsalV3(data);
             }
             catch
             {
-                // Cache corrotta — la ignoriamo; l'utente dovrà rifare il login
+                // Cache corrotta o non decifrabile — la ignoriamo; l'utente dovrà rifare il login
             }
         }
     }
@@ -41,7 +47,10 @@ internal static class TokenCacheHelper
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(CacheFilePath)!);
-            File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
+            var data = args.TokenCache.SerializeMsalV3();
+            if (OperatingSystem.IsWindows())
+                data = ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
+            File.WriteAllBytes(CacheFilePath, data);
         }
         catch
         {
