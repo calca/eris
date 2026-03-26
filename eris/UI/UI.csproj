@@ -11,7 +11,8 @@
     <Nullable>enable</Nullable>
 
     <!-- App info -->
-    <ApplicationTitle>eris</ApplicationTitle>
+    <AssemblyName>Eris</AssemblyName>
+    <ApplicationTitle>Eris</ApplicationTitle>
     <ApplicationId>com.eris.app</ApplicationId>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
