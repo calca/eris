@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Storage;
+using Microsoft.Maui.ApplicationModel;
 using eris.Core.Models;
 using eris.Core.Services;
 
@@ -120,8 +121,14 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsConfigIncomplete))]
+    [NotifyPropertyChangedFor(nameof(OutputFolderName))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
     private string _outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+    public string OutputFolderName =>
+        string.IsNullOrWhiteSpace(OutputFolder)
+            ? "Nessuna cartella selezionata"
+            : Path.GetFileName(OutputFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
     public bool IsConfigIncomplete =>
         string.IsNullOrWhiteSpace(OutputFolder)
@@ -335,6 +342,13 @@ public partial class MainViewModel : ObservableObject
     }
 
     private bool CanSelectFolder() => !IsBusy;
+
+    [RelayCommand]
+    private async Task OpenOutputFolderAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(OutputFolder) && Directory.Exists(OutputFolder))
+            await Launcher.OpenAsync(new Uri($"file://{OutputFolder}"));
+    }
 
     [RelayCommand(CanExecute = nameof(CanGenerate))]
     private async Task GenerateReportAsync()
