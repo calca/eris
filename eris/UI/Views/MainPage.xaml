@@ -298,7 +298,7 @@
                                BackgroundColor="{StaticResource SurfaceVariant}"
                                PlaceholderColor="{StaticResource OnSurfaceMuted}"
                                Placeholder="https://example.com/calendar.ics"
-                               Keyboard="Url"
+                               Keyboard="Default"
                                FontSize="13" />
                 </VerticalStackLayout>
 
