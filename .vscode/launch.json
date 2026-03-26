@@ -6,9 +6,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build-cli",
-            "program": "${workspaceFolder}/WeeklyReport/CLI/bin/Debug/net10.0/owreport.dll",
+            "program": "${workspaceFolder}/eris/CLI/bin/Debug/net10.0/owreport.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/WeeklyReport/CLI",
+            "cwd": "${workspaceFolder}/eris/CLI",
             "console": "integratedTerminal",
             "stopAtEntry": false,
             "env": {

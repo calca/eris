@@ -33,17 +33,17 @@ jobs:
 
       - name: Publish (Mac Catalyst – Release)
         run: |
-          dotnet publish WeeklyReport/UI/UI.csproj \
+          dotnet publish eris/UI/UI.csproj \
             -f net10.0-maccatalyst \
             -c Release \
             -p:RunAOTCompilation=false
 
       - name: Create DMG
         run: |
-          APP=$(find WeeklyReport/UI/bin/Release -name '*.app' -type d | head -1)
+          APP=$(find eris/UI/bin/Release -name '*.app' -type d | head -1)
           if [ -z "$APP" ]; then
             echo "::error::Nessun bundle .app trovato"
-            find WeeklyReport/UI/bin/Release -maxdepth 4 | sort
+            find eris/UI/bin/Release -maxdepth 4 | sort
             exit 1
           fi
           echo "Packaging: $APP"
@@ -82,17 +82,17 @@ jobs:
 
       - name: Publish (Windows unpackaged – Release)
         run: >-
-          dotnet publish WeeklyReport/UI/UI.csproj
+          dotnet publish eris/UI/UI.csproj
           -f net10.0-windows10.0.19041.0
           -c Release
 
       - name: Create ZIP
         shell: pwsh
         run: |
-          $publishDir = "WeeklyReport\UI\bin\Release\net10.0-windows10.0.19041.0\publish"
+          $publishDir = "eris\UI\bin\Release\net10.0-windows10.0.19041.0\publish"
           if (-not (Test-Path $publishDir)) {
             Write-Error "Directory publish non trovata: $publishDir"
-            Get-ChildItem -Recurse "WeeklyReport\UI\bin\Release" | Select-Object -ExpandProperty FullName
+            Get-ChildItem -Recurse "eris\UI\bin\Release" | Select-Object -ExpandProperty FullName
             exit 1
           }
           Write-Host "Packaging: $publishDir"

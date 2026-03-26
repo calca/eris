@@ -15,25 +15,25 @@
         {
             "label": "build-cli",
             "type": "shell",
-            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" build '${workspaceFolder}/WeeklyReport/CLI/CLI.csproj' --configuration Debug",
+            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" build '${workspaceFolder}/eris/CLI/CLI.csproj' --configuration Debug",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "build-ui",
             "type": "shell",
-            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" build '${workspaceFolder}/WeeklyReport/UI/UI.csproj' --configuration Debug -f net10.0-maccatalyst",
+            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" build '${workspaceFolder}/eris/UI/UI.csproj' --configuration Debug -f net10.0-maccatalyst",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "publish-ui",
             "type": "shell",
-            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" publish '${workspaceFolder}/WeeklyReport/UI/UI.csproj' -f net10.0-maccatalyst -c Debug",
+            "command": "DOTNET_ROOT=\"$HOME/.dotnet-local\" \"$HOME/.dotnet-local/dotnet\" publish '${workspaceFolder}/eris/UI/UI.csproj' -f net10.0-maccatalyst -c Debug",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "run-ui",
             "type": "shell",
-            "command": "APP=$(find '${workspaceFolder}/WeeklyReport/UI/bin/Debug/net10.0-maccatalyst' -name '*.app' -maxdepth 2 | head -1) && echo \"Launching: $APP\" && open \"$APP\"",
+            "command": "APP=$(find '${workspaceFolder}/eris/UI/bin/Debug/net10.0-maccatalyst' -name '*.app' -maxdepth 2 | head -1) && echo \"Launching: $APP\" && open \"$APP\"",
             "dependsOn": "publish-ui",
             "problemMatcher": []
         }
