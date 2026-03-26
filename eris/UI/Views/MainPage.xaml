@@ -274,6 +274,20 @@
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
 
+                <!-- ── Intestazione impostazioni ──────────────────────── -->
+                <Label Text="Impostazioni"
+                       FontSize="22" FontAttributes="Bold"
+                       TextColor="{StaticResource OnBackground}"
+                       HorizontalOptions="Center"
+                       Margin="0,0,0,4" />
+                <Label Text="Configura le preferenze dell'app. Quando hai finito, premi &quot;Chiudi&quot; in alto a destra oppure usa il pulsante in fondo alla pagina per tornare alla schermata principale."
+                       FontSize="13"
+                       TextColor="{StaticResource OnSurfaceMuted}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="FillAndExpand"
+                       LineBreakMode="WordWrap"
+                       Margin="0,0,0,20" />
+
                 <!-- ── Sorgente Calendario ─────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
 
@@ -283,7 +297,7 @@
                         <Label Text="Sorgente dati" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                             <Button Grid.Column="0"
-                                    Text="File ICS"
+                                    Text="ICS Calendar"
                                     Command="{Binding SelectSourceIcsCommand}">
                                 <Button.Triggers>
                                     <DataTrigger TargetType="Button" Binding="{Binding IsIcsSource}" Value="True">
@@ -295,7 +309,7 @@
                                 </Button.Triggers>
                             </Button>
                             <Button Grid.Column="1"
-                                    Text="Outlook Graph"
+                                    Text="Outlook"
                                     Command="{Binding SelectSourceGraphCommand}">
                                 <Button.Triggers>
                                     <DataTrigger TargetType="Button" Binding="{Binding IsGraphSource}" Value="True">
@@ -442,6 +456,15 @@
                                Keyboard="Numeric"
                                FontSize="13" />
                 </VerticalStackLayout>
+
+                <!-- ── Chiudi ──────────────────────────────────────────── -->
+                <Button Text="✕  Chiudi e torna all'app"
+                        Style="{StaticResource SecondaryBtn}"
+                        HeightRequest="52"
+                        FontSize="15"
+                        HorizontalOptions="FillAndExpand"
+                        Margin="0,8,0,0"
+                        Command="{Binding SelectTabGenerateCommand}" />
 
             </VerticalStackLayout>
         </ScrollView>
