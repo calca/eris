@@ -41,13 +41,9 @@ public static class MauiProgram
             PublicClientApplicationBuilder.Create(config.ClientId),
             config.TenantId);
 
-        // Su Apple (iOS/Mac Catalyst) il redirect deve usare lo schema custom msal{ClientId}://auth
-        // registrato nel Info.plist. Su desktop/CLI resta valido il loopback localhost.
-    #if IOS || MACCATALYST
-        pcaBuilder.WithRedirectUri($"msal{config.ClientId}://auth");
-    #else
+        // Con MSAL .NET system browser in questa app MAUI usare loopback redirect URI.
+        // Deve essere registrata uguale anche in Azure AD app registration.
         pcaBuilder.WithRedirectUri("http://localhost");
-    #endif
 
         var pca = pcaBuilder.Build();
 
