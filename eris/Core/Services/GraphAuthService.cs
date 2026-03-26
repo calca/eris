@@ -54,6 +54,36 @@ public sealed class GraphAuthService
         return interactive.AccessToken;
     }
 
+    /// <summary>
+    /// Tenta login silenzioso/interattivo; su Mac Catalyst, in caso di errore interattivo,
+    /// esegue fallback al device code flow.
+    /// </summary>
+    public async Task<string> GetAccessTokenWithMacCatalystFallbackAsync(
+        object? parentWindow = null,
+        Func<string, Task>? onDeviceCode = null)
+    {
+        try
+        {
+            return await GetAccessTokenAsync(parentWindow);
+        }
+        catch (MsalClientException) when (OperatingSystem.IsMacCatalyst())
+        {
+            var result = await _app
+                .AcquireTokenWithDeviceCode(_scopes, deviceCodeResult =>
+                {
+                    if (onDeviceCode is null)
+                        return Task.CompletedTask;
+
+                    var message =
+                        $"Apri {deviceCodeResult.VerificationUrl} e inserisci il codice: {deviceCodeResult.UserCode}";
+                    return onDeviceCode(message);
+                })
+                .ExecuteAsync();
+
+            return result.AccessToken;
+        }
+    }
+
     /// <summary>Restituisce lo username dell'account autenticato (o stringa vuota).</summary>
     public async Task<string> GetUserDisplayNameAsync()
     {

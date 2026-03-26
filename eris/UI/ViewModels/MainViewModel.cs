@@ -312,13 +312,21 @@ public partial class MainViewModel : ObservableObject
     private async Task LoginAsync()
     {
         IsBusy = true;
+        DeviceCodeMessage = null;
 
         try
         {
-            await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
+            await _authService.GetAccessTokenWithMacCatalystFallbackAsync(
+                GetPlatformParentWindow(),
+                message =>
+                {
+                    MainThread.BeginInvokeOnMainThread(() => DeviceCodeMessage = message);
+                    return Task.CompletedTask;
+                });
 
             UserDisplayName  = await _authService.GetUserDisplayNameAsync();
             IsAuthenticated  = true;
+            DeviceCodeMessage = null;
             AuthErrorMessage = string.Empty;
             ErrorMessage     = string.Empty;
         }
@@ -578,11 +586,14 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     private static object? GetPlatformParentWindow()
     {
-#if MACCATALYST || IOS
+    #if IOS
         // Ottiene il UIViewController root dalla finestra corrente MAUI
         var window = Application.Current?.Windows.FirstOrDefault();
         var platformWindow = window?.Handler?.PlatformView as UIKit.UIWindow;
         return platformWindow?.RootViewController;
+    #elif MACCATALYST
+        // Su Mac Catalyst con MSAL system browser usiamo redirect loopback e nessuna parent window.
+        return null;
 #elif WINDOWS
         var window = Application.Current?.Windows.FirstOrDefault();
         if (window?.Handler?.PlatformView is Microsoft.UI.Xaml.Window winUiWindow)
