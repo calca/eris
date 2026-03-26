@@ -9,6 +9,23 @@ namespace eris.UI;
 
 public static class MauiProgram
 {
+    private static PublicClientApplicationBuilder ConfigureAuthority(
+        PublicClientApplicationBuilder builder,
+        string tenantId)
+    {
+        if (string.IsNullOrWhiteSpace(tenantId) ||
+            tenantId.Equals("organizations", StringComparison.OrdinalIgnoreCase))
+            return builder.WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs);
+
+        if (tenantId.Equals("common", StringComparison.OrdinalIgnoreCase))
+            return builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount);
+
+        if (tenantId.Equals("consumers", StringComparison.OrdinalIgnoreCase))
+            return builder.WithAuthority(AadAuthorityAudience.PersonalMicrosoftAccount);
+
+        return builder.WithAuthority(AzureCloudInstance.AzurePublic, tenantId);
+    }
+
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -20,13 +37,17 @@ public static class MauiProgram
         // ── MSAL ──────────────────────────────────────────────────────────────
         var config = ConfigLoader.Load();
 
-        var pcaBuilder = PublicClientApplicationBuilder
-            .Create(config.ClientId)
-            .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs);
+        var pcaBuilder = ConfigureAuthority(
+            PublicClientApplicationBuilder.Create(config.ClientId),
+            config.TenantId);
 
-        // Per il system browser di MSAL .NET usare sempre una loopback redirect URI.
-        // La stessa URI deve essere registrata anche nell'app registration Azure AD.
+        // Su Apple (iOS/Mac Catalyst) il redirect deve usare lo schema custom msal{ClientId}://auth
+        // registrato nel Info.plist. Su desktop/CLI resta valido il loopback localhost.
+    #if IOS || MACCATALYST
+        pcaBuilder.WithRedirectUri($"msal{config.ClientId}://auth");
+    #else
         pcaBuilder.WithRedirectUri("http://localhost");
+    #endif
 
         var pca = pcaBuilder.Build();
 

@@ -172,6 +172,11 @@ public partial class MainViewModel : ObservableObject
     private string _errorMessage = string.Empty;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAuthError))]
+    private string _authErrorMessage = string.Empty;
+    public bool HasAuthError => !string.IsNullOrEmpty(AuthErrorMessage);
+
     // ── Risultato ─────────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -265,11 +270,12 @@ public partial class MainViewModel : ObservableObject
 
             UserDisplayName  = await _authService.GetUserDisplayNameAsync();
             IsAuthenticated  = true;
+            AuthErrorMessage = string.Empty;
             ErrorMessage     = string.Empty;
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Errore autenticazione: {ex.Message}";
+            AuthErrorMessage = $"Errore autenticazione: {ex.Message}";
         }
         finally
         {
@@ -288,6 +294,7 @@ public partial class MainViewModel : ObservableObject
         IsAuthenticated   = false;
         UserDisplayName   = "Non autenticato";
         DeviceCodeMessage = null;
+        AuthErrorMessage  = string.Empty;
         ShowResult        = false;
         ErrorMessage      = string.Empty;
     }
@@ -325,6 +332,7 @@ public partial class MainViewModel : ObservableObject
     private void SelectSourceGraph()
     {
         IsGraphSelected = true;
+        AuthErrorMessage = string.Empty;
         Preferences.Default.Set("SourceGraph", true);
     }
 
@@ -332,6 +340,7 @@ public partial class MainViewModel : ObservableObject
     private void SelectSourceIcs()
     {
         IsGraphSelected = false;
+        AuthErrorMessage = string.Empty;
         Preferences.Default.Set("SourceGraph", false);
     }
 

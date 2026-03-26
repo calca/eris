@@ -218,16 +218,16 @@
                                        WidthRequest="26" />
                 </Grid>
 
-                <!-- ── Errore ─────────────────────────────────────────────── -->
-                <Label Text="{Binding ErrorMessage}"
-                       IsVisible="{Binding HasError}"
-                       FontSize="17"
-                       FontAttributes="Bold"
-                       TextColor="{StaticResource Error}"
-                       HorizontalTextAlignment="Center"
-                       HorizontalOptions="FillAndExpand"
-                       LineBreakMode="WordWrap"
-                       Margin="0,0,0,12" />
+                  <!-- ── Errore ─────────────────────────────────────────────── -->
+                  <Label Text="{Binding ErrorMessage}"
+                      IsVisible="{Binding HasError}"
+                      FontSize="17"
+                      FontAttributes="Bold"
+                      TextColor="{StaticResource Error}"
+                      HorizontalTextAlignment="Center"
+                      HorizontalOptions="FillAndExpand"
+                      LineBreakMode="WordWrap"
+                      Margin="0,0,0,12" />
 
                 <!-- ── Risultato: cerchi statistiche ──────────────────────────── -->
                 <HorizontalStackLayout IsVisible="{Binding ShowResult}"
@@ -433,6 +433,15 @@
                                            IsVisible="{Binding IsBusy}"
                                            Color="{StaticResource Primary}"
                                            HeightRequest="32" />
+
+                           <Label Text="{Binding AuthErrorMessage}"
+                               IsVisible="{Binding HasAuthError}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Error}"
+                               HorizontalTextAlignment="Start"
+                               LineBreakMode="WordWrap"
+                               Margin="0,2,0,0" />
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1"
