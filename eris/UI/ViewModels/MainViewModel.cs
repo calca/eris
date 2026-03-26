@@ -19,7 +19,7 @@ public partial class MainViewModel : ObservableObject
     private bool _isGenerateTab = true;
 
     public bool IsConfigTab => !IsGenerateTab;
-    public string PageTitle => IsConfigTab ? "impostazioni" : "Your Reports";
+    public string PageTitle => IsConfigTab ? "Impostazioni" : "Your Reports";
     public string ToggleConfigLabel => IsConfigTab ? "🏠" : "⚙️";
 
     [RelayCommand]
