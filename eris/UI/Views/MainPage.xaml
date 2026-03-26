@@ -49,6 +49,30 @@
                        HorizontalOptions="Center"
                        Margin="0,12,0,16" />
 
+                <!-- Messaggio benvenuto (visibile solo se config incompleta) -->
+                <VerticalStackLayout IsVisible="{Binding IsConfigIncomplete}" Spacing="8" Margin="0,0,0,24">
+                    <Label Text="Benvenuto"
+                           FontSize="34"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource OnBackground}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center"
+                           Margin="0,12,0,12" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*" />
+                            <ColumnDefinition Width="0.6*" />
+                            <ColumnDefinition Width="0.2*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="1"
+                               Text="Eris è qui per estrarre l'essenza dalle tue giornate affollate. Trasforma la confusione del calendario in report ordinati: perché anche dalla discordia degli impegni può nascere un'armonia perfetta."
+                               FontSize="18"
+                               TextColor="{StaticResource OnSurfaceMuted}"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap" />
+                    </Grid>
+                </VerticalStackLayout>
+
                 <!-- Contenuto principale (nascosto se config incompleta) -->
                 <VerticalStackLayout Spacing="0"
                                      IsVisible="{Binding IsConfigIncomplete, Converter={StaticResource InvertBool}}">
@@ -137,12 +161,14 @@
                 </HorizontalStackLayout>
 
                 <!-- Periodo selezionato -->
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8"
-                                       Margin="0,4,0,4"
-                                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="10"
+                                       Margin="0,4,0,20"
+                                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                                       VerticalOptions="Center">
                     <Button Text="Lun – Ven"
                             FontSize="12" CornerRadius="12"
                             Padding="12,6" BorderWidth="1.5"
+                            VerticalOptions="Center"
                             Command="{Binding ToggleWorkWeekCommand}">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding IsWorkWeek}" Value="True">
@@ -157,16 +183,13 @@
                             </DataTrigger>
                         </Button.Triggers>
                     </Button>
+                    <Label Text="{Binding WeekRangeDisplay}"
+                           FontSize="15"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource OnSurface}"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
                 </HorizontalStackLayout>
-
-                <Label Text="{Binding WeekRangeDisplay}"
-                       FontSize="15"
-                       FontAttributes="Bold"
-                       TextColor="{StaticResource OnSurface}"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center"
-                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                       Margin="0,4,0,20" />
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
                 <Grid HeightRequest="52"
