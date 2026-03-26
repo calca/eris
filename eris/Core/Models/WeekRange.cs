@@ -41,7 +41,7 @@ public sealed class WeekRange
         return date.Year;
     }
 
-    public static WeekRange FromPeriod(WeekPeriod period)
+    public static WeekRange FromPeriod(WeekPeriod period, bool workWeek = false)
     {
         var today        = DateTime.Today;
         int daysToMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
@@ -50,7 +50,9 @@ public sealed class WeekRange
 
         var offset = DateTimeOffset.Now.Offset;
         var start  = new DateTimeOffset(monday, offset);
-        return new WeekRange(start, start.AddDays(7));
+        // Work week: Mon–Fri (5 days); solar week: Mon–Sun (7 days)
+        var daysInRange = workWeek ? 5 : 7;
+        return new WeekRange(start, start.AddDays(daysInRange));
     }
 
     public static WeekRange FromCustom(DateTime start, DateTime end)

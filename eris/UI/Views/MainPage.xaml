@@ -137,6 +137,28 @@
                 </HorizontalStackLayout>
 
                 <!-- Periodo selezionato -->
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8"
+                                       Margin="0,4,0,4"
+                                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                    <Button Text="Lun – Ven"
+                            FontSize="12" CornerRadius="12"
+                            Padding="12,6" BorderWidth="1.5"
+                            Command="{Binding ToggleWorkWeekCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsWorkWeek}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                <Setter Property="TextColor" Value="White" />
+                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsWorkWeek}" Value="False">
+                                <Setter Property="BackgroundColor" Value="Transparent" />
+                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                <Setter Property="BorderColor" Value="{StaticResource SurfaceVariant}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </HorizontalStackLayout>
+
                 <Label Text="{Binding WeekRangeDisplay}"
                        FontSize="15"
                        FontAttributes="Bold"
