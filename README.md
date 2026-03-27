@@ -25,6 +25,40 @@ L'output può essere **CSV** o **XLSX** (con fogli _Detail_ e _Summary_).
 
 ---
 
+## Funzionalità
+
+La GUI MAUI offre due tab principali:
+
+### Tab Home
+
+- **Selezione periodo** — Slider a tre stati: _Questa settimana_, _Mese precedente_, _Periodo libero_
+- **Lun–Ven / Lun–Dom** — Toggle per limitare il range ai soli giorni lavorativi (icona clock con indicatore visivo)
+- **Selezione date** — Icona calendario cliccabile per scegliere date custom (attiva solo in periodo libero)
+- **Grafici circolari** — Ore totali e numero meeting con arco di progresso rispetto al monte ore settimanale
+- **Apertura rapida** — Link per aprire direttamente i file generati (Detail / Summary)
+
+### Tab Impostazioni
+
+- **Sorgente calendario** — ICS Calendar / Outlook (slider)
+- **Formato Subject** — Template configurabile per il parsing dei titoli eventi
+- **URL ICS** — Campo per inserire l'URL del file `.ics` (con guida integrata)
+- **Account Microsoft** — Login/logout con stato di autenticazione (pallino + nome utente)
+- **Cartella di output** — Selezione della cartella dove salvare i report
+- **Formato export** — Slider CSV / XLSX
+- **Ore settimanali** — Monte ore lavorative settimanali di riferimento
+- **Filtri** — Dialog per escludere categorie, clienti, progetti, topic ed eventi provvisori
+
+### Screenshot
+
+<p align="center">
+  <img src="assets/Home-V1.png" alt="Home" width="32%" />
+  <img src="assets/Home-Report-V1.png" alt="Report" width="32%" />
+  <img src="assets/Settings.png" alt="Impostazioni" width="32%" />
+</p>
+
+---
+
+
 ## Struttura della soluzione
 
 ```
@@ -227,39 +261,6 @@ Su tag `v*.*.*` viene creata automaticamente una **GitHub Release** con entrambi
 | UI   | `Microsoft.Maui.Controls` | 10.0.0 |
 | UI   | `CommunityToolkit.Maui` | 9.0.3 |
 | UI   | `CommunityToolkit.Mvvm` | 8.3.2 |
-
----
-
-## Funzionalità UI
-
-La GUI MAUI offre due tab principali:
-
-### Tab Home
-
-- **Selezione periodo** — Slider a tre stati: _Questa settimana_, _Mese precedente_, _Periodo libero_
-- **Lun–Ven / Lun–Dom** — Toggle per limitare il range ai soli giorni lavorativi (icona clock con indicatore visivo)
-- **Selezione date** — Icona calendario cliccabile per scegliere date custom (attiva solo in periodo libero)
-- **Grafici circolari** — Ore totali e numero meeting con arco di progresso rispetto al monte ore settimanale
-- **Apertura rapida** — Link per aprire direttamente i file generati (Detail / Summary)
-
-### Tab Impostazioni
-
-- **Sorgente calendario** — ICS Calendar / Outlook (slider)
-- **Formato Subject** — Template configurabile per il parsing dei titoli eventi
-- **URL ICS** — Campo per inserire l'URL del file `.ics` (con guida integrata)
-- **Account Microsoft** — Login/logout con stato di autenticazione (pallino + nome utente)
-- **Cartella di output** — Selezione della cartella dove salvare i report
-- **Formato export** — Slider CSV / XLSX
-- **Ore settimanali** — Monte ore lavorative settimanali di riferimento
-- **Filtri** — Dialog per escludere categorie, clienti, progetti, topic ed eventi provvisori
-
-### Screenshot
-
-<p align="center">
-  <img src="assets/Home-V1.png" alt="Home" width="32%" />
-  <img src="assets/Home-Report-V1.png" alt="Report" width="32%" />
-  <img src="assets/Settings.png" alt="Impostazioni" width="32%" />
-</p>
 
 ---
 
