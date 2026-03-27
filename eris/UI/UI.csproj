@@ -53,6 +53,8 @@
     <MauiImage Include="Resources/Icons/week_fading.svg" TintColor="#cbd5e1" />
     <MauiImage Include="Resources/Icons/calendar.svg" TintColor="#cbd5e1" />
     <MauiImage Include="Resources/Icons/calendar_clock.svg" TintColor="#cbd5e1" />
+    <MauiImage Include="Resources/Icons/report_hours.svg" TintColor="#64748b" />
+    <MauiImage Include="Resources/Icons/report_meetings.svg" TintColor="#64748b" />
   </ItemGroup>
 
   <ItemGroup>

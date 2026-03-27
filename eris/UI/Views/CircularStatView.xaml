@@ -13,10 +13,9 @@
         <VerticalStackLayout HorizontalOptions="Center"
                              VerticalOptions="Center"
                              Spacing="2">
-            <Label Text="{Binding Source={x:Reference self}, Path=Icon}"
-                   FontSize="18"
-                   HorizontalOptions="Center"
-                   TextColor="#64748b" />
+            <Image Source="{Binding Source={x:Reference self}, Path=IconSource}"
+                   WidthRequest="22" HeightRequest="22"
+                   HorizontalOptions="Center" />
             <Label Text="{Binding Source={x:Reference self}, Path=StatLabel}"
                    FontSize="12"
                    HorizontalOptions="Center"

@@ -307,13 +307,13 @@
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>
 
-                    <views:CircularStatView Icon="⏱"
+                    <views:CircularStatView IconSource="report_hours.png"
                                             StatLabel="Ore"
                                             Value="{Binding TotalHours, StringFormat='{0:F1}h'}"
                                             Progress="{Binding HoursProgress}" />
 
-                    <views:CircularStatView Icon="📊"
-                                            StatLabel="Meeting"
+                    <views:CircularStatView IconSource="report_meetings.png"
+                                            StatLabel="Meetings"
                                             Value="{Binding MeetingCount, StringFormat='{0}'}"
                                             Progress="{Binding MeetingProgress}" />
 

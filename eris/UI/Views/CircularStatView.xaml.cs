@@ -13,6 +13,9 @@ public partial class CircularStatView : ContentView
     public static readonly BindableProperty IconProperty =
         BindableProperty.Create(nameof(Icon), typeof(string), typeof(CircularStatView), "");
 
+    public static readonly BindableProperty IconSourceProperty =
+        BindableProperty.Create(nameof(IconSource), typeof(ImageSource), typeof(CircularStatView), null);
+
     public static readonly BindableProperty ProgressProperty =
         BindableProperty.Create(nameof(Progress), typeof(float), typeof(CircularStatView), 0.85f,
             propertyChanged: (b, _, _2) => ((CircularStatView)b).Refresh());
@@ -20,6 +23,7 @@ public partial class CircularStatView : ContentView
     public string Value     { get => (string)GetValue(ValueProperty);     set => SetValue(ValueProperty, value); }
     public string StatLabel { get => (string)GetValue(StatLabelProperty); set => SetValue(StatLabelProperty, value); }
     public string Icon      { get => (string)GetValue(IconProperty);      set => SetValue(IconProperty, value); }
+    public ImageSource IconSource { get => (ImageSource)GetValue(IconSourceProperty); set => SetValue(IconSourceProperty, value); }
     public float  Progress  { get => (float)GetValue(ProgressProperty);   set => SetValue(ProgressProperty, value); }
 
     public CircularStatView()
