@@ -25,7 +25,7 @@
     <Grid RowDefinitions="Auto,*" BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}">
 
         <!-- ════════════════════════════════════════════════════════════════ -->
-        <!-- ══  TAB 1: GENERA REPORT  ═════════════════════════════════════ -->
+        <!-- ══  TAB 1: HOME  ═════════════════════════════════════ -->
         <!-- ════════════════════════════════════════════════════════════════ -->
         <ScrollView Grid.Row="1" IsVisible="{Binding IsGenerateTab}">
             <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
