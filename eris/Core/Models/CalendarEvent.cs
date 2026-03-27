@@ -1,8 +1,9 @@
 namespace eris.Core.Models;
 
+using System.Text.RegularExpressions;
+
 /// <summary>
 /// Rappresenta un evento di calendario estratto da Microsoft Graph o da un file ICS.
-/// Contiene solo gli eventi accettati o organizzati dall'utente.
 /// </summary>
 public class CalendarEvent
 {
@@ -29,32 +30,74 @@ public class CalendarEvent
     public bool IsTentative { get; set; }
 
     /// <summary>
-    /// Parsa il Subject strutturato nei campi Client, Project, Topic.
-    /// Formati supportati:
-    ///   "CLIENT | PROJECT | TOPIC" → tutti e tre popolati
-    ///   "CLIENT|PROJECT|TOPIC"      → tutti e tre popolati (spazi opzionali attorno a '|')
-    ///   "CLIENT | TOPIC"           → Client e Topic popolati, Project null
-    /// Subject senza separatore " | " vengono ignorati (campi restano null).
+    /// Parsa il Subject strutturato nei campi Client, Project, Topic
+    /// usando il template di default "{Cliente} | {Progetto} | {Topic}".
     /// </summary>
     public static void ParseStructuredSubject(CalendarEvent evt)
+        => ParseStructuredSubject(evt, null);
+
+    /// <summary>
+    /// Parsa il Subject secondo un template configurabile.
+    /// Il template usa placeholder tra graffe: {Cliente}, {Progetto}, {Topic}.
+    /// Il separatore è dedotto automaticamente dal testo tra i placeholder.
+    /// Esempi di template validi:
+    ///   "{Cliente} | {Progetto} | {Topic}"  (default)
+    ///   "{Cliente} - {Topic}"
+    ///   "{Progetto} / {Cliente} / {Topic}"
+    /// </summary>
+    public static void ParseStructuredSubject(CalendarEvent evt, string? template)
     {
         if (string.IsNullOrWhiteSpace(evt.Subject)) return;
 
+        var (separator, fieldNames) = ParseTemplate(template);
+
         var parts = evt.Subject
-            .Split('|', StringSplitOptions.TrimEntries)
+            .Split(separator, StringSplitOptions.TrimEntries)
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .ToArray();
 
-        if (parts.Length >= 3)
+        if (parts.Length < 2) return;
+
+        var assignment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        if (parts.Length >= fieldNames.Length)
         {
-            evt.Client  = parts[0];
-            evt.Project = parts[1];
-            evt.Topic   = string.Join(" | ", parts.Skip(2));
+            for (int i = 0; i < fieldNames.Length - 1; i++)
+                assignment[fieldNames[i]] = parts[i];
+            assignment[fieldNames[^1]] = string.Join($" {separator} ", parts.Skip(fieldNames.Length - 1));
         }
-        else if (parts.Length == 2)
+        else // parts.Length < fieldNames.Length ma >= 2
         {
-            evt.Client = parts[0];
-            evt.Topic  = parts[1];
+            assignment[fieldNames[0]] = parts[0];
+            assignment[fieldNames[^1]] = parts[^1];
+            for (int i = 1; i < parts.Length - 1 && i < fieldNames.Length - 1; i++)
+                assignment[fieldNames[i]] = parts[i];
         }
+
+        if (assignment.TryGetValue("Cliente", out var c)) evt.Client = c;
+        if (assignment.TryGetValue("Progetto", out var p)) evt.Project = p;
+        if (assignment.TryGetValue("Topic", out var t)) evt.Topic = t;
+    }
+
+    public const string DefaultTemplate = "{Cliente} | {Progetto} | {Topic}";
+
+    private static (string separator, string[] fields) ParseTemplate(string? template)
+    {
+        template ??= DefaultTemplate;
+
+        var matches = Regex.Matches(template, @"\{(\w+)\}");
+        var fields = matches.Select(m => m.Groups[1].Value).ToArray();
+        if (fields.Length == 0)
+            return ("|", ["Cliente", "Progetto", "Topic"]);
+
+        string separator = "|";
+        if (matches.Count >= 2)
+        {
+            var between = template[(matches[0].Index + matches[0].Length)..matches[1].Index].Trim();
+            if (!string.IsNullOrEmpty(between))
+                separator = between;
+        }
+
+        return (separator, fields);
     }
 }

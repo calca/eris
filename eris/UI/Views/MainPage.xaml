@@ -386,6 +386,21 @@
                             </Grid>
                         </Border>
                     </VerticalStackLayout>
+
+                    <!-- Formato Subject -->
+                    <VerticalStackLayout Grid.Column="1" Spacing="8">
+                        <Label Text="Come sono strutturati i titoli dei tuoi eventi."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               HeightRequest="36"
+                               Margin="0,0,0,4" />
+                        <Button Text="Formato Subject"
+                                Style="{StaticResource SecondaryBtn}"
+                                HeightRequest="46"
+                                FontSize="13"
+                                Padding="16,8"
+                                Command="{Binding OpenTemplateDialogCommand}" />
+                    </VerticalStackLayout>
                 </Grid>
 
                 <!-- ── URL ICS ─────────────────────────────────────── -->
@@ -796,6 +811,76 @@
                             Style="{StaticResource PrimaryBtn}"
                             HeightRequest="44"
                             Command="{Binding ApplyFiltersDialogCommand}" />
+                      </Grid>
+
+                  </VerticalStackLayout>
+                 </Frame>
+             </Grid>
+
+             <!-- ── Dialog formato subject ─────────────────────────────────────── -->
+             <Grid Grid.RowSpan="2" IsVisible="{Binding IsTemplateDialogOpen}"
+                BackgroundColor="#CC000000">
+                 <Frame BackgroundColor="{StaticResource Surface}"
+                     BorderColor="{StaticResource SurfaceVariant}"
+                     CornerRadius="16" HasShadow="False"
+                     Padding="24" WidthRequest="420"
+                     HorizontalOptions="Center" VerticalOptions="Center">
+                  <VerticalStackLayout Spacing="12">
+
+                      <Label Text="Formato Subject"
+                          FontSize="18"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource OnBackground}"
+                          HorizontalOptions="Center" />
+
+                      <Label Text="Definisci come sono strutturati i titoli dei tuoi eventi nel calendario. Usa i placeholder &#x7B;Cliente&#x7D;, &#x7B;Progetto&#x7D; e &#x7B;Topic&#x7D; separati dal carattere che usi nei titoli."
+                          Style="{StaticResource MutedLabel}"
+                          HorizontalTextAlignment="Center"
+                          LineBreakMode="WordWrap" />
+
+                      <Label Text="Esempio: se i tuoi eventi si chiamano &quot;Acme | Website | Review&quot;, il template è:"
+                          Style="{StaticResource MutedLabel}"
+                          HorizontalTextAlignment="Center"
+                          LineBreakMode="WordWrap" />
+
+                      <Label Text="{}&#x7B;Cliente&#x7D; | &#x7B;Progetto&#x7D; | &#x7B;Topic&#x7D;"
+                          FontSize="14"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource Primary}"
+                          HorizontalTextAlignment="Center" />
+
+                      <Label Text="Template"
+                          TextColor="{StaticResource OnSurface}"
+                          FontSize="13"
+                          FontAttributes="Bold"
+                          Margin="0,4,0,0" />
+                      <Entry Text="{Binding DialogSubjectTemplate}"
+                          TextColor="{StaticResource OnSurface}"
+                          BackgroundColor="{StaticResource SurfaceVariant}"
+                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          Placeholder="{}&#x7B;Cliente&#x7D; | &#x7B;Progetto&#x7D; | &#x7B;Topic&#x7D;"
+                          Keyboard="Default"
+                          FontSize="13" />
+
+                      <Button Text="Ripristina Default"
+                          Style="{StaticResource SecondaryBtn}"
+                          HeightRequest="36"
+                          FontSize="12"
+                          Padding="10,0"
+                          HorizontalOptions="End"
+                          Command="{Binding ResetTemplateDialogCommand}" />
+
+                      <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,6,0,0">
+                       <Button Grid.Column="0"
+                            Text="Annulla"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding CancelTemplateDialogCommand}" />
+                       <Button Grid.Column="1"
+                            Text="Salva"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding ApplyTemplateDialogCommand}" />
                       </Grid>
 
                   </VerticalStackLayout>

@@ -122,6 +122,10 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private bool _excludeTentative = true;
 
+    /// <summary>Template per il parsing del subject strutturato.</summary>
+    [ObservableProperty]
+    private string _subjectTemplate = CalendarEvent.DefaultTemplate;
+
     public bool HasActiveFilters => ExcludeTentative
         || HasFilterValues(ExcludedCategories)
         || HasFilterValues(ExcludedClients)
@@ -145,6 +149,12 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isFiltersDialogOpen;
+
+    [ObservableProperty]
+    private bool _isTemplateDialogOpen;
+
+    [ObservableProperty]
+    private string _dialogSubjectTemplate = CalendarEvent.DefaultTemplate;
 
     [ObservableProperty]
     private string _dialogExcludedCategories = string.Empty;
@@ -278,6 +288,7 @@ public partial class MainViewModel : ObservableObject
         _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
         _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
         _excludeTentative   = Preferences.Default.Get("ExcludeTentative", true);
+        _subjectTemplate    = Preferences.Default.Get("SubjectTemplate", CalendarEvent.DefaultTemplate);
         UpdateWeekDisplay();
     }
 
@@ -292,6 +303,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
     partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
     partial void OnExcludeTentativeChanged(bool value)       => Preferences.Default.Set("ExcludeTentative",   value);
+    partial void OnSubjectTemplateChanged(string value)      => Preferences.Default.Set("SubjectTemplate",    value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -398,6 +410,29 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void CancelDatePicker() => IsDatePickerOpen = false;
+
+    [RelayCommand]
+    private void OpenTemplateDialog()
+    {
+        DialogSubjectTemplate = SubjectTemplate;
+        IsTemplateDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelTemplateDialog() => IsTemplateDialogOpen = false;
+
+    [RelayCommand]
+    private void ApplyTemplateDialog()
+    {
+        SubjectTemplate = DialogSubjectTemplate;
+        IsTemplateDialogOpen = false;
+    }
+
+    [RelayCommand]
+    private void ResetTemplateDialog()
+    {
+        DialogSubjectTemplate = CalendarEvent.DefaultTemplate;
+    }
 
     [RelayCommand]
     private void OpenFiltersDialog()
@@ -519,7 +554,7 @@ public partial class MainViewModel : ObservableObject
                 Projects   = ParseList(ExcludedProjects),
                 Topics     = ParseList(ExcludedTopics),
             };
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters);
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplate);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;

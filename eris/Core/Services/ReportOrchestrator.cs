@@ -25,14 +25,19 @@ public sealed class ReportOrchestrator
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
     /// <param name="format">Formato di esportazione (CSV o XLSX).</param>
     /// <param name="filters">Filtri di esclusione per categoria, cliente, progetto e topic.</param>
+    /// <param name="subjectTemplate">Template per il parsing del subject (es. "{Cliente} | {Progetto} | {Topic}").</param>
     public async Task<ReportResult> GenerateAsync(
         WeekPeriod       period,
         string           outputBaseDir,
         ExportFormat     format  = ExportFormat.Xlsx,
-        EventFilters?    filters = null)
+        EventFilters?    filters = null,
+        string?          subjectTemplate = null)
     {
-        var week   = WeekRange.FromPeriod(period);
-        var events = ApplyExclusions(await _source.GetEventsAsync(week), filters);
+        var week      = WeekRange.FromPeriod(period);
+        var rawEvents = await _source.GetEventsAsync(week);
+        foreach (var e in rawEvents)
+            CalendarEvent.ParseStructuredSubject(e, subjectTemplate);
+        var events = ApplyExclusions(rawEvents, filters);
 
         IExportService exporter = format switch
         {
@@ -57,9 +62,13 @@ public sealed class ReportOrchestrator
         WeekRange     range,
         string        outputBaseDir,
         ExportFormat  format  = ExportFormat.Xlsx,
-        EventFilters? filters = null)
+        EventFilters? filters = null,
+        string?       subjectTemplate = null)
     {
-        var events = ApplyExclusions(await _source.GetEventsAsync(range), filters);
+        var rawEvents = await _source.GetEventsAsync(range);
+        foreach (var e in rawEvents)
+            CalendarEvent.ParseStructuredSubject(e, subjectTemplate);
+        var events = ApplyExclusions(rawEvents, filters);
 
         IExportService exporter = format switch
         {

@@ -60,7 +60,7 @@ public sealed class IcsCalendarService : ICalendarSource
                     EndTime       = evtEnd,
                     IsTentative   = tentative,
                 };
-                CalendarEvent.ParseStructuredSubject(calEvent);
+                CalendarEvent.ParseStructuredSubject(calEvent, null);
                 events.Add(calEvent);
             }
         }
