@@ -165,13 +165,17 @@
                 </Border>
 
                 <!-- Periodo selezionato -->
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="10"
-                                       Margin="0,4,0,20"
-                                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                                       VerticalOptions="Center">
-                    <Button Text="Lun – Ven"
-                            FontSize="12" CornerRadius="12"
-                            Padding="12,6" BorderWidth="1.5"
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      ColumnSpacing="12"
+                      HorizontalOptions="FillAndExpand"
+                      Margin="40,4,40,20"
+                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                      VerticalOptions="Center">
+                    <Button Grid.Column="0"
+                            Text="Lun – Ven"
+                            FontSize="13" CornerRadius="19"
+                            HeightRequest="46"
+                            Padding="16,0" BorderWidth="1.5"
                             VerticalOptions="Center"
                             Command="{Binding ToggleWorkWeekCommand}">
                         <Button.Triggers>
@@ -188,34 +192,32 @@
                         </Button.Triggers>
                     </Button>
 
-                    <!-- Date non cliccabili (settimana corrente / precedente) -->
-                    <Label Text="{Binding WeekRangeDisplay}"
+                    <Label Grid.Column="1"
+                           Text="{Binding WeekRangeDisplay}"
                            FontSize="15"
                            FontAttributes="Bold"
                            TextColor="{StaticResource OnSurface}"
                            HorizontalTextAlignment="Center"
-                           VerticalOptions="Center"
-                           IsVisible="{Binding IsCustomPeriodSelected, Converter={StaticResource InvertBool}}" />
+                           VerticalOptions="Center" />
 
-                    <!-- Date cliccabili (periodo libero) -->
-                    <Label Text="{Binding WeekRangeDisplay}"
-                           FontSize="15"
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource Primary}"
-                           TextDecorations="Underline"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center"
-                           IsVisible="{Binding IsCustomPeriodSelected}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding OpenDatePickerCommand}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                </HorizontalStackLayout>
+                    <!-- Bottone calendario (periodo libero) -->
+                    <Button Grid.Column="2"
+                            Text="📅"
+                            FontSize="18"
+                            WidthRequest="36" HeightRequest="36"
+                            CornerRadius="18"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Primary}"
+                            Padding="0"
+                            VerticalOptions="Center"
+                            IsVisible="{Binding IsCustomPeriodSelected}"
+                            Command="{Binding OpenDatePickerCommand}" />
+                </Grid>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
                 <Grid HeightRequest="52"
                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                      Margin="0,0,0,12">
+                      Margin="40,0,40,12">
                     <Button Style="{StaticResource PrimaryBtn}"
                             FontSize="15"
                             HeightRequest="52"
