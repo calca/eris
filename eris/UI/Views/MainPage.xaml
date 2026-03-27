@@ -178,14 +178,20 @@
                     <VerticalStackLayout Spacing="10">
                         <!-- Riga Lun-Ven -->
                         <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                            <Button Text="🕐"
-                                    FontSize="16"
-                                    WidthRequest="32" HeightRequest="32"
-                                    CornerRadius="16"
-                                    BackgroundColor="Transparent"
-                                    Padding="0"
-                                    VerticalOptions="Center"
-                                    Command="{Binding ToggleWorkWeekCommand}" />
+                            <ImageButton WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Padding="0"
+                                         VerticalOptions="Center"
+                                         Command="{Binding ToggleWorkWeekCommand}">
+                                <ImageButton.Triggers>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsWorkWeek}" Value="True">
+                                        <Setter Property="Source" Value="week_fading.png" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsWorkWeek}" Value="False">
+                                        <Setter Property="Source" Value="week.png" />
+                                    </DataTrigger>
+                                </ImageButton.Triggers>
+                            </ImageButton>
                             <Label Text="{Binding WorkWeekLabel}"
                                    FontSize="15"
                                    TextColor="{StaticResource OnSurface}"
