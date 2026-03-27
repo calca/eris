@@ -554,7 +554,7 @@ public partial class MainViewModel : ObservableObject
                 Projects   = ParseList(ExcludedProjects),
                 Topics     = ParseList(ExcludedTopics),
             };
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplate);
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplate, WeeklyWorkingHours);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;

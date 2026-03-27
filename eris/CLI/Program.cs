@@ -371,7 +371,7 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
         .SpinnerStyle(Style.Parse("skyblue1"))
         .StartAsync("[skyblue1]Generazione report in corso…[/]", async _ =>
         {
-            result = await orchestrator.GenerateAsync(period, output, exportFormat, appConfig.Filters);
+            result = await orchestrator.GenerateAsync(period, output, exportFormat, appConfig.Filters, null, appConfig.WeeklyWorkingHours);
         });
 
     var table = new Table()

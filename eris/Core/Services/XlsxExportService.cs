@@ -12,7 +12,8 @@ public sealed class XlsxExportService : IExportService
     public (string DetailPath, string SummaryPath) Export(
         List<CalendarEvent> events,
         string outputFolder,
-        WeekRange week)
+        WeekRange week,
+        double weeklyHours = 40)
     {
         Directory.CreateDirectory(outputFolder);
 
@@ -20,7 +21,7 @@ public sealed class XlsxExportService : IExportService
         var filePath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}.xlsx");
 
         using var wb = new XLWorkbook();
-        WriteSummary(wb, events);
+        WriteSummary(wb, events, weeklyHours);
         WriteDetail(wb, events);
         wb.SaveAs(filePath);
 
@@ -69,21 +70,29 @@ public sealed class XlsxExportService : IExportService
         ws.Columns().AdjustToContents();
     }
 
-    private static void WriteSummary(XLWorkbook wb, List<CalendarEvent> events)
+    private static void WriteSummary(XLWorkbook wb, List<CalendarEvent> events, double weeklyHours)
     {
         var ws = wb.Worksheets.Add("Summary");
 
         double total = events.Sum(e => e.DurationHours);
+        double percentBase = weeklyHours > 0 ? weeklyHours : total;
+
+        // Monte ore
+        ws.Cell(1, 1).Value = "Monte ore settimanale";
+        ws.Cell(1, 1).Style.Font.Bold = true;
+        ws.Cell(1, 2).Value = weeklyHours;
+        ws.Cell(1, 2).Style.NumberFormat.Format = "0";
+        ws.Cell(1, 2).Style.Font.Bold = true;
 
         // Intestazione
-        ws.Cell(1, 1).Value = "Categoria";
-        ws.Cell(1, 2).Value = "Cliente";
-        ws.Cell(1, 3).Value = "Progetto";
-        ws.Cell(1, 4).Value = "Topic";
-        ws.Cell(1, 5).Value = "Ore";
-        ws.Cell(1, 6).Value = "%";
+        ws.Cell(3, 1).Value = "Categoria";
+        ws.Cell(3, 2).Value = "Cliente";
+        ws.Cell(3, 3).Value = "Progetto";
+        ws.Cell(3, 4).Value = "Topic";
+        ws.Cell(3, 5).Value = "Ore";
+        ws.Cell(3, 6).Value = "%";
 
-        var headerRange = ws.Range(1, 1, 1, 6);
+        var headerRange = ws.Range(3, 1, 3, 6);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -108,13 +117,13 @@ public sealed class XlsxExportService : IExportService
                     Project    = g.Key.Project,
                     Topic      = g.Key.Topic,
                     TotalHours = hours,
-                    Percentage = FormatPercent(hours, total),
+                    Percentage = FormatPercent(hours, percentBase),
                 };
             })
             .OrderByDescending(r => r.TotalHours)
             .ToList();
 
-        int row = 2;
+        int row = 4;
         foreach (var r in rows)
         {
             ws.Cell(row, 1).Value = r.Category;
@@ -133,7 +142,7 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(row, 5).Value = Math.Round(total, 2);
         ws.Cell(row, 5).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = "100%";
+        ws.Cell(row, 6).Value = FormatPercent(total, percentBase);
         ws.Cell(row, 6).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();

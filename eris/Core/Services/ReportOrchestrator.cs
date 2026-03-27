@@ -31,7 +31,8 @@ public sealed class ReportOrchestrator
         string           outputBaseDir,
         ExportFormat     format  = ExportFormat.Xlsx,
         EventFilters?    filters = null,
-        string?          subjectTemplate = null)
+        string?          subjectTemplate = null,
+        double           weeklyHours = 40)
     {
         var week      = WeekRange.FromPeriod(period);
         var rawEvents = await _source.GetEventsAsync(week);
@@ -46,7 +47,7 @@ public sealed class ReportOrchestrator
         };
 
         var reportDir = Path.Combine(outputBaseDir, week.FolderName);
-        var (detail, summary) = exporter.Export(events, reportDir, week);
+        var (detail, summary) = exporter.Export(events, reportDir, week, weeklyHours);
 
         return new ReportResult
         {
@@ -63,7 +64,8 @@ public sealed class ReportOrchestrator
         string        outputBaseDir,
         ExportFormat  format  = ExportFormat.Xlsx,
         EventFilters? filters = null,
-        string?       subjectTemplate = null)
+        string?       subjectTemplate = null,
+        double        weeklyHours = 40)
     {
         var rawEvents = await _source.GetEventsAsync(range);
         foreach (var e in rawEvents)
@@ -77,7 +79,7 @@ public sealed class ReportOrchestrator
         };
 
         var reportDir = Path.Combine(outputBaseDir, range.FolderName);
-        var (detail, summary) = exporter.Export(events, reportDir, range);
+        var (detail, summary) = exporter.Export(events, reportDir, range, weeklyHours);
 
         return new ReportResult
         {

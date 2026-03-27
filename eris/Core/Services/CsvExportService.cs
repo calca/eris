@@ -21,7 +21,8 @@ public sealed class CsvExportService : IExportService
     public (string DetailPath, string SummaryPath) Export(
         List<CalendarEvent> events,
         string outputFolder,
-        WeekRange week)
+        WeekRange week,
+        double weeklyHours = 40)
     {
         Directory.CreateDirectory(outputFolder);
 
@@ -30,7 +31,7 @@ public sealed class CsvExportService : IExportService
         var summaryPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary.csv");
 
         WriteDetail(events, detailPath);
-        WriteSummary(events, summaryPath);
+        WriteSummary(events, summaryPath, weeklyHours);
 
         return (detailPath, summaryPath);
     }
@@ -75,9 +76,10 @@ public sealed class CsvExportService : IExportService
 
     // ── summary.csv ───────────────────────────────────────────────────────────
 
-    private static void WriteSummary(List<CalendarEvent> events, string path)
+    private static void WriteSummary(List<CalendarEvent> events, string path, double weeklyHours)
     {
         double total = events.Sum(e => e.DurationHours);
+        double percentBase = weeklyHours > 0 ? weeklyHours : total;
 
         // Raggruppa ogni evento per la chiave di aggregazione:
         //   1. Category (se presente)
@@ -103,7 +105,7 @@ public sealed class CsvExportService : IExportService
                     Project    = g.Key.Project,
                     Topic      = g.Key.Topic,
                     TotalHours = hours,
-                    Percentage = FormatPercent(hours, total),
+                    Percentage = FormatPercent(hours, percentBase),
                 };
             })
             .OrderByDescending(r => r.TotalHours)
@@ -111,6 +113,12 @@ public sealed class CsvExportService : IExportService
 
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         using var csv = new CsvWriter(sw, SemicolonConfig);
+
+        // Monte ore
+        csv.WriteField("Monte ore settimanale");
+        csv.WriteField(weeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.NextRecord();
+        csv.NextRecord();
 
         // Intestazione
         csv.WriteField("Categoria");
@@ -138,7 +146,7 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(string.Empty);
         csv.WriteField("TOTALE");
         csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField("100%");
+        csv.WriteField(FormatPercent(total, percentBase));
         csv.NextRecord();
     }
 

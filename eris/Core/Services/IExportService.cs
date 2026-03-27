@@ -10,5 +10,6 @@ public interface IExportService
     (string DetailPath, string SummaryPath) Export(
         List<CalendarEvent> events,
         string outputFolder,
-        WeekRange week);
+        WeekRange week,
+        double weeklyHours = 40);
 }
