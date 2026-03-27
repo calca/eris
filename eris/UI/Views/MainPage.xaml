@@ -96,69 +96,73 @@
                        IsVisible="{Binding ShowResult}"
                        Margin="0,12,0,24" />
 
-                <!-- ── Periodo (chips) ─────────────────────────────────── -->
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8"
-                                       Margin="0,0,0,16"
-                                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
-
-                    <!-- Questa settimana -->
-                    <Button Text="Questa Settimana"
-                            FontSize="13" CornerRadius="20"
-                            Padding="16,8" BorderWidth="1.5"
-                            Command="{Binding SelectThisWeekCommand}">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                                <Setter Property="TextColor" Value="White" />
-                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="False">
-                                <Setter Property="BackgroundColor" Value="Transparent" />
-                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                <Setter Property="BorderColor" Value="{StaticResource SurfaceVariant}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-
-                    <!-- Settimana precedente -->
-                    <Button Text="Settimana Precedente"
-                            FontSize="13" CornerRadius="20"
-                            Padding="16,8" BorderWidth="1.5"
-                            Command="{Binding SelectCurrentMonthCommand}">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                                <Setter Property="TextColor" Value="White" />
-                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="False">
-                                <Setter Property="BackgroundColor" Value="Transparent" />
-                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                <Setter Property="BorderColor" Value="{StaticResource SurfaceVariant}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-
-                    <!-- Periodo libero -->
-                    <Button Text="Periodo Libero"
-                            FontSize="13" CornerRadius="20"
-                            Padding="16,8" BorderWidth="1.5"
-                            Command="{Binding SelectCustomPeriodCommand}">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                                <Setter Property="TextColor" Value="White" />
-                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="False">
-                                <Setter Property="BackgroundColor" Value="Transparent" />
-                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                <Setter Property="BorderColor" Value="{StaticResource SurfaceVariant}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-
-                </HorizontalStackLayout>
+                <!-- ── Periodo (slider) ────────────────────────────────── -->
+                <Border BackgroundColor="{StaticResource SurfaceVariant}"
+                        StrokeThickness="0"
+                        HeightRequest="46"
+                        HorizontalOptions="FillAndExpand"
+                        Margin="40,0,40,16"
+                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="23" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,*,*">
+                        <Button Grid.Column="0"
+                                Text="Questa Settimana"
+                                Command="{Binding SelectThisWeekCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Text="Sett. Precedente"
+                                Command="{Binding SelectCurrentMonthCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="2"
+                                Text="Periodo Libero"
+                                Command="{Binding SelectCustomPeriodCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+                </Border>
 
                 <!-- Periodo selezionato -->
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="10"
@@ -183,12 +187,29 @@
                             </DataTrigger>
                         </Button.Triggers>
                     </Button>
+
+                    <!-- Date non cliccabili (settimana corrente / precedente) -->
                     <Label Text="{Binding WeekRangeDisplay}"
                            FontSize="15"
                            FontAttributes="Bold"
                            TextColor="{StaticResource OnSurface}"
                            HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
+                           VerticalOptions="Center"
+                           IsVisible="{Binding IsCustomPeriodSelected, Converter={StaticResource InvertBool}}" />
+
+                    <!-- Date cliccabili (periodo libero) -->
+                    <Label Text="{Binding WeekRangeDisplay}"
+                           FontSize="15"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"
+                           TextDecorations="Underline"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding IsCustomPeriodSelected}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenDatePickerCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
                 </HorizontalStackLayout>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->

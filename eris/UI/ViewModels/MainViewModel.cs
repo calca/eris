@@ -366,10 +366,13 @@ public partial class MainViewModel : ObservableObject
     private void ToggleWorkWeek() => IsWorkWeek = !IsWorkWeek;
 
     [RelayCommand]
-    private void SelectCustomPeriod()
+    private void SelectCustomPeriod() => PeriodSelection = 2;
+
+    [RelayCommand]
+    private void OpenDatePicker()
     {
-        DialogStartDate  = IsCustomPeriodSelected ? CustomStartDate : DateTime.Today;
-        DialogEndDate    = IsCustomPeriodSelected ? CustomEndDate   : DateTime.Today;
+        DialogStartDate  = CustomStartDate;
+        DialogEndDate    = CustomEndDate;
         IsDatePickerOpen = true;
     }
 
