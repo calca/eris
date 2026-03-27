@@ -31,15 +31,17 @@ L'output può essere **CSV** o **XLSX** (con fogli _Detail_ e _Summary_).
 eris/
 ├── eris.sln
 ├── Core/               — Logica condivisa (modelli, servizi, export)
+├── Core.Tests/         — Test unitari (xUnit)
 ├── CLI/                — Interfaccia da terminale (System.CommandLine + Spectre.Console)
 └── UI/                 — App MAUI dark-theme (Windows 10/11 + macOS Catalyst)
 ```
 
 | Progetto | Descrizione |
 |----------|-------------|
-| **Core** | Modelli (`CalendarEvent`, `WeekRange`, `CategorySummary`, `AppConfig`), orchestratore report, servizi calendario (Graph + ICS), export CSV/XLSX |
+| **Core** | Modelli (`CalendarEvent`, `WeekRange`, `CategorySummary`, `EventFilters`, `AppConfig`), orchestratore report, servizi calendario (Graph + ICS), export CSV/XLSX |
 | **CLI**  | Comandi: `generate`, `whoami`, `test-login`, `signout` |
-| **UI**   | App MAUI con tema scuro, selezione periodo (settimana / mese / custom), grafico circolare, esportazione one-click |
+| **UI**   | App MAUI con tema scuro, selezione periodo (settimana / mese / custom), grafico circolare, filtri eventi, template subject configurabile, esportazione one-click |
+| **Core.Tests** | Test unitari (xUnit) per orchestratore e filtri |
 
 ---
 
@@ -147,13 +149,43 @@ I file CSV usano `;` come separatore e UTF-8 con BOM (compatibili con Excel ital
 
 ### Subject strutturato
 
-Per ottenere la suddivisione per Client / Progetto / Attività, nomina gli eventi con il formato:
+Per ottenere la suddivisione per Client / Progetto / Attività, nomina gli eventi con un formato a campi separati.
+
+Il template di default è:
 
 ```
-CLIENT | PROGETTO | ATTIVITÀ
+{Cliente} | {Progetto} | {Topic}
 ```
 
 Esempio: `Acme | Platform | Code Review`
+
+Il template è **configurabile** dalla UI (tab Impostazioni → "Formato Subject") o passando un template custom. I nomi dei campi e il separatore vengono dedotti automaticamente dal template (es. `{Client} - {Project} - {Task}` usa `-` come separatore).
+
+---
+
+## Filtri ed esclusioni
+
+L'app permette di escludere eventi dal report in base a diversi criteri:
+
+| Filtro | Descrizione |
+|--------|-------------|
+| **Categorie** | Escludi per categoria/tag (es. "Personale, OOO") |
+| **Clienti** | Escludi per nome cliente |
+| **Progetti** | Escludi per nome progetto |
+| **Topic** | Escludi per argomento |
+| **Eventi "tentative"** | Escludi eventi accettati come provvisori (abilitato di default) |
+
+I filtri sono configurabili sia dalla CLI (`--exclude-categories`, ecc.) sia dalla UI (pulsante "Filtri" nel tab Genera).
+
+---
+
+## Monte ore settimanale
+
+Le percentuali nella tabella Summary sono calcolate **rispetto al monte ore settimanale** configurato (default: 40h), non rispetto alla somma delle ore tracciate.
+
+Esempio: con 20h di meeting su 40h settimanali, una categoria con 10h mostrerà `25.0%` (10/40).
+
+Il monte ore è riportato in testa al foglio Summary sia in CSV che in XLSX.
 
 ---
 
@@ -195,6 +227,39 @@ Su tag `v*.*.*` viene creata automaticamente una **GitHub Release** con entrambi
 | UI   | `Microsoft.Maui.Controls` | 10.0.0 |
 | UI   | `CommunityToolkit.Maui` | 9.0.3 |
 | UI   | `CommunityToolkit.Mvvm` | 8.3.2 |
+
+---
+
+## Funzionalità UI
+
+La GUI MAUI offre due tab principali:
+
+### Tab Home
+
+- **Selezione periodo** — Slider a tre stati: _Questa settimana_, _Mese precedente_, _Periodo libero_
+- **Lun–Ven / Lun–Dom** — Toggle per limitare il range ai soli giorni lavorativi (icona clock con indicatore visivo)
+- **Selezione date** — Icona calendario cliccabile per scegliere date custom (attiva solo in periodo libero)
+- **Grafici circolari** — Ore totali e numero meeting con arco di progresso rispetto al monte ore settimanale
+- **Apertura rapida** — Link per aprire direttamente i file generati (Detail / Summary)
+
+### Tab Impostazioni
+
+- **Sorgente calendario** — ICS Calendar / Outlook (slider)
+- **Formato Subject** — Template configurabile per il parsing dei titoli eventi
+- **URL ICS** — Campo per inserire l'URL del file `.ics` (con guida integrata)
+- **Account Microsoft** — Login/logout con stato di autenticazione (pallino + nome utente)
+- **Cartella di output** — Selezione della cartella dove salvare i report
+- **Formato export** — Slider CSV / XLSX
+- **Ore settimanali** — Monte ore lavorative settimanali di riferimento
+- **Filtri** — Dialog per escludere categorie, clienti, progetti, topic ed eventi provvisori
+
+### Screenshot
+
+<p align="center">
+  <img src="assets/Home-V1.png" alt="Home" width="32%" />
+  <img src="assets/Home-Report-V1.png" alt="Report" width="32%" />
+  <img src="assets/Settings.png" alt="Impostazioni" width="32%" />
+</p>
 
 ---
 
