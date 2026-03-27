@@ -219,15 +219,26 @@
                 </Grid>
 
                   <!-- ── Errore ─────────────────────────────────────────────── -->
-                  <Label Text="{Binding ErrorMessage}"
-                      IsVisible="{Binding HasError}"
-                      FontSize="17"
-                      FontAttributes="Bold"
-                      TextColor="{StaticResource Error}"
-                      HorizontalTextAlignment="Center"
-                      HorizontalOptions="FillAndExpand"
-                      LineBreakMode="WordWrap"
-                      Margin="0,0,0,12" />
+                  <Grid ColumnDefinitions="*,Auto"
+                        ColumnSpacing="8"
+                        IsVisible="{Binding HasError}"
+                        Margin="0,0,0,12">
+                      <Label Grid.Column="0"
+                          Text="{Binding ErrorMessage}"
+                          FontSize="17"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource Error}"
+                          HorizontalTextAlignment="Center"
+                          LineBreakMode="WordWrap"
+                          VerticalOptions="Center" />
+                      <Button Grid.Column="1"
+                          Text="Copia"
+                          Style="{StaticResource SecondaryBtn}"
+                          FontSize="12"
+                          HeightRequest="36"
+                          Padding="10,0"
+                          Command="{Binding CopyStatusCommand}" />
+                  </Grid>
 
                 <!-- ── Risultato: cerchi statistiche ──────────────────────────── -->
                 <HorizontalStackLayout IsVisible="{Binding ShowResult}"
