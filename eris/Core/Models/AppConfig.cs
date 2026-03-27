@@ -25,4 +25,7 @@ public class AppConfig
 
     /// <summary>Monte ore lavorative settimanali di riferimento (default: 40h = 5 gg × 8h).</summary>
     public double WeeklyWorkingHours { get; set; } = 40.0;
+
+    /// <summary>Categorie (tag) degli eventi da escludere dal report (es. "Personale", "OOO").</summary>
+    public string[] ExcludedCategories { get; set; } = [];
 }

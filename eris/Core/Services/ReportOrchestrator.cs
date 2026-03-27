@@ -24,13 +24,15 @@ public sealed class ReportOrchestrator
     /// <param name="period">Settimana corrente o precedente.</param>
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
     /// <param name="format">Formato di esportazione (CSV o XLSX).</param>
+    /// <param name="excludedCategories">Categorie di eventi da escludere (confronto case-insensitive).</param>
     public async Task<ReportResult> GenerateAsync(
         WeekPeriod       period,
         string           outputBaseDir,
-        ExportFormat     format = ExportFormat.Xlsx)
+        ExportFormat     format = ExportFormat.Xlsx,
+        IReadOnlyList<string>? excludedCategories = null)
     {
         var week   = WeekRange.FromPeriod(period);
-        var events = await _source.GetEventsAsync(week);
+        var events = ApplyExclusions(await _source.GetEventsAsync(week), excludedCategories);
 
         IExportService exporter = format switch
         {
@@ -54,9 +56,10 @@ public sealed class ReportOrchestrator
     public async Task<ReportResult> GenerateAsync(
         WeekRange    range,
         string       outputBaseDir,
-        ExportFormat format = ExportFormat.Xlsx)
+        ExportFormat format = ExportFormat.Xlsx,
+        IReadOnlyList<string>? excludedCategories = null)
     {
-        var events = await _source.GetEventsAsync(range);
+        var events = ApplyExclusions(await _source.GetEventsAsync(range), excludedCategories);
 
         IExportService exporter = format switch
         {
@@ -75,5 +78,16 @@ public sealed class ReportOrchestrator
             SummaryPath = summary,
             Week        = range,
         };
+    }
+
+    private static List<CalendarEvent> ApplyExclusions(
+        List<CalendarEvent> events,
+        IReadOnlyList<string>? excludedCategories)
+    {
+        if (excludedCategories is not { Count: > 0 })
+            return events;
+
+        var excluded = new HashSet<string>(excludedCategories, StringComparer.OrdinalIgnoreCase);
+        return events.Where(e => e.Category is null || !excluded.Contains(e.Category)).ToList();
     }
 }

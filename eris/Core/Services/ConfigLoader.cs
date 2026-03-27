@@ -63,6 +63,15 @@ public static class ConfigLoader
             appConfig.WeeklyWorkingHours = hours;
         }
 
+        // ── Filters ───────────────────────────────────────────────────────────
+        var excludedCategories = config.GetSection("Filters:ExcludedCategories")
+                                       .GetChildren()
+                                       .Select(c => c.Value)
+                                       .OfType<string>()
+                                       .ToArray();
+        if (excludedCategories.Length > 0)
+            appConfig.ExcludedCategories = excludedCategories;
+
         return appConfig;
     }
 }

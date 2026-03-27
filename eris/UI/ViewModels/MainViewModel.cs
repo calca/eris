@@ -97,6 +97,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isWorkWeek;
 
+    /// <summary>Categorie (tag) degli eventi da escludere, separate da virgola (es. "Personale, OOO").</summary>
+    [ObservableProperty]
+    private string _excludedCategories = string.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
@@ -224,6 +228,7 @@ public partial class MainViewModel : ObservableObject
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
         _isWorkWeek = Preferences.Default.Get("IsWorkWeek", false);
+        _excludedCategories = Preferences.Default.Get("ExcludedCategories", string.Join(", ", appConfig.ExcludedCategories));
         UpdateWeekDisplay();
     }
 
@@ -231,6 +236,11 @@ public partial class MainViewModel : ObservableObject
     {
         if (value > 0 && double.IsFinite(value))
             Preferences.Default.Set("WeeklyWorkingHours", value);
+    }
+
+    partial void OnExcludedCategoriesChanged(string value)
+    {
+        Preferences.Default.Set("ExcludedCategories", value);
     }
 
     partial void OnIsWorkWeekChanged(bool value)
@@ -411,7 +421,9 @@ public partial class MainViewModel : ObservableObject
                 _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
             };
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
+            var excludedList = ExcludedCategories
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, excludedList);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;

@@ -45,6 +45,10 @@ var weeklyHoursOpt = new Option<double?>(
     "--weekly-hours",
     description: "Monte ore lavorative settimanali di riferimento (default da config, es. 40 o 30)");
 
+var excludeCategoriesOpt = new Option<string?>(
+    "--exclude-categories",
+    description: "Categorie da escludere, separate da virgola (es. \"Personale,OOO\"; default da config)");
+
 generateCmd.AddOption(weekOpt);
 generateCmd.AddOption(outputOpt);
 generateCmd.AddOption(configOpt);
@@ -52,12 +56,13 @@ generateCmd.AddOption(sourceOpt);
 generateCmd.AddOption(icsUrlOpt);
 generateCmd.AddOption(formatOpt);
 generateCmd.AddOption(weeklyHoursOpt);
+generateCmd.AddOption(excludeCategoriesOpt);
 
-generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl, string format, double? weeklyHours) =>
+generateCmd.SetHandler(async (string week, string output, string? config, string? source, string? icsUrl, string format, double? weeklyHours, string? excludeCategories) =>
 {
-    await RunGenerateAsync(week, output, config, source, icsUrl, format, weeklyHours);
+    await RunGenerateAsync(week, output, config, source, icsUrl, format, weeklyHours, excludeCategories);
 
-}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt, formatOpt, weeklyHoursOpt);
+}, weekOpt, outputOpt, configOpt, sourceOpt, icsUrlOpt, formatOpt, weeklyHoursOpt, excludeCategoriesOpt);
 
 // ── whoami ─────────────────────────────────────────────────────────────────────
 var whoamiCmd = new Command("whoami", "Mostra l'account Microsoft attualmente autenticato");
@@ -199,11 +204,18 @@ async Task<int> RunInteractiveAsync()
                         weeklyHoursInteractive = AnsiConsole.Ask<double>("Ore settimanali", 40);
                     }
 
+                    string? excludeCategoriesInteractive = null;
+                    if (AnsiConsole.Confirm("Vuoi escludere categorie di eventi? (es. Personale, OOO)", false))
+                    {
+                        excludeCategoriesInteractive = AnsiConsole.Ask<string>("Categorie da escludere (separate da virgola)");
+                    }
+
                     await RunGenerateAsync(week, output, configPath,
                         sourceChoice.StartsWith("ICS") ? "ics" : "graph",
                         icsUrlInteractive,
                         formatChoice,
-                        weeklyHoursInteractive);
+                        weeklyHoursInteractive,
+                        excludeCategoriesInteractive);
                     break;
 
                 case "Mostra account":
@@ -244,7 +256,7 @@ async Task<int> RunInteractiveAsync()
     }
 }
 
-async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null, string format = "xlsx", double? weeklyHours = null)
+async Task RunGenerateAsync(string week, string output, string? config, string? source = null, string? icsUrl = null, string format = "xlsx", double? weeklyHours = null, string? excludeCategories = null)
 {
     var appConfig = ConfigLoader.Load(config);
 
@@ -255,6 +267,13 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
             appConfig.WeeklyWorkingHours = wh;
         else
             AnsiConsole.MarkupLine($"[yellow]Avviso: --weekly-hours deve essere un valore positivo. Verrà usato il valore da config ({appConfig.WeeklyWorkingHours:F0} h).[/]");
+    }
+
+    // Argomento CLI --exclude-categories sovrascrive il valore da config
+    if (!string.IsNullOrWhiteSpace(excludeCategories))
+    {
+        appConfig.ExcludedCategories = excludeCategories
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     // Determina la sorgente: argomento CLI > config
@@ -314,7 +333,7 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
         .SpinnerStyle(Style.Parse("skyblue1"))
         .StartAsync("[skyblue1]Generazione report in corso…[/]", async _ =>
         {
-            result = await orchestrator.GenerateAsync(period, output, exportFormat);
+            result = await orchestrator.GenerateAsync(period, output, exportFormat, appConfig.ExcludedCategories);
         });
 
     var table = new Table()
@@ -327,6 +346,8 @@ async Task RunGenerateAsync(string week, string output, string? config, string? 
     table.AddRow("Sorgente", sourceType.ToString());
     table.AddRow("Formato", exportFormat.ToString().ToUpper());
     table.AddRow("Ore settimanali", $"{appConfig.WeeklyWorkingHours:F0} h");
+    if (appConfig.ExcludedCategories.Length > 0)
+        table.AddRow("Escluse", Markup.Escape(string.Join(", ", appConfig.ExcludedCategories)));
     table.AddRow("Meeting", result.EventCount.ToString());
     table.AddRow("Ore totali", $"{result.TotalHours:F1} h");
     table.AddRow("Detail", Markup.Escape(result.DetailPath));

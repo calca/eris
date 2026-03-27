@@ -570,6 +570,21 @@
                         </Grid>
                 </VerticalStackLayout>
 
+                <!-- ── Categorie escluse ──────────────────────────────── -->
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
+                        <Label Text="Categorie (tag) degli eventi da escludere dal report, separate da virgola (es. Personale, OOO)."
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,0,0,4" />
+                        <Entry Text="{Binding ExcludedCategories}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="Personale, OOO"
+                               Keyboard="Default"
+                               FontSize="13" />
+                </VerticalStackLayout>
+
                 <!-- ── Chiudi ──────────────────────────────────────────── -->
                 <Button Text="Chiudi e torna in home"
                         Style="{StaticResource SecondaryBtn}"
