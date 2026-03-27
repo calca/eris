@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:eris.UI.ViewModels"
              xmlns:conv="clr-namespace:eris.UI.Converters"
              xmlns:views="clr-namespace:eris.UI.Views"
+             xmlns:strings="clr-namespace:eris.UI.Resources.Strings"
              x:Class="eris.UI.Views.MainPage"
              x:DataType="vm:MainViewModel"
              Title="{Binding PageTitle}">
@@ -39,7 +40,7 @@
                        Margin="0,0,0,16">
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="Configura la sorgente per generare il report  " />
+                            <Span Text="{x:Static strings:AppStrings.ConfigureBannerText}" />
                             <Span Text="&#x2197;" FontSize="18" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -53,7 +54,7 @@
 
                 <!-- Messaggio benvenuto (visibile solo se config incompleta) -->
                 <VerticalStackLayout IsVisible="{Binding IsConfigIncomplete}" Spacing="8" Margin="0,0,0,24">
-                    <Label Text="Benvenuto"
+                    <Label Text="{x:Static strings:AppStrings.Welcome}"
                            FontSize="34"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
@@ -67,7 +68,7 @@
                             <ColumnDefinition Width="0.2*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1"
-                               Text="Eris è qui per estrarre l'essenza dalle tue giornate affollate. Trasforma la confusione del calendario in report ordinati: perché anche dalla discordia degli impegni può nascere un'armonia perfetta."
+                               Text="{x:Static strings:AppStrings.WelcomeDescription}"
                                FontSize="18"
                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                HorizontalTextAlignment="Center"
@@ -80,7 +81,7 @@
                                      IsVisible="{Binding IsConfigIncomplete, Converter={StaticResource InvertBool}}">
 
                 <!-- Intestazione -->
-                <Label Text="Esporta i tuoi meeting in un report"
+                <Label Text="{x:Static strings:AppStrings.ExportMeetingsTitle}"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
@@ -89,7 +90,7 @@
                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
                        Margin="0,12,0,24" />
 
-                <Label Text="Ecco il tuo report"
+                <Label Text="{x:Static strings:AppStrings.HereIsYourReport}"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
@@ -110,7 +111,7 @@
                     </Border.StrokeShape>
                     <Grid ColumnDefinitions="*,*,*">
                         <Button Grid.Column="0"
-                                Text="Questa Settimana"
+                                Text="{x:Static strings:AppStrings.ThisWeek}"
                                 Command="{Binding SelectThisWeekCommand}"
                                 Margin="4" CornerRadius="19"
                                 FontSize="13" Padding="0">
@@ -128,7 +129,7 @@
                             </Button.Triggers>
                         </Button>
                         <Button Grid.Column="1"
-                                Text="Sett. Precedente"
+                                Text="{x:Static strings:AppStrings.PreviousWeek}"
                                 Command="{Binding SelectCurrentMonthCommand}"
                                 Margin="4" CornerRadius="19"
                                 FontSize="13" Padding="0">
@@ -146,7 +147,7 @@
                             </Button.Triggers>
                         </Button>
                         <Button Grid.Column="2"
-                                Text="Periodo Libero"
+                                Text="{x:Static strings:AppStrings.CustomPeriod}"
                                 Command="{Binding SelectCustomPeriodCommand}"
                                 Margin="4" CornerRadius="19"
                                 FontSize="13" Padding="0">
@@ -243,7 +244,7 @@
                             HorizontalOptions="FillAndExpand">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="False">
-                                <Setter Property="Text" Value="▶  Genera Report" />
+                                <Setter Property="Text" Value="{x:Static strings:AppStrings.GenerateReport}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
                                 <Setter Property="Text" Value="" />
@@ -273,7 +274,7 @@
                           LineBreakMode="WordWrap"
                           VerticalOptions="Center" />
                       <Button Grid.Column="1"
-                          Text="Copia"
+                          Text="{x:Static strings:AppStrings.Copy}"
                           Style="{StaticResource SecondaryBtn}"
                           FontSize="12"
                           HeightRequest="36"
@@ -290,7 +291,7 @@
                     <!-- Periodo -->
                     <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center"
                                          WidthRequest="150">
-                        <Label Text="PERIODO"
+                        <Label Text="{x:Static strings:AppStrings.PeriodLabel}"
                                FontSize="11" FontAttributes="Bold"
                                CharacterSpacing="1"
                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
@@ -310,12 +311,12 @@
                     </VerticalStackLayout>
 
                     <views:CircularStatView IconSource="report_hours.png"
-                                            StatLabel="Ore"
+                                            StatLabel="{x:Static strings:AppStrings.HoursLabel}"
                                             Value="{Binding TotalHours, StringFormat='{0:F1}h'}"
                                             Progress="{Binding HoursProgress}" />
 
                     <views:CircularStatView IconSource="report_meetings.png"
-                                            StatLabel="Meetings"
+                                            StatLabel="{x:Static strings:AppStrings.MeetingsLabel}"
                                             Value="{Binding MeetingCount, StringFormat='{0}'}"
                                             Progress="{Binding MeetingProgress}" />
 
@@ -323,13 +324,13 @@
 
                 <!-- Bottoni post-risultato -->
                 <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,12,0,12">
-                    <Button Text="Nuovo Report"
+                    <Button Text="{x:Static strings:AppStrings.NewReport}"
                             Style="{StaticResource SecondaryBtn}"
                             HeightRequest="52"
                             FontSize="15"
                             HorizontalOptions="FillAndExpand"
                             Command="{Binding NuovoReportCommand}" />
-                    <Button Text="Apri Report"
+                    <Button Text="{x:Static strings:AppStrings.OpenReport}"
                             Style="{StaticResource PrimaryBtn}"
                             HeightRequest="52"
                             FontSize="15"
@@ -352,7 +353,7 @@
                 <!-- ── Sorgente Calendario ─────────────────────────── -->
                 <Grid ColumnDefinitions="45*,20*,35*" ColumnSpacing="0" Margin="0,0,0,32" Padding="0">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Scegli da dove leggere i tuoi eventi."
+                        <Label Text="{x:Static strings:AppStrings.ChooseSource}"
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap" />
 
@@ -405,10 +406,10 @@
 
                     <!-- Formato Subject -->
                     <VerticalStackLayout Grid.Column="2" Spacing="4">
-                        <Label Text="Struttura dei titoli."
+                        <Label Text="{x:Static strings:AppStrings.TitleStructure}"
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap" />
-                        <Button Text="Formato Subject"
+                        <Button Text="{x:Static strings:AppStrings.SubjectFormat}"
                                 Style="{StaticResource SecondaryBtn}"
                                 HeightRequest="46"
                                 FontSize="13"
@@ -420,7 +421,7 @@
                 <!-- ── URL ICS ─────────────────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4"
                                     IsVisible="{Binding IsIcsSource}">
-                        <Label Text="Inserisci l'URL del file .ics del tuo calendario. Lo trovi nelle impostazioni del tuo provider di calendario."
+                        <Label Text="{x:Static strings:AppStrings.IcsUrlDescription}"
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
@@ -449,7 +450,7 @@
                 <!-- ── Account Microsoft ───────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4"
                                     IsVisible="{Binding IsGraphSource}">
-                        <Label Text="Accedi con il tuo account Microsoft 365 per leggere gli eventi dal calendario Outlook."
+                        <Label Text="{x:Static strings:AppStrings.MicrosoftAccountDescription}"
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
@@ -458,18 +459,18 @@
                             <Grid Grid.Column="0" ColumnDefinitions="*,Auto" ColumnSpacing="8"
                                   IsVisible="{Binding IsBusy, Converter={StaticResource InvertBool}}">
                                 <Button Grid.Column="0"
-                                        Text="Accedi con Microsoft"
+                                        Text="{x:Static strings:AppStrings.LoginWithMicrosoft}"
                                         Style="{StaticResource PrimaryBtn}"
                                         Command="{Binding LoginCommand}"
                                         IsVisible="{Binding IsNotAuthenticated}" />
                                 <Button Grid.Column="0"
-                                        Text="✓  Autenticato"
+                                        Text="{x:Static strings:AppStrings.AuthenticatedLabel}"
                                         Style="{StaticResource PrimaryBtn}"
                                         BackgroundColor="{StaticResource Success}"
                                         IsEnabled="False"
                                         IsVisible="{Binding IsAuthenticated}" />
                                 <Button Grid.Column="1"
-                                        Text="Esci"
+                                        Text="{x:Static strings:AppStrings.SignOut}"
                                         Style="{StaticResource DangerBtn}"
                                         Command="{Binding LogoutCommand}"
                                         IsVisible="{Binding IsAuthenticated}" />
@@ -488,7 +489,7 @@
                                BackgroundColor="{AppThemeBinding Light={StaticResource DeviceCodeBgLight}, Dark={StaticResource DeviceCodeBgDark}}" BorderColor="#0284c7"
                                CornerRadius="8" Padding="12">
                             <VerticalStackLayout Spacing="6">
-                                <Label Text="Autenticazione via codice dispositivo:"
+                                <Label Text="{x:Static strings:AppStrings.DeviceCodeAuthLabel}"
                                        Style="{StaticResource MutedLabel}" />
                                 <Label Text="{Binding DeviceCodeMessage}"
                                        TextColor="{StaticResource PrimaryLight}"
@@ -514,7 +515,7 @@
                                 LineBreakMode="WordWrap"
                                 VerticalOptions="Center" />
                             <Button Grid.Column="1"
-                                 Text="Copia"
+                                 Text="{x:Static strings:AppStrings.Copy}"
                                  Style="{StaticResource SecondaryBtn}"
                                  FontSize="12"
                                  HeightRequest="36"
@@ -529,7 +530,7 @@
 
                 <!-- ── Cartella di output ──────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4">
-                        <Label Text="I file del report verranno salvati in questa cartella."
+                        <Label Text="{x:Static strings:AppStrings.OutputFolderDescription}"
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
@@ -551,7 +552,7 @@
                                        LineBreakMode="TailTruncation" />
                             </Border>
                             <Button Grid.Column="1"
-                                    Text="Seleziona"
+                                    Text="{x:Static strings:AppStrings.SelectButton}"
                                     Style="{StaticResource SecondaryBtn}"
                                     FontSize="13"
                                     Command="{Binding SelectFolderCommand}" />
@@ -568,7 +569,7 @@
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <!-- Formato -->
                             <VerticalStackLayout Grid.Column="0" Spacing="8">
-                                <Label Text="Formato del file generato: Excel o CSV."
+                                <Label Text="{x:Static strings:AppStrings.ExportFormatDescription}"
                                        Style="{StaticResource MutedLabel}"
                                        LineBreakMode="WordWrap"
                                         HeightRequest="36"
@@ -621,7 +622,7 @@
                             </VerticalStackLayout>
                             <!-- Ore settimanali -->
                             <VerticalStackLayout Grid.Column="1" Spacing="8">
-                                <Label Text="Monte ore lavorative settimanali (es. 40)."
+                                <Label Text="{x:Static strings:AppStrings.WeeklyHoursDescription}"
                                        Style="{StaticResource MutedLabel}"
                                        LineBreakMode="WordWrap"
                                         HeightRequest="36"
@@ -639,13 +640,13 @@
 
                             <!-- Filtri -->
                             <VerticalStackLayout Grid.Column="2" Spacing="8">
-                                <Label Text="Filtri attività da escludere."
+                                <Label Text="{x:Static strings:AppStrings.FiltersActivityDescription}"
                                        Style="{StaticResource MutedLabel}"
                                        LineBreakMode="WordWrap"
                                         HeightRequest="36"
                                        Margin="0,0,0,4" />
                                 <Grid>
-                                    <Button Text="Filtri"
+                                    <Button Text="{x:Static strings:AppStrings.Filters}"
                                             Style="{StaticResource SecondaryBtn}"
                                           HeightRequest="46"
                                             FontSize="13"
@@ -670,7 +671,7 @@
                 </VerticalStackLayout>
 
                 <!-- ── Chiudi ──────────────────────────────────────────── -->
-                <Button Text="Chiudi e torna in home"
+                <Button Text="{x:Static strings:AppStrings.CloseGoHome}"
                         Style="{StaticResource SecondaryBtn}"
                         HeightRequest="52"
                         FontSize="15"
@@ -691,13 +692,13 @@
                    HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="16">
 
-                    <Label Text="Seleziona Periodo"
+                    <Label Text="{x:Static strings:AppStrings.SelectPeriodTitle}"
                            FontSize="17" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                            HorizontalOptions="Center" />
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="DA" FontSize="11" FontAttributes="Bold"
+                        <Label Text="{x:Static strings:AppStrings.FromLabel}" FontSize="11" FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                         <DatePicker Date="{Binding DialogStartDate}"
                                     Format="dd/MM/yyyy"
@@ -707,7 +708,7 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="A" FontSize="11" FontAttributes="Bold"
+                        <Label Text="{x:Static strings:AppStrings.ToLabel}" FontSize="11" FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                         <DatePicker Date="{Binding DialogEndDate}"
                                     Format="dd/MM/yyyy"
@@ -717,11 +718,11 @@
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
-                        <Button Grid.Column="0" Text="Annulla"
+                        <Button Grid.Column="0" Text="{x:Static strings:AppStrings.Cancel}"
                                 Style="{StaticResource SecondaryBtn}"
                                 HeightRequest="44"
                                 Command="{Binding CancelDatePickerCommand}" />
-                        <Button Grid.Column="1" Text="Conferma"
+                        <Button Grid.Column="1" Text="{x:Static strings:AppStrings.Confirm}"
                                 Style="{StaticResource PrimaryBtn}"
                                 HeightRequest="44"
                                 Command="{Binding ConfirmDatePickerCommand}" />
@@ -741,20 +742,20 @@
                      HorizontalOptions="Center" VerticalOptions="Center">
                   <VerticalStackLayout Spacing="12">
 
-                      <Label Text="Filtri"
+                      <Label Text="{x:Static strings:AppStrings.Filters}"
                           FontSize="18"
                           FontAttributes="Bold"
                           TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                           HorizontalOptions="Center" />
 
-                      <Label Text="Gli eventi corrispondenti verranno esclusi dal report. Separa i valori con una virgola."
+                      <Label Text="{x:Static strings:AppStrings.FiltersDialogDescription}"
                           Style="{StaticResource MutedLabel}"
                           HorizontalTextAlignment="Center" />
 
                       <!-- Escludi tentative -->
                       <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,4">
                           <Label Grid.Column="0"
-                              Text="Escludi eventi &quot;tentative&quot;"
+                              Text="{x:Static strings:AppStrings.ExcludeTentativeLabel}"
                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                               FontSize="13"
                               FontAttributes="Bold"
@@ -765,7 +766,7 @@
                               VerticalOptions="Center" />
                       </Grid>
 
-                      <Label Text="Categorie (tag)"
+                      <Label Text="{x:Static strings:AppStrings.CategoriesTagLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold" />
@@ -777,7 +778,7 @@
                           Keyboard="Default"
                           FontSize="13" />
 
-                      <Label Text="Cliente"
+                      <Label Text="{x:Static strings:AppStrings.ClientLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
@@ -790,7 +791,7 @@
                           Keyboard="Default"
                           FontSize="13" />
 
-                      <Label Text="Progetto"
+                      <Label Text="{x:Static strings:AppStrings.ProjectLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
@@ -803,7 +804,7 @@
                           Keyboard="Default"
                           FontSize="13" />
 
-                      <Label Text="Topic"
+                      <Label Text="{x:Static strings:AppStrings.TopicLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
@@ -818,12 +819,12 @@
 
                       <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,0">
                        <Button Grid.Column="0"
-                            Text="Annulla"
+                            Text="{x:Static strings:AppStrings.Cancel}"
                             Style="{StaticResource SecondaryBtn}"
                             HeightRequest="44"
                             Command="{Binding CancelFiltersDialogCommand}" />
                        <Button Grid.Column="1"
-                            Text="Salva"
+                            Text="{x:Static strings:AppStrings.Save}"
                             Style="{StaticResource PrimaryBtn}"
                             HeightRequest="44"
                             Command="{Binding ApplyFiltersDialogCommand}" />
@@ -843,18 +844,18 @@
                      HorizontalOptions="Center" VerticalOptions="Center">
                   <VerticalStackLayout Spacing="12">
 
-                      <Label Text="Formato Subject"
+                      <Label Text="{x:Static strings:AppStrings.SubjectFormat}"
                           FontSize="18"
                           FontAttributes="Bold"
                           TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                           HorizontalOptions="Center" />
 
-                      <Label Text="Definisci come sono strutturati i titoli dei tuoi eventi nel calendario. Usa i placeholder &#x7B;Cliente&#x7D;, &#x7B;Progetto&#x7D; e &#x7B;Topic&#x7D; separati dal carattere che usi nei titoli."
+                      <Label Text="{x:Static strings:AppStrings.SubjectFormatDescription}"
                           Style="{StaticResource MutedLabel}"
                           HorizontalTextAlignment="Center"
                           LineBreakMode="WordWrap" />
 
-                      <Label Text="Esempio: se i tuoi eventi si chiamano &quot;Acme | Website | Review&quot;, il template è:"
+                      <Label Text="{x:Static strings:AppStrings.SubjectFormatExample}"
                           Style="{StaticResource MutedLabel}"
                           HorizontalTextAlignment="Center"
                           LineBreakMode="WordWrap" />
@@ -865,7 +866,7 @@
                           TextColor="{StaticResource Primary}"
                           HorizontalTextAlignment="Center" />
 
-                      <Label Text="Template"
+                      <Label Text="{x:Static strings:AppStrings.TemplateLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
@@ -878,7 +879,7 @@
                           Keyboard="Default"
                           FontSize="13" />
 
-                      <Button Text="Ripristina Default"
+                      <Button Text="{x:Static strings:AppStrings.RestoreDefault}"
                           Style="{StaticResource SecondaryBtn}"
                           HeightRequest="36"
                           FontSize="12"
@@ -888,12 +889,12 @@
 
                       <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,6,0,0">
                        <Button Grid.Column="0"
-                            Text="Annulla"
+                            Text="{x:Static strings:AppStrings.Cancel}"
                             Style="{StaticResource SecondaryBtn}"
                             HeightRequest="44"
                             Command="{Binding CancelTemplateDialogCommand}" />
                        <Button Grid.Column="1"
-                            Text="Salva"
+                            Text="{x:Static strings:AppStrings.Save}"
                             Style="{StaticResource PrimaryBtn}"
                             HeightRequest="44"
                             Command="{Binding ApplyTemplateDialogCommand}" />

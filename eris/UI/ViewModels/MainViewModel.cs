@@ -4,6 +4,7 @@ using CommunityToolkit.Maui.Storage;
 using Microsoft.Maui.ApplicationModel;
 using eris.Core.Models;
 using eris.Core.Services;
+using eris.UI.Resources.Strings;
 
 namespace eris.UI.ViewModels;
 
@@ -19,7 +20,7 @@ public partial class MainViewModel : ObservableObject
     private bool _isGenerateTab = true;
 
     public bool IsConfigTab => !IsGenerateTab;
-    public string PageTitle => IsConfigTab ? "Impostazioni" : "Your Reports";
+    public string PageTitle => IsConfigTab ? AppStrings.Settings : AppStrings.YourReports;
     public string ToggleConfigLabel => IsConfigTab ? "🏠" : "⚙️";
 
     [RelayCommand]
@@ -67,13 +68,9 @@ public partial class MainViewModel : ObservableObject
     private async Task ShowIcsHelp()
     {
         await Application.Current!.Windows[0].Page!.DisplayAlert(
-            "Come ottenere il link ICS da Outlook",
-            "1. Vai su outlook.com e apri il Calendario\n" +
-            "2. Clicca sull'ingranaggio ⚙ → Visualizza tutte le impostazioni\n" +
-            "3. Vai in Calendario → Calendari condivisi\n" +
-            "4. Nella sezione \"Pubblica un calendario\" scegli il calendario e seleziona \"Titolo e posizione\"\n" +
-            "5. Clicca \"Pubblica\" e copia il link ICS",
-            "OK");
+            AppStrings.IcsHelpTitle,
+            AppStrings.IcsHelpBody,
+            AppStrings.Ok);
     }
 
     // ── Autenticazione ────────────────────────────────────────────────────────
@@ -85,7 +82,7 @@ public partial class MainViewModel : ObservableObject
     private bool _isAuthenticated;
 
     [ObservableProperty]
-    private string _userDisplayName = "Non autenticato";
+    private string _userDisplayName = AppStrings.NotAuthenticated;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasDeviceCode))]
@@ -113,7 +110,7 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(WorkWeekLabel))]
     private bool _isWorkWeek;
 
-    public string WorkWeekLabel => IsWorkWeek ? "Lun – Ven" : "Lun – Dom";
+    public string WorkWeekLabel => IsWorkWeek ? AppStrings.MonFri : AppStrings.MonSun;
 
     /// <summary>Categorie (tag) degli eventi da escludere, separate da virgola (es. "Personale, OOO").</summary>
     [ObservableProperty]
@@ -219,7 +216,7 @@ public partial class MainViewModel : ObservableObject
 
     public string OutputFolderName =>
         string.IsNullOrWhiteSpace(OutputFolder)
-            ? "Nessuna cartella selezionata"
+            ? AppStrings.NoFolderSelected
             : Path.GetFileName(OutputFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
     public bool IsConfigIncomplete =>
@@ -343,7 +340,7 @@ public partial class MainViewModel : ObservableObject
             2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
             _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
         };
-        WeekRangeDisplay = $"Dal {week.Start:dd/MM/yyyy} al {week.End.AddDays(-1):dd/MM/yyyy}";
+        WeekRangeDisplay = string.Format(AppStrings.DateRangeFormat, week.Start.ToString("dd/MM/yyyy"), week.End.AddDays(-1).ToString("dd/MM/yyyy"));
         WeekNumber       = week.WeekNumber;
     }
 
@@ -373,7 +370,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            AuthErrorMessage = $"Errore autenticazione: {ex.Message}";
+            AuthErrorMessage = string.Format(AppStrings.AuthErrorFormat, ex.Message);
         }
         finally
         {
@@ -390,7 +387,7 @@ public partial class MainViewModel : ObservableObject
             await _authService.SignOutAsync();
 
         IsAuthenticated   = false;
-        UserDisplayName   = "Non autenticato";
+        UserDisplayName   = AppStrings.NotAuthenticated;
         DeviceCodeMessage = null;
         AuthErrorMessage  = string.Empty;
         ShowResult        = false;
@@ -587,7 +584,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Errore: {ex.Message}";
+            ErrorMessage = string.Format(AppStrings.GenericErrorFormat, ex.Message);
         }
         finally
         {
