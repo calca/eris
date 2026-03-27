@@ -24,13 +24,15 @@ public sealed class ReportOrchestrator
     /// <param name="period">Settimana corrente o precedente.</param>
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
     /// <param name="format">Formato di esportazione (CSV o XLSX).</param>
+    /// <param name="filters">Filtri di esclusione per categoria, cliente, progetto e topic.</param>
     public async Task<ReportResult> GenerateAsync(
         WeekPeriod       period,
         string           outputBaseDir,
-        ExportFormat     format = ExportFormat.Xlsx)
+        ExportFormat     format  = ExportFormat.Xlsx,
+        EventFilters?    filters = null)
     {
         var week   = WeekRange.FromPeriod(period);
-        var events = await _source.GetEventsAsync(week);
+        var events = ApplyExclusions(await _source.GetEventsAsync(week), filters);
 
         IExportService exporter = format switch
         {
@@ -52,11 +54,12 @@ public sealed class ReportOrchestrator
     }
 
     public async Task<ReportResult> GenerateAsync(
-        WeekRange    range,
-        string       outputBaseDir,
-        ExportFormat format = ExportFormat.Xlsx)
+        WeekRange     range,
+        string        outputBaseDir,
+        ExportFormat  format  = ExportFormat.Xlsx,
+        EventFilters? filters = null)
     {
-        var events = await _source.GetEventsAsync(range);
+        var events = ApplyExclusions(await _source.GetEventsAsync(range), filters);
 
         IExportService exporter = format switch
         {
@@ -75,5 +78,37 @@ public sealed class ReportOrchestrator
             SummaryPath = summary,
             Week        = range,
         };
+    }
+
+    private static List<CalendarEvent> ApplyExclusions(
+        List<CalendarEvent> events,
+        EventFilters?       filters)
+    {
+        if (filters is null || filters.IsEmpty)
+            return events;
+
+        var cats     = filters.Categories.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var clients  = filters.Clients.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var projects = filters.Projects.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var topics   = filters.Topics.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+
+        return events.Where(e =>
+            (cats.Length     == 0 || !MatchesAnyFilter(e.Category, cats))  &&
+            (clients.Length  == 0 || !MatchesAnyFilter(e.Client, clients)) &&
+            (projects.Length == 0 || !MatchesAnyFilter(e.Project, projects)) &&
+            (topics.Length   == 0 || !MatchesAnyFilter(e.Topic ?? e.Subject, topics))
+        ).ToList();
+    }
+
+    private static bool MatchesAnyFilter(string? value, string[] filters)
+    {
+        if (string.IsNullOrWhiteSpace(value) || filters.Length == 0)
+            return false;
+
+        var normalizedValue = value.Trim();
+
+        return filters.Any(filter =>
+            normalizedValue.Equals(filter, StringComparison.OrdinalIgnoreCase) ||
+            normalizedValue.Contains(filter, StringComparison.OrdinalIgnoreCase));
     }
 }

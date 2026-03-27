@@ -97,6 +97,31 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isWorkWeek;
 
+    /// <summary>Categorie (tag) degli eventi da escludere, separate da virgola (es. "Personale, OOO").</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
+    private string _excludedCategories = string.Empty;
+
+    /// <summary>Clienti da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
+    private string _excludedClients = string.Empty;
+
+    /// <summary>Progetti da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
+    private string _excludedProjects = string.Empty;
+
+    /// <summary>Topic da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
+    private string _excludedTopics = string.Empty;
+
+    public bool HasActiveFilters => HasFilterValues(ExcludedCategories)
+        || HasFilterValues(ExcludedClients)
+        || HasFilterValues(ExcludedProjects)
+        || HasFilterValues(ExcludedTopics);
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
@@ -111,6 +136,21 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isDatePickerOpen;
+
+    [ObservableProperty]
+    private bool _isFiltersDialogOpen;
+
+    [ObservableProperty]
+    private string _dialogExcludedCategories = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedClients = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedProjects = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedTopics = string.Empty;
 
     [ObservableProperty]
     private DateTime _dialogStartDate = DateTime.Today;
@@ -224,6 +264,10 @@ public partial class MainViewModel : ObservableObject
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
         _isWorkWeek = Preferences.Default.Get("IsWorkWeek", false);
+        _excludedCategories = Preferences.Default.Get("ExcludedCategories", string.Join(", ", appConfig.Filters.Categories));
+        _excludedClients    = Preferences.Default.Get("ExcludedClients",    string.Join(", ", appConfig.Filters.Clients));
+        _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
+        _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
         UpdateWeekDisplay();
     }
 
@@ -232,6 +276,11 @@ public partial class MainViewModel : ObservableObject
         if (value > 0 && double.IsFinite(value))
             Preferences.Default.Set("WeeklyWorkingHours", value);
     }
+
+    partial void OnExcludedCategoriesChanged(string value) => Preferences.Default.Set("ExcludedCategories", value);
+    partial void OnExcludedClientsChanged(string value)    => Preferences.Default.Set("ExcludedClients",    value);
+    partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
+    partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -329,6 +378,29 @@ public partial class MainViewModel : ObservableObject
     private void CancelDatePicker() => IsDatePickerOpen = false;
 
     [RelayCommand]
+    private void OpenFiltersDialog()
+    {
+        DialogExcludedCategories = ExcludedCategories;
+        DialogExcludedClients = ExcludedClients;
+        DialogExcludedProjects = ExcludedProjects;
+        DialogExcludedTopics = ExcludedTopics;
+        IsFiltersDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelFiltersDialog() => IsFiltersDialogOpen = false;
+
+    [RelayCommand]
+    private void ApplyFiltersDialog()
+    {
+        ExcludedCategories = DialogExcludedCategories;
+        ExcludedClients = DialogExcludedClients;
+        ExcludedProjects = DialogExcludedProjects;
+        ExcludedTopics = DialogExcludedTopics;
+        IsFiltersDialogOpen = false;
+    }
+
+    [RelayCommand]
     private void SelectSourceGraph()
     {
         IsGraphSelected = true;
@@ -411,7 +483,18 @@ public partial class MainViewModel : ObservableObject
                 _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
             };
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format);
+
+            static string[] ParseList(string raw) =>
+                raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var filters = new EventFilters
+            {
+                Categories = ParseList(ExcludedCategories),
+                Clients    = ParseList(ExcludedClients),
+                Projects   = ParseList(ExcludedProjects),
+                Topics     = ParseList(ExcludedTopics),
+            };
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;
@@ -511,5 +594,15 @@ public partial class MainViewModel : ObservableObject
 #else
         return null;
 #endif
+    }
+
+    private static bool HasFilterValues(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        return raw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Length > 0;
     }
 }
