@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore eris/Core/Core.csproj
+
+      - name: Build Core
+        run: dotnet build eris/Core/Core.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test eris/Core.Tests/Core.Tests.csproj --configuration Release --verbosity normal
+
+  build-cli:
+    name: Build CLI
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build CLI
+        run: dotnet build eris/CLI/CLI.csproj --configuration Release
+
+  build-ui-macos:
+    name: Build UI · macOS
+    runs-on: macos-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Select Xcode 26.2
+        run: sudo xcode-select --switch /Applications/Xcode_26.2.app
+
+      - name: Install MAUI Mac Catalyst workload
+        run: dotnet workload install maui-maccatalyst
+
+      - name: Build UI (Mac Catalyst)
+        run: dotnet build eris/UI/UI.csproj -f net10.0-maccatalyst --configuration Release
+
+  build-ui-windows:
+    name: Build UI · Windows
+    runs-on: windows-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-windows maui-maccatalyst
+
+      - name: Build UI (Windows)
+        run: dotnet build eris/UI/UI.csproj -f net10.0-windows10.0.19041.0 --configuration Release

@@ -1,0 +1,73 @@
+---
+name: Bug Report
+description: Segnala un bug in eris
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione! Compila i campi seguenti per aiutarci a capire e risolvere il problema.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente
+      description: In quale parte di eris si verifica il bug?
+      options:
+        - Core (modelli/servizi)
+        - CLI (interfaccia terminale)
+        - UI MAUI (interfaccia grafica)
+        - CI/CD (build/release)
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Piattaforma
+      description: Su quale sistema operativo si verifica?
+      options:
+        - macOS
+        - Windows
+        - Entrambi
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrizione
+      description: Descrivi chiaramente il bug.
+      placeholder: Cosa succede? Cosa ti aspettavi?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passi per riprodurre
+      description: Come si può riprodurre il bug?
+      placeholder: |
+        1. Apri l'app
+        2. Vai su Settings
+        3. Clicca "Login"
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log / Messaggi di errore
+      description: Incolla eventuali log o messaggi di errore.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Versione eris
+      description: "Quale versione di eris stai usando? (es. v1.2.0)"
+      placeholder: "v1.0.0"

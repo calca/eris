@@ -1,0 +1,58 @@
+---
+name: Feature Request
+description: Proponi una nuova funzionalità per eris
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Proponi una nuova funzionalità o miglioramento per eris.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente
+      description: Quale parte di eris è interessata?
+      options:
+        - Core (modelli/servizi)
+        - CLI (interfaccia terminale)
+        - UI MAUI (interfaccia grafica)
+        - CI/CD (build/release)
+        - Nuovo componente
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema o esigenza
+      description: Descrivi il problema che questa feature risolverebbe.
+      placeholder: "Attualmente devo fare X manualmente, sarebbe utile se..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Soluzione proposta
+      description: Come vorresti che funzionasse?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative considerate
+      description: Hai considerato approcci alternativi?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorità
+      options:
+        - Bassa — nice to have
+        - Media — migliorerebbe il workflow
+        - Alta — blocca o rallenta significativamente
+      default: 1
