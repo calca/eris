@@ -56,7 +56,7 @@ public partial class MainViewModel : ObservableObject
             "1. Vai su outlook.com e apri il Calendario\n" +
             "2. Clicca sull'ingranaggio ⚙ → Visualizza tutte le impostazioni\n" +
             "3. Vai in Calendario → Calendari condivisi\n" +
-            "4. Nella sezione \"Pubblica un calendario\" scegli il calendario e seleziona \"Tutti i dettagli\"\n" +
+            "4. Nella sezione \"Pubblica un calendario\" scegli il calendario e seleziona \"Titolo e posizione\"\n" +
             "5. Clicca \"Pubblica\" e copia il link ICS",
             "OK");
     }

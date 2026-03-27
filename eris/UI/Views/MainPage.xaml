@@ -716,7 +716,7 @@
                           TextColor="{StaticResource OnBackground}"
                           HorizontalOptions="Center" />
 
-                      <Label Text="Inserisci valori separati da virgola."
+                      <Label Text="Gli eventi corrispondenti verranno esclusi dal report. Separa i valori con una virgola."
                           Style="{StaticResource MutedLabel}"
                           HorizontalTextAlignment="Center" />
 
