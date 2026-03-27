@@ -199,15 +199,21 @@
                         </HorizontalStackLayout>
                         <!-- Riga Date -->
                         <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                            <Button Text="📅"
-                                    FontSize="16"
-                                    WidthRequest="32" HeightRequest="32"
-                                    CornerRadius="16"
-                                    BackgroundColor="Transparent"
-                                    Padding="0"
-                                    VerticalOptions="Center"
-                                    Command="{Binding OpenDatePickerCommand}"
-                                    IsEnabled="{Binding IsCustomPeriodSelected}" />
+                            <ImageButton WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Padding="0"
+                                         VerticalOptions="Center"
+                                         Command="{Binding OpenDatePickerCommand}"
+                                         IsEnabled="{Binding IsCustomPeriodSelected}">
+                                <ImageButton.Triggers>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                        <Setter Property="Source" Value="calendar_clock.png" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsCustomPeriodSelected}" Value="False">
+                                        <Setter Property="Source" Value="calendar.png" />
+                                    </DataTrigger>
+                                </ImageButton.Triggers>
+                            </ImageButton>
                             <Label Text="{Binding WeekRangeDisplay}"
                                    FontSize="15"
                                    TextColor="{StaticResource OnSurface}"

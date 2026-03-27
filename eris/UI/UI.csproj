@@ -51,6 +51,8 @@
     <MauiImage Include="Resources/Logo/eris_logo.png" />
     <MauiImage Include="Resources/Icons/week.svg" TintColor="#cbd5e1" />
     <MauiImage Include="Resources/Icons/week_fading.svg" TintColor="#cbd5e1" />
+    <MauiImage Include="Resources/Icons/calendar.svg" TintColor="#cbd5e1" />
+    <MauiImage Include="Resources/Icons/calendar_clock.svg" TintColor="#cbd5e1" />
   </ItemGroup>
 
   <ItemGroup>
