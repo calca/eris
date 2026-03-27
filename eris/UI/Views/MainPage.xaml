@@ -165,54 +165,50 @@
                 </Border>
 
                 <!-- Periodo selezionato -->
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      ColumnSpacing="12"
-                      HorizontalOptions="FillAndExpand"
-                      Margin="40,4,40,20"
-                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                      VerticalOptions="Center">
-                    <Button Grid.Column="0"
-                            Text="Lun – Ven"
-                            FontSize="13" CornerRadius="19"
-                            HeightRequest="46"
-                            Padding="16,0" BorderWidth="1.5"
-                            VerticalOptions="Center"
-                            Command="{Binding ToggleWorkWeekCommand}">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsWorkWeek}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                                <Setter Property="TextColor" Value="White" />
-                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsWorkWeek}" Value="False">
-                                <Setter Property="BackgroundColor" Value="Transparent" />
-                                <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
-                                <Setter Property="BorderColor" Value="{StaticResource SurfaceVariant}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-
-                    <Label Grid.Column="1"
-                           Text="{Binding WeekRangeDisplay}"
-                           FontSize="15"
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource OnSurface}"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
-
-                    <!-- Bottone calendario (periodo libero) -->
-                    <Button Grid.Column="2"
-                            Text="📅"
-                            FontSize="18"
-                            WidthRequest="36" HeightRequest="36"
-                            CornerRadius="18"
-                            BackgroundColor="Transparent"
-                            TextColor="{StaticResource Primary}"
-                            Padding="0"
-                            VerticalOptions="Center"
-                            IsVisible="{Binding IsCustomPeriodSelected}"
-                            Command="{Binding OpenDatePickerCommand}" />
-                </Grid>
+                <Border BackgroundColor="Transparent"
+                        Stroke="{StaticResource SurfaceVariant}"
+                        StrokeThickness="1.5"
+                        HorizontalOptions="FillAndExpand"
+                        Margin="40,4,40,20"
+                        Padding="16,12"
+                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <!-- Riga Lun-Ven -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <Button Text="🕐"
+                                    FontSize="16"
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    BackgroundColor="Transparent"
+                                    Padding="0"
+                                    VerticalOptions="Center"
+                                    Command="{Binding ToggleWorkWeekCommand}" />
+                            <Label Text="{Binding WorkWeekLabel}"
+                                   FontSize="15"
+                                   TextColor="{StaticResource OnSurface}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <!-- Riga Date -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <Button Text="📅"
+                                    FontSize="16"
+                                    WidthRequest="32" HeightRequest="32"
+                                    CornerRadius="16"
+                                    BackgroundColor="Transparent"
+                                    Padding="0"
+                                    VerticalOptions="Center"
+                                    Command="{Binding OpenDatePickerCommand}"
+                                    IsEnabled="{Binding IsCustomPeriodSelected}" />
+                            <Label Text="{Binding WeekRangeDisplay}"
+                                   FontSize="15"
+                                   TextColor="{StaticResource OnSurface}"
+                                   VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
                 <Grid HeightRequest="52"

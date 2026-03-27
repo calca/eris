@@ -95,7 +95,10 @@ public partial class MainViewModel : ObservableObject
 
     /// <summary>Quando abilitato, il range è limitato a Lunedì–Venerdì (settimana lavorativa).</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WorkWeekLabel))]
     private bool _isWorkWeek;
+
+    public string WorkWeekLabel => IsWorkWeek ? "Lun – Ven" : "Lun – Dom";
 
     /// <summary>Categorie (tag) degli eventi da escludere, separate da virgola (es. "Personale, OOO").</summary>
     [ObservableProperty]
