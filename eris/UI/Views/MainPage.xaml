@@ -329,10 +329,10 @@
         <!-- ══  TAB 2: CONFIGURAZIONE  ════════════════════════════════════ -->
         <!-- ════════════════════════════════════════════════════════════════ -->
         <ScrollView Grid.Row="1" IsVisible="{Binding IsConfigTab}">
-            <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
+            <VerticalStackLayout Padding="20,32,20,32" Spacing="0">
 
                 <!-- ── Sorgente Calendario ─────────────────────────── -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="14" Margin="0,0,0,8" Padding="0">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="14" Margin="0,0,0,32" Padding="0">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="Scegli da dove leggere i tuoi eventi."
                                Style="{StaticResource MutedLabel}"
@@ -400,7 +400,7 @@
                 </Grid>
 
                 <!-- ── URL ICS ─────────────────────────────────────── -->
-                <VerticalStackLayout Spacing="10" Margin="0,0,0,8" Padding="0,4"
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4"
                                     IsVisible="{Binding IsIcsSource}">
                         <Label Text="Inserisci l'URL del file .ics del tuo calendario. Lo trovi nelle impostazioni del tuo provider di calendario."
                                Style="{StaticResource MutedLabel}"
@@ -429,7 +429,7 @@
                 </VerticalStackLayout>
 
                 <!-- ── Account Microsoft ───────────────────────────── -->
-                <VerticalStackLayout Spacing="10" Margin="0,0,0,8" Padding="0,4"
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4"
                                     IsVisible="{Binding IsGraphSource}">
                         <Label Text="Accedi con il tuo account Microsoft 365 per leggere gli eventi dal calendario Outlook."
                                Style="{StaticResource MutedLabel}"
@@ -508,7 +508,7 @@
                          Margin="0,4,0,4" />
 
                 <!-- ── Cartella di output ──────────────────────────── -->
-                <VerticalStackLayout Spacing="10" Margin="0,0,0,8" Padding="0,4">
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4">
                         <Label Text="I file del report verranno salvati in questa cartella."
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
@@ -544,7 +544,7 @@
                 </VerticalStackLayout>
 
                 <!-- ── Formato esportazione + Ore settimanali ────────────── -->
-                <VerticalStackLayout Spacing="10" Margin="0,0,0,8" Padding="0,4">
+                <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4">
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <!-- Formato -->
                             <VerticalStackLayout Grid.Column="0" Spacing="8">
