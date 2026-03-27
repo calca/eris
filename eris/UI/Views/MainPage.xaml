@@ -436,13 +436,35 @@
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
 
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
-                                     Fill="{Binding IsAuthenticated, Converter={StaticResource AuthStatusColor}}" />
-                            <Label Text="{Binding UserDisplayName}"
-                                   Style="{StaticResource SubtitleLabel}"
-                                   VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="45*,20*,35*" ColumnSpacing="0">
+                            <Grid Grid.Column="0" ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                                  IsVisible="{Binding IsBusy, Converter={StaticResource InvertBool}}">
+                                <Button Grid.Column="0"
+                                        Text="Accedi con Microsoft"
+                                        Style="{StaticResource PrimaryBtn}"
+                                        Command="{Binding LoginCommand}"
+                                        IsVisible="{Binding IsNotAuthenticated}" />
+                                <Button Grid.Column="0"
+                                        Text="✓  Autenticato"
+                                        Style="{StaticResource PrimaryBtn}"
+                                        BackgroundColor="{StaticResource Success}"
+                                        IsEnabled="False"
+                                        IsVisible="{Binding IsAuthenticated}" />
+                                <Button Grid.Column="1"
+                                        Text="Esci"
+                                        Style="{StaticResource DangerBtn}"
+                                        Command="{Binding LogoutCommand}"
+                                        IsVisible="{Binding IsAuthenticated}" />
+                            </Grid>
+
+                            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center">
+                                <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                         Fill="{Binding IsAuthenticated, Converter={StaticResource AuthStatusColor}}" />
+                                <Label Text="{Binding UserDisplayName}"
+                                       Style="{StaticResource SubtitleLabel}"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Grid>
 
                         <Frame IsVisible="{Binding HasDeviceCode}"
                                BackgroundColor="#1c3448" BorderColor="#0284c7"
@@ -455,26 +477,6 @@
                                        FontSize="12" LineBreakMode="WordWrap" />
                             </VerticalStackLayout>
                         </Frame>
-
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
-                              IsVisible="{Binding IsBusy, Converter={StaticResource InvertBool}}">
-                            <Button Grid.Column="0"
-                                    Text="Accedi con Microsoft"
-                                    Style="{StaticResource PrimaryBtn}"
-                                    Command="{Binding LoginCommand}"
-                                    IsVisible="{Binding IsNotAuthenticated}" />
-                            <Button Grid.Column="0"
-                                    Text="✓  Autenticato"
-                                    Style="{StaticResource PrimaryBtn}"
-                                    BackgroundColor="{StaticResource Success}"
-                                    IsEnabled="False"
-                                    IsVisible="{Binding IsAuthenticated}" />
-                            <Button Grid.Column="1"
-                                    Text="Esci"
-                                    Style="{StaticResource DangerBtn}"
-                                    Command="{Binding LogoutCommand}"
-                                    IsVisible="{Binding IsAuthenticated}" />
-                        </Grid>
 
                         <ActivityIndicator IsRunning="{Binding IsBusy}"
                                            IsVisible="{Binding IsBusy}"
