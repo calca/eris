@@ -397,6 +397,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenDatePicker()
     {
+        if (!IsCustomPeriodSelected) return;
         DialogStartDate  = CustomStartDate;
         DialogEndDate    = CustomEndDate;
         IsDatePickerOpen = true;

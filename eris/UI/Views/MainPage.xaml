@@ -195,7 +195,11 @@
                             <Label Text="{Binding WorkWeekLabel}"
                                    FontSize="15"
                                    TextColor="{StaticResource OnSurface}"
-                                   VerticalOptions="Center" />
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleWorkWeekCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
                         </HorizontalStackLayout>
                         <!-- Riga Date -->
                         <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
@@ -217,7 +221,11 @@
                             <Label Text="{Binding WeekRangeDisplay}"
                                    FontSize="15"
                                    TextColor="{StaticResource OnSurface}"
-                                   VerticalOptions="Center" />
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenDatePickerCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Border>
