@@ -49,10 +49,10 @@
     <MauiIcon Include="Resources/AppIcon/appicon.png" />
     <MauiSplashScreen Include="Resources/Splash/splash.svg" Color="#1e293b" BaseSize="128,128" />
     <MauiImage Include="Resources/Logo/eris_logo.png" />
-    <MauiImage Include="Resources/Icons/week.svg" TintColor="#cbd5e1" />
-    <MauiImage Include="Resources/Icons/week_fading.svg" TintColor="#cbd5e1" />
-    <MauiImage Include="Resources/Icons/calendar.svg" TintColor="#cbd5e1" />
-    <MauiImage Include="Resources/Icons/calendar_clock.svg" TintColor="#cbd5e1" />
+    <MauiImage Include="Resources/Icons/week.svg" TintColor="#64748b" />
+    <MauiImage Include="Resources/Icons/week_fading.svg" TintColor="#64748b" />
+    <MauiImage Include="Resources/Icons/calendar.svg" TintColor="#64748b" />
+    <MauiImage Include="Resources/Icons/calendar_clock.svg" TintColor="#64748b" />
     <MauiImage Include="Resources/Icons/report_hours.svg" TintColor="#64748b" />
     <MauiImage Include="Resources/Icons/report_meetings.svg" TintColor="#64748b" />
   </ItemGroup>

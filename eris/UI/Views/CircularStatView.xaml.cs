@@ -30,6 +30,17 @@ public partial class CircularStatView : ContentView
     {
         InitializeComponent();
         RingView.Drawable = _drawable;
+        UpdateTrackColor();
+        Application.Current!.RequestedThemeChanged += (_, _) => UpdateTrackColor();
+    }
+
+    private void UpdateTrackColor()
+    {
+        var isDark = Application.Current!.RequestedTheme == AppTheme.Dark;
+        _drawable.TrackColor = isDark
+            ? Color.FromArgb("#1e293b")
+            : Color.FromArgb("#e2e8f0");
+        RingView.Invalidate();
     }
 
     private void Refresh()
@@ -42,8 +53,8 @@ public partial class CircularStatView : ContentView
 internal sealed class RingDrawable : IDrawable
 {
     public float Progress { get; set; } = 0.85f;
+    public Color TrackColor { get; set; } = Color.FromArgb("#1e293b");
 
-    private static readonly Color TrackColor = Color.FromArgb("#1e293b");
     private static readonly Color ArcColor   = Color.FromArgb("#0ea5e9");
 
     public void Draw(ICanvas canvas, RectF rect)

@@ -9,6 +9,8 @@
              Title="{Binding PageTitle}">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{Binding ThemeLabel}"
+                     Command="{Binding ToggleThemeCommand}" />
         <ToolbarItem Text="{Binding ToggleConfigLabel}"
                      Command="{Binding ToggleConfigCommand}" />
     </ContentPage.ToolbarItems>
@@ -20,7 +22,7 @@
                                    FalseColor="#64748b" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" BackgroundColor="{StaticResource Background}">
+    <Grid RowDefinitions="Auto,*" BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}">
 
         <!-- ════════════════════════════════════════════════════════════════ -->
         <!-- ══  TAB 1: GENERA REPORT  ═════════════════════════════════════ -->
@@ -31,7 +33,7 @@
                 <!-- Banner configurazione mancante -->
                 <Label IsVisible="{Binding IsConfigIncomplete}"
                        FontSize="16" FontAttributes="Bold"
-                       TextColor="{StaticResource OnSurfaceMuted}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                        HorizontalOptions="Center"
                        HorizontalTextAlignment="Center"
                        Margin="0,0,0,16">
@@ -54,7 +56,7 @@
                     <Label Text="Benvenuto"
                            FontSize="34"
                            FontAttributes="Bold"
-                           TextColor="{StaticResource OnBackground}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                            HorizontalTextAlignment="Center"
                            HorizontalOptions="Center"
                            Margin="0,12,0,12" />
@@ -67,7 +69,7 @@
                         <Label Grid.Column="1"
                                Text="Eris è qui per estrarre l'essenza dalle tue giornate affollate. Trasforma la confusione del calendario in report ordinati: perché anche dalla discordia degli impegni può nascere un'armonia perfetta."
                                FontSize="18"
-                               TextColor="{StaticResource OnSurfaceMuted}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                HorizontalTextAlignment="Center"
                                LineBreakMode="WordWrap" />
                     </Grid>
@@ -81,7 +83,7 @@
                 <Label Text="Esporta i tuoi meeting in un report"
                        FontSize="20"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource OnBackground}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                        HorizontalTextAlignment="Center"
                        HorizontalOptions="FillAndExpand"
                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
@@ -90,14 +92,14 @@
                 <Label Text="Ecco il tuo report"
                        FontSize="20"
                        FontAttributes="Bold"
-                       TextColor="{StaticResource OnBackground}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                        HorizontalTextAlignment="Center"
                        HorizontalOptions="FillAndExpand"
                        IsVisible="{Binding ShowResult}"
                        Margin="0,12,0,24" />
 
                 <!-- ── Periodo (slider) ────────────────────────────────── -->
-                <Border BackgroundColor="{StaticResource SurfaceVariant}"
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                         StrokeThickness="0"
                         HeightRequest="46"
                         HorizontalOptions="FillAndExpand"
@@ -120,7 +122,7 @@
                                 </DataTrigger>
                                 <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="False">
                                     <Setter Property="BackgroundColor" Value="Transparent" />
-                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                     <Setter Property="FontAttributes" Value="None" />
                                 </DataTrigger>
                             </Button.Triggers>
@@ -138,7 +140,7 @@
                                 </DataTrigger>
                                 <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="False">
                                     <Setter Property="BackgroundColor" Value="Transparent" />
-                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                     <Setter Property="FontAttributes" Value="None" />
                                 </DataTrigger>
                             </Button.Triggers>
@@ -156,7 +158,7 @@
                                 </DataTrigger>
                                 <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="False">
                                     <Setter Property="BackgroundColor" Value="Transparent" />
-                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                     <Setter Property="FontAttributes" Value="None" />
                                 </DataTrigger>
                             </Button.Triggers>
@@ -166,7 +168,7 @@
 
                 <!-- Periodo selezionato -->
                 <Border BackgroundColor="Transparent"
-                        Stroke="{StaticResource SurfaceVariant}"
+                        Stroke="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                         StrokeThickness="1.5"
                         HorizontalOptions="FillAndExpand"
                         Margin="40,4,40,20"
@@ -194,7 +196,7 @@
                             </ImageButton>
                             <Label Text="{Binding WorkWeekLabel}"
                                    FontSize="15"
-                                   TextColor="{StaticResource OnSurface}"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                                    VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding ToggleWorkWeekCommand}" />
@@ -220,7 +222,7 @@
                             </ImageButton>
                             <Label Text="{Binding WeekRangeDisplay}"
                                    FontSize="15"
-                                   TextColor="{StaticResource OnSurface}"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                                    VerticalOptions="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenDatePickerCommand}" />
@@ -291,19 +293,19 @@
                         <Label Text="PERIODO"
                                FontSize="11" FontAttributes="Bold"
                                CharacterSpacing="1"
-                               TextColor="{StaticResource OnSurfaceMuted}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                HorizontalOptions="Center" />
                         <Label Text="{Binding ResultPeriodStart}"
                                FontSize="20" FontAttributes="Bold"
-                               TextColor="{StaticResource OnBackground}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                                HorizontalOptions="Center" />
                         <Label Text="–"
                                FontSize="14"
-                               TextColor="{StaticResource OnSurfaceMuted}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                HorizontalOptions="Center" />
                         <Label Text="{Binding ResultPeriodEnd}"
                                FontSize="20" FontAttributes="Bold"
-                               TextColor="{StaticResource OnBackground}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>
 
@@ -354,7 +356,7 @@
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap" />
 
-                        <Border BackgroundColor="{StaticResource SurfaceVariant}"
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                                 StrokeThickness="0"
                                 HeightRequest="46">
                             <Border.StrokeShape>
@@ -374,7 +376,7 @@
                                         </DataTrigger>
                                         <DataTrigger TargetType="Button" Binding="{Binding IsIcsSource}" Value="False">
                                             <Setter Property="BackgroundColor" Value="Transparent" />
-                                            <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                             <Setter Property="FontAttributes" Value="None" />
                                         </DataTrigger>
                                     </Button.Triggers>
@@ -392,7 +394,7 @@
                                         </DataTrigger>
                                         <DataTrigger TargetType="Button" Binding="{Binding IsGraphSource}" Value="False">
                                             <Setter Property="BackgroundColor" Value="Transparent" />
-                                            <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                             <Setter Property="FontAttributes" Value="None" />
                                         </DataTrigger>
                                     </Button.Triggers>
@@ -425,9 +427,9 @@
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="Center">
                             <Entry Grid.Column="0"
                                    Text="{Binding IcsUrl}"
-                                   TextColor="{StaticResource OnSurface}"
-                                   BackgroundColor="{StaticResource SurfaceVariant}"
-                                   PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                    Placeholder="https://example.com/calendar.ics"
                                    Keyboard="Default"
                                    FontSize="13" />
@@ -437,7 +439,7 @@
                                     WidthRequest="36" HeightRequest="36"
                                     CornerRadius="18"
                                     BackgroundColor="Transparent"
-                                    TextColor="{StaticResource OnSurfaceMuted}"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                     Padding="0"
                                     VerticalOptions="Center"
                                     Command="{Binding ShowIcsHelpCommand}" />
@@ -483,7 +485,7 @@
                         </Grid>
 
                         <Frame IsVisible="{Binding HasDeviceCode}"
-                               BackgroundColor="#1c3448" BorderColor="#0284c7"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource DeviceCodeBgLight}, Dark={StaticResource DeviceCodeBgDark}}" BorderColor="#0284c7"
                                CornerRadius="8" Padding="12">
                             <VerticalStackLayout Spacing="6">
                                 <Label Text="Autenticazione via codice dispositivo:"
@@ -522,7 +524,7 @@
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1"
-                         BackgroundColor="{StaticResource SurfaceVariant}"
+                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                          Margin="0,4,0,4" />
 
                 <!-- ── Cartella di output ──────────────────────────── -->
@@ -533,7 +535,7 @@
                                Margin="0,0,0,4" />
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <Border Grid.Column="0"
-                                    BackgroundColor="{StaticResource SurfaceVariant}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                                     StrokeThickness="0"
                                     Padding="12,0"
                                     HeightRequest="46">
@@ -542,7 +544,7 @@
                                 </Border.StrokeShape>
                                 <Label Text="{Binding OutputFolderName}"
                                        ToolTipProperties.Text="{Binding OutputFolder}"
-                                       TextColor="{StaticResource OnSurface}"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                                        FontSize="15"
                                        VerticalOptions="Center"
                                        VerticalTextAlignment="Center"
@@ -571,7 +573,7 @@
                                        LineBreakMode="WordWrap"
                                         HeightRequest="36"
                                        Margin="0,0,0,4" />
-                                <Border BackgroundColor="{StaticResource SurfaceVariant}"
+                                <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                                         StrokeThickness="0"
                                         HeightRequest="46">
                                     <Border.StrokeShape>
@@ -591,7 +593,7 @@
                                                 </DataTrigger>
                                                 <DataTrigger TargetType="Button" Binding="{Binding IsXlsxFormat}" Value="False">
                                                     <Setter Property="BackgroundColor" Value="Transparent" />
-                                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                                     <Setter Property="FontAttributes" Value="None" />
                                                 </DataTrigger>
                                             </Button.Triggers>
@@ -609,7 +611,7 @@
                                                 </DataTrigger>
                                                 <DataTrigger TargetType="Button" Binding="{Binding IsCsvFormat}" Value="False">
                                                     <Setter Property="BackgroundColor" Value="Transparent" />
-                                                    <Setter Property="TextColor" Value="{StaticResource OnSurfaceMuted}" />
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                                                     <Setter Property="FontAttributes" Value="None" />
                                                 </DataTrigger>
                                             </Button.Triggers>
@@ -625,9 +627,9 @@
                                         HeightRequest="36"
                                        Margin="0,0,0,4" />
                                 <Entry Text="{Binding WeeklyWorkingHours}"
-                                       TextColor="{StaticResource OnSurface}"
-                                       BackgroundColor="{StaticResource SurfaceVariant}"
-                                       PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                                        Placeholder="40"
                                        Keyboard="Numeric"
                                        HeightRequest="46"
@@ -681,9 +683,9 @@
 
         <!-- ── Dialog selezione periodo ──────────────────────────────────── -->
         <Grid Grid.RowSpan="2" IsVisible="{Binding IsDatePickerOpen}"
-              BackgroundColor="#CC000000">
-            <Frame BackgroundColor="{StaticResource Surface}"
-                   BorderColor="{StaticResource SurfaceVariant}"
+              BackgroundColor="{AppThemeBinding Light=#88000000, Dark=#CC000000}">
+            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                    CornerRadius="16" HasShadow="False"
                    Padding="28" WidthRequest="320"
                    HorizontalOptions="Center" VerticalOptions="Center">
@@ -691,26 +693,26 @@
 
                     <Label Text="Seleziona Periodo"
                            FontSize="17" FontAttributes="Bold"
-                           TextColor="{StaticResource OnBackground}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                            HorizontalOptions="Center" />
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="DA" FontSize="11" FontAttributes="Bold"
-                               TextColor="{StaticResource OnSurfaceMuted}" />
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                         <DatePicker Date="{Binding DialogStartDate}"
                                     Format="dd/MM/yyyy"
-                                    TextColor="{StaticResource OnSurface}"
-                                    BackgroundColor="{StaticResource SurfaceVariant}"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                                     HorizontalOptions="FillAndExpand" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="A" FontSize="11" FontAttributes="Bold"
-                               TextColor="{StaticResource OnSurfaceMuted}" />
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
                         <DatePicker Date="{Binding DialogEndDate}"
                                     Format="dd/MM/yyyy"
-                                    TextColor="{StaticResource OnSurface}"
-                                    BackgroundColor="{StaticResource SurfaceVariant}"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                                     HorizontalOptions="FillAndExpand" />
                     </VerticalStackLayout>
 
@@ -731,9 +733,9 @@
 
              <!-- ── Dialog filtri attività ─────────────────────────────────────── -->
              <Grid Grid.RowSpan="2" IsVisible="{Binding IsFiltersDialogOpen}"
-                BackgroundColor="#CC000000">
-                 <Frame BackgroundColor="{StaticResource Surface}"
-                     BorderColor="{StaticResource SurfaceVariant}"
+                BackgroundColor="{AppThemeBinding Light=#88000000, Dark=#CC000000}">
+                 <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                     BorderColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                      CornerRadius="16" HasShadow="False"
                      Padding="24" WidthRequest="360"
                      HorizontalOptions="Center" VerticalOptions="Center">
@@ -742,7 +744,7 @@
                       <Label Text="Filtri"
                           FontSize="18"
                           FontAttributes="Bold"
-                          TextColor="{StaticResource OnBackground}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                           HorizontalOptions="Center" />
 
                       <Label Text="Gli eventi corrispondenti verranno esclusi dal report. Separa i valori con una virgola."
@@ -753,7 +755,7 @@
                       <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,4">
                           <Label Grid.Column="0"
                               Text="Escludi eventi &quot;tentative&quot;"
-                              TextColor="{StaticResource OnSurface}"
+                              TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                               FontSize="13"
                               FontAttributes="Bold"
                               VerticalOptions="Center" />
@@ -764,52 +766,52 @@
                       </Grid>
 
                       <Label Text="Categorie (tag)"
-                          TextColor="{StaticResource OnSurface}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold" />
                       <Entry Text="{Binding DialogExcludedCategories}"
-                          TextColor="{StaticResource OnSurface}"
-                          BackgroundColor="{StaticResource SurfaceVariant}"
-                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                           Placeholder="Personale, OOO"
                           Keyboard="Default"
                           FontSize="13" />
 
                       <Label Text="Cliente"
-                          TextColor="{StaticResource OnSurface}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
                           Margin="0,4,0,0" />
                       <Entry Text="{Binding DialogExcludedClients}"
-                          TextColor="{StaticResource OnSurface}"
-                          BackgroundColor="{StaticResource SurfaceVariant}"
-                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                           Placeholder="ClienteX, ClienteY"
                           Keyboard="Default"
                           FontSize="13" />
 
                       <Label Text="Progetto"
-                          TextColor="{StaticResource OnSurface}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
                           Margin="0,4,0,0" />
                       <Entry Text="{Binding DialogExcludedProjects}"
-                          TextColor="{StaticResource OnSurface}"
-                          BackgroundColor="{StaticResource SurfaceVariant}"
-                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                           Placeholder="ProgettoA, ProgettoB"
                           Keyboard="Default"
                           FontSize="13" />
 
                       <Label Text="Topic"
-                          TextColor="{StaticResource OnSurface}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
                           Margin="0,4,0,0" />
                       <Entry Text="{Binding DialogExcludedTopics}"
-                          TextColor="{StaticResource OnSurface}"
-                          BackgroundColor="{StaticResource SurfaceVariant}"
-                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                           Placeholder="TopicX, TopicY"
                           Keyboard="Default"
                           FontSize="13" />
@@ -833,9 +835,9 @@
 
              <!-- ── Dialog formato subject ─────────────────────────────────────── -->
              <Grid Grid.RowSpan="2" IsVisible="{Binding IsTemplateDialogOpen}"
-                BackgroundColor="#CC000000">
-                 <Frame BackgroundColor="{StaticResource Surface}"
-                     BorderColor="{StaticResource SurfaceVariant}"
+                BackgroundColor="{AppThemeBinding Light=#88000000, Dark=#CC000000}">
+                 <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+                     BorderColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
                      CornerRadius="16" HasShadow="False"
                      Padding="24" WidthRequest="420"
                      HorizontalOptions="Center" VerticalOptions="Center">
@@ -844,7 +846,7 @@
                       <Label Text="Formato Subject"
                           FontSize="18"
                           FontAttributes="Bold"
-                          TextColor="{StaticResource OnBackground}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
                           HorizontalOptions="Center" />
 
                       <Label Text="Definisci come sono strutturati i titoli dei tuoi eventi nel calendario. Usa i placeholder &#x7B;Cliente&#x7D;, &#x7B;Progetto&#x7D; e &#x7B;Topic&#x7D; separati dal carattere che usi nei titoli."
@@ -864,14 +866,14 @@
                           HorizontalTextAlignment="Center" />
 
                       <Label Text="Template"
-                          TextColor="{StaticResource OnSurface}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
                           FontAttributes="Bold"
                           Margin="0,4,0,0" />
                       <Entry Text="{Binding DialogSubjectTemplate}"
-                          TextColor="{StaticResource OnSurface}"
-                          BackgroundColor="{StaticResource SurfaceVariant}"
-                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
                           Placeholder="{}&#x7B;Cliente&#x7D; | &#x7B;Progetto&#x7D; | &#x7B;Topic&#x7D;"
                           Keyboard="Default"
                           FontSize="13" />

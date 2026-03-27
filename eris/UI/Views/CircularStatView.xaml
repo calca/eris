@@ -19,12 +19,12 @@
             <Label Text="{Binding Source={x:Reference self}, Path=StatLabel}"
                    FontSize="12"
                    HorizontalOptions="Center"
-                   TextColor="#94a3b8" />
+                   TextColor="{AppThemeBinding Light=#64748b, Dark=#94a3b8}" />
             <Label Text="{Binding Source={x:Reference self}, Path=Value}"
                    FontSize="26"
                    FontAttributes="Bold"
                    HorizontalOptions="Center"
-                   TextColor="#f1f5f9" />
+                   TextColor="{AppThemeBinding Light=#0f172a, Dark=#f1f5f9}" />
         </VerticalStackLayout>
 
     </Grid>

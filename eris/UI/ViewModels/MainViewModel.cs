@@ -31,6 +31,21 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ToggleConfig() => IsGenerateTab = !IsGenerateTab;
 
+    // ── Tema ──────────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ThemeLabel))]
+    private bool _isDarkTheme = Application.Current!.RequestedTheme == AppTheme.Dark;
+
+    public string ThemeLabel => IsDarkTheme ? "☀️" : "🌙";
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        IsDarkTheme = !IsDarkTheme;
+        Application.Current!.UserAppTheme = IsDarkTheme ? AppTheme.Dark : AppTheme.Light;
+    }
+
     // ── Sorgente ──────────────────────────────────────────────────────────
 
     [ObservableProperty]

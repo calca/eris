@@ -2,26 +2,40 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- ── Sfondo (dark slate) ─────────────────────────────── -->
-    <Color x:Key="Background">#0f172a</Color>
-    <Color x:Key="Surface">#1e293b</Color>
-    <Color x:Key="SurfaceVariant">#334155</Color>
-    <Color x:Key="SurfaceBorder">#475569</Color>
+    <!-- ── Dark palette ────────────────────────────────────── -->
+    <Color x:Key="BackgroundDark">#0f172a</Color>
+    <Color x:Key="SurfaceDark">#1e293b</Color>
+    <Color x:Key="SurfaceVariantDark">#334155</Color>
+    <Color x:Key="SurfaceBorderDark">#475569</Color>
+    <Color x:Key="OnBackgroundDark">#f1f5f9</Color>
+    <Color x:Key="OnSurfaceDark">#cbd5e1</Color>
+    <Color x:Key="OnSurfaceMutedDark">#94a3b8</Color>
 
-    <!-- ── Testo ────────────────────────────────────────────── -->
-    <Color x:Key="OnBackground">#f1f5f9</Color>
-    <Color x:Key="OnSurface">#cbd5e1</Color>
-    <Color x:Key="OnSurfaceMuted">#94a3b8</Color>
+    <!-- ── Light palette ───────────────────────────────────── -->
+    <Color x:Key="BackgroundLight">#f8fafc</Color>
+    <Color x:Key="SurfaceLight">#ffffff</Color>
+    <Color x:Key="SurfaceVariantLight">#e2e8f0</Color>
+    <Color x:Key="SurfaceBorderLight">#cbd5e1</Color>
+    <Color x:Key="OnBackgroundLight">#0f172a</Color>
+    <Color x:Key="OnSurfaceLight">#334155</Color>
+    <Color x:Key="OnSurfaceMutedLight">#64748b</Color>
 
-    <!-- ── Accent (sky blue) ────────────────────────────────── -->
+    <!-- ── Accent (sky blue) — same in both themes ──────────── -->
     <Color x:Key="Primary">#0284c7</Color>
     <Color x:Key="PrimaryDark">#0369a1</Color>
     <Color x:Key="PrimaryLight">#38bdf8</Color>
 
-    <!-- ── Status ───────────────────────────────────────────── -->
+    <!-- ── Status — same in both themes ─────────────────────── -->
     <Color x:Key="Success">#16a34a</Color>
     <Color x:Key="Error">#dc2626</Color>
     <Color x:Key="Warning">#d97706</Color>
     <Color x:Key="Info">#0284c7</Color>
+
+    <!-- ── Ring chart accent ─────────────────────────────────── -->
+    <Color x:Key="RingArc">#0ea5e9</Color>
+
+    <!-- ── Device code frame ─────────────────────────────────── -->
+    <Color x:Key="DeviceCodeBgDark">#1c3448</Color>
+    <Color x:Key="DeviceCodeBgLight">#e0f2fe</Color>
 
 </ResourceDictionary>
