@@ -29,6 +29,7 @@ public class CalendarEvent
     /// Parsa il Subject strutturato nei campi Client, Project, Topic.
     /// Formati supportati:
     ///   "CLIENT | PROJECT | TOPIC" → tutti e tre popolati
+    ///   "CLIENT|PROJECT|TOPIC"      → tutti e tre popolati (spazi opzionali attorno a '|')
     ///   "CLIENT | TOPIC"           → Client e Topic popolati, Project null
     /// Subject senza separatore " | " vengono ignorati (campi restano null).
     /// </summary>
@@ -36,17 +37,21 @@ public class CalendarEvent
     {
         if (string.IsNullOrWhiteSpace(evt.Subject)) return;
 
-        var parts = evt.Subject.Split(" | ");
+        var parts = evt.Subject
+            .Split('|', StringSplitOptions.TrimEntries)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .ToArray();
+
         if (parts.Length >= 3)
         {
-            evt.Client  = parts[0].Trim();
-            evt.Project = parts[1].Trim();
-            evt.Topic   = string.Join(" | ", parts.Skip(3).Prepend(parts[2])).Trim();
+            evt.Client  = parts[0];
+            evt.Project = parts[1];
+            evt.Topic   = string.Join(" | ", parts.Skip(2));
         }
         else if (parts.Length == 2)
         {
-            evt.Client = parts[0].Trim();
-            evt.Topic  = parts[1].Trim();
+            evt.Client = parts[0];
+            evt.Topic  = parts[1];
         }
     }
 }

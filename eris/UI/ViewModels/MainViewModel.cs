@@ -99,19 +99,28 @@ public partial class MainViewModel : ObservableObject
 
     /// <summary>Categorie (tag) degli eventi da escludere, separate da virgola (es. "Personale, OOO").</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private string _excludedCategories = string.Empty;
 
     /// <summary>Clienti da escludere dal report, separati da virgola.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private string _excludedClients = string.Empty;
 
     /// <summary>Progetti da escludere dal report, separati da virgola.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private string _excludedProjects = string.Empty;
 
     /// <summary>Topic da escludere dal report, separati da virgola.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private string _excludedTopics = string.Empty;
+
+    public bool HasActiveFilters => HasFilterValues(ExcludedCategories)
+        || HasFilterValues(ExcludedClients)
+        || HasFilterValues(ExcludedProjects)
+        || HasFilterValues(ExcludedTopics);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
@@ -127,6 +136,21 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isDatePickerOpen;
+
+    [ObservableProperty]
+    private bool _isFiltersDialogOpen;
+
+    [ObservableProperty]
+    private string _dialogExcludedCategories = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedClients = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedProjects = string.Empty;
+
+    [ObservableProperty]
+    private string _dialogExcludedTopics = string.Empty;
 
     [ObservableProperty]
     private DateTime _dialogStartDate = DateTime.Today;
@@ -354,6 +378,29 @@ public partial class MainViewModel : ObservableObject
     private void CancelDatePicker() => IsDatePickerOpen = false;
 
     [RelayCommand]
+    private void OpenFiltersDialog()
+    {
+        DialogExcludedCategories = ExcludedCategories;
+        DialogExcludedClients = ExcludedClients;
+        DialogExcludedProjects = ExcludedProjects;
+        DialogExcludedTopics = ExcludedTopics;
+        IsFiltersDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelFiltersDialog() => IsFiltersDialogOpen = false;
+
+    [RelayCommand]
+    private void ApplyFiltersDialog()
+    {
+        ExcludedCategories = DialogExcludedCategories;
+        ExcludedClients = DialogExcludedClients;
+        ExcludedProjects = DialogExcludedProjects;
+        ExcludedTopics = DialogExcludedTopics;
+        IsFiltersDialogOpen = false;
+    }
+
+    [RelayCommand]
     private void SelectSourceGraph()
     {
         IsGraphSelected = true;
@@ -547,5 +594,15 @@ public partial class MainViewModel : ObservableObject
 #else
         return null;
 #endif
+    }
+
+    private static bool HasFilterValues(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        return raw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Length > 0;
     }
 }

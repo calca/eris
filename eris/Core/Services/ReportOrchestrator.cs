@@ -87,16 +87,28 @@ public sealed class ReportOrchestrator
         if (filters is null || filters.IsEmpty)
             return events;
 
-        var cats     = new HashSet<string>(filters.Categories, StringComparer.OrdinalIgnoreCase);
-        var clients  = new HashSet<string>(filters.Clients,    StringComparer.OrdinalIgnoreCase);
-        var projects = new HashSet<string>(filters.Projects,   StringComparer.OrdinalIgnoreCase);
-        var topics   = new HashSet<string>(filters.Topics,     StringComparer.OrdinalIgnoreCase);
+        var cats     = filters.Categories.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var clients  = filters.Clients.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var projects = filters.Projects.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
+        var topics   = filters.Topics.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToArray();
 
         return events.Where(e =>
-            (cats.Count     == 0 || e.Category is null || !cats.Contains(e.Category))  &&
-            (clients.Count  == 0 || e.Client   is null || !clients.Contains(e.Client)) &&
-            (projects.Count == 0 || e.Project  is null || !projects.Contains(e.Project)) &&
-            (topics.Count   == 0 || e.Topic    is null || !topics.Contains(e.Topic))
+            (cats.Length     == 0 || !MatchesAnyFilter(e.Category, cats))  &&
+            (clients.Length  == 0 || !MatchesAnyFilter(e.Client, clients)) &&
+            (projects.Length == 0 || !MatchesAnyFilter(e.Project, projects)) &&
+            (topics.Length   == 0 || !MatchesAnyFilter(e.Topic ?? e.Subject, topics))
         ).ToList();
+    }
+
+    private static bool MatchesAnyFilter(string? value, string[] filters)
+    {
+        if (string.IsNullOrWhiteSpace(value) || filters.Length == 0)
+            return false;
+
+        var normalizedValue = value.Trim();
+
+        return filters.Any(filter =>
+            normalizedValue.Equals(filter, StringComparison.OrdinalIgnoreCase) ||
+            normalizedValue.Contains(filter, StringComparison.OrdinalIgnoreCase));
     }
 }

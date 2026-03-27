@@ -498,12 +498,13 @@
 
                 <!-- ── Formato esportazione + Ore settimanali ────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <!-- Formato -->
                             <VerticalStackLayout Grid.Column="0" Spacing="8">
                                 <Label Text="Formato del file generato: Excel o CSV."
                                        Style="{StaticResource MutedLabel}"
                                        LineBreakMode="WordWrap"
+                                        HeightRequest="36"
                                        Margin="0,0,0,4" />
                                 <Border BackgroundColor="{StaticResource SurfaceVariant}"
                                         StrokeThickness="0"
@@ -552,10 +553,11 @@
                                 </Border>
                             </VerticalStackLayout>
                             <!-- Ore settimanali -->
-                            <VerticalStackLayout Grid.Column="1" Spacing="8" WidthRequest="88">
+                            <VerticalStackLayout Grid.Column="1" Spacing="8">
                                 <Label Text="Monte ore lavorative settimanali (es. 40)."
                                        Style="{StaticResource MutedLabel}"
                                        LineBreakMode="WordWrap"
+                                        HeightRequest="36"
                                        Margin="0,0,0,4" />
                                 <Entry Text="{Binding WeeklyWorkingHours}"
                                        TextColor="{StaticResource OnSurface}"
@@ -567,62 +569,37 @@
                                        FontSize="15"
                                        HorizontalTextAlignment="Center" />
                             </VerticalStackLayout>
+
+                            <!-- Filtri -->
+                            <VerticalStackLayout Grid.Column="2" Spacing="8">
+                                <Label Text="Filtri attività da escludere."
+                                       Style="{StaticResource MutedLabel}"
+                                       LineBreakMode="WordWrap"
+                                        HeightRequest="36"
+                                       Margin="0,0,0,4" />
+                                <Grid>
+                                    <Button Text="Filtri"
+                                            Style="{StaticResource SecondaryBtn}"
+                                          HeightRequest="46"
+                                            FontSize="13"
+                                            Padding="16,8"
+                                            Command="{Binding OpenFiltersDialogCommand}" />
+
+                                    <Border IsVisible="{Binding HasActiveFilters}"
+                                            BackgroundColor="{StaticResource Primary}"
+                                            StrokeThickness="0"
+                                            WidthRequest="10"
+                                            HeightRequest="10"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Start"
+                                            Margin="0,4,6,0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="5" />
+                                        </Border.StrokeShape>
+                                    </Border>
+                                </Grid>
+                            </VerticalStackLayout>
                         </Grid>
-                </VerticalStackLayout>
-
-                <!-- ── Filtri di esclusione ──────────────────────────── -->
-                <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
-                        <Label Text="Eventi da escludere dal report. Inserisci valori separati da virgola per ogni filtro desiderato."
-                               Style="{StaticResource MutedLabel}"
-                               LineBreakMode="WordWrap"
-                               Margin="0,0,0,4" />
-
-                        <Label Text="Categorie (tag)"
-                               TextColor="{StaticResource OnSurface}"
-                               FontSize="13" FontAttributes="Bold" />
-                        <Entry Text="{Binding ExcludedCategories}"
-                               TextColor="{StaticResource OnSurface}"
-                               BackgroundColor="{StaticResource SurfaceVariant}"
-                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
-                               Placeholder="Personale, OOO"
-                               Keyboard="Default"
-                               FontSize="13" />
-
-                        <Label Text="Cliente"
-                               TextColor="{StaticResource OnSurface}"
-                               FontSize="13" FontAttributes="Bold"
-                               Margin="0,6,0,0" />
-                        <Entry Text="{Binding ExcludedClients}"
-                               TextColor="{StaticResource OnSurface}"
-                               BackgroundColor="{StaticResource SurfaceVariant}"
-                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
-                               Placeholder="ClienteX, ClienteY"
-                               Keyboard="Default"
-                               FontSize="13" />
-
-                        <Label Text="Progetto"
-                               TextColor="{StaticResource OnSurface}"
-                               FontSize="13" FontAttributes="Bold"
-                               Margin="0,6,0,0" />
-                        <Entry Text="{Binding ExcludedProjects}"
-                               TextColor="{StaticResource OnSurface}"
-                               BackgroundColor="{StaticResource SurfaceVariant}"
-                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
-                               Placeholder="ProgettoA, ProgettoB"
-                               Keyboard="Default"
-                               FontSize="13" />
-
-                        <Label Text="Topic"
-                               TextColor="{StaticResource OnSurface}"
-                               FontSize="13" FontAttributes="Bold"
-                               Margin="0,6,0,0" />
-                        <Entry Text="{Binding ExcludedTopics}"
-                               TextColor="{StaticResource OnSurface}"
-                               BackgroundColor="{StaticResource SurfaceVariant}"
-                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
-                               Placeholder="TopicX, TopicY"
-                               Keyboard="Default"
-                               FontSize="13" />
                 </VerticalStackLayout>
 
                 <!-- ── Chiudi ──────────────────────────────────────────── -->
@@ -686,6 +663,94 @@
                 </VerticalStackLayout>
             </Frame>
         </Grid>
+
+             <!-- ── Dialog filtri attività ─────────────────────────────────────── -->
+             <Grid Grid.RowSpan="2" IsVisible="{Binding IsFiltersDialogOpen}"
+                BackgroundColor="#CC000000">
+                 <Frame BackgroundColor="{StaticResource Surface}"
+                     BorderColor="{StaticResource SurfaceVariant}"
+                     CornerRadius="16" HasShadow="False"
+                     Padding="24" WidthRequest="360"
+                     HorizontalOptions="Center" VerticalOptions="Center">
+                  <VerticalStackLayout Spacing="12">
+
+                      <Label Text="Filtri"
+                          FontSize="18"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource OnBackground}"
+                          HorizontalOptions="Center" />
+
+                      <Label Text="Inserisci valori separati da virgola."
+                          Style="{StaticResource MutedLabel}"
+                          HorizontalTextAlignment="Center" />
+
+                      <Label Text="Categorie (tag)"
+                          TextColor="{StaticResource OnSurface}"
+                          FontSize="13"
+                          FontAttributes="Bold" />
+                      <Entry Text="{Binding DialogExcludedCategories}"
+                          TextColor="{StaticResource OnSurface}"
+                          BackgroundColor="{StaticResource SurfaceVariant}"
+                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          Placeholder="Personale, OOO"
+                          Keyboard="Default"
+                          FontSize="13" />
+
+                      <Label Text="Cliente"
+                          TextColor="{StaticResource OnSurface}"
+                          FontSize="13"
+                          FontAttributes="Bold"
+                          Margin="0,4,0,0" />
+                      <Entry Text="{Binding DialogExcludedClients}"
+                          TextColor="{StaticResource OnSurface}"
+                          BackgroundColor="{StaticResource SurfaceVariant}"
+                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          Placeholder="ClienteX, ClienteY"
+                          Keyboard="Default"
+                          FontSize="13" />
+
+                      <Label Text="Progetto"
+                          TextColor="{StaticResource OnSurface}"
+                          FontSize="13"
+                          FontAttributes="Bold"
+                          Margin="0,4,0,0" />
+                      <Entry Text="{Binding DialogExcludedProjects}"
+                          TextColor="{StaticResource OnSurface}"
+                          BackgroundColor="{StaticResource SurfaceVariant}"
+                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          Placeholder="ProgettoA, ProgettoB"
+                          Keyboard="Default"
+                          FontSize="13" />
+
+                      <Label Text="Topic"
+                          TextColor="{StaticResource OnSurface}"
+                          FontSize="13"
+                          FontAttributes="Bold"
+                          Margin="0,4,0,0" />
+                      <Entry Text="{Binding DialogExcludedTopics}"
+                          TextColor="{StaticResource OnSurface}"
+                          BackgroundColor="{StaticResource SurfaceVariant}"
+                          PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                          Placeholder="TopicX, TopicY"
+                          Keyboard="Default"
+                          FontSize="13" />
+
+                      <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,0">
+                       <Button Grid.Column="0"
+                            Text="Annulla"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding CancelFiltersDialogCommand}" />
+                       <Button Grid.Column="1"
+                            Text="Salva"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding ApplyFiltersDialogCommand}" />
+                      </Grid>
+
+                  </VerticalStackLayout>
+                 </Frame>
+             </Grid>
 
     </Grid>
 </ContentPage>
