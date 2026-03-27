@@ -720,6 +720,20 @@
                           Style="{StaticResource MutedLabel}"
                           HorizontalTextAlignment="Center" />
 
+                      <!-- Escludi tentative -->
+                      <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,4">
+                          <Label Grid.Column="0"
+                              Text="Escludi eventi &quot;tentative&quot;"
+                              TextColor="{StaticResource OnSurface}"
+                              FontSize="13"
+                              FontAttributes="Bold"
+                              VerticalOptions="Center" />
+                          <Switch Grid.Column="1"
+                              IsToggled="{Binding DialogExcludeTentative}"
+                              OnColor="{StaticResource Primary}"
+                              VerticalOptions="Center" />
+                      </Grid>
+
                       <Label Text="Categorie (tag)"
                           TextColor="{StaticResource OnSurface}"
                           FontSize="13"

@@ -25,6 +25,9 @@ public class CalendarEvent
     /// <summary>Attività estratta dal subject strutturato.</summary>
     public string? Topic   { get; set; }
 
+    /// <summary>True se l'evento è in stato tentative (non ancora accettato).</summary>
+    public bool IsTentative { get; set; }
+
     /// <summary>
     /// Parsa il Subject strutturato nei campi Client, Project, Topic.
     /// Formati supportati:

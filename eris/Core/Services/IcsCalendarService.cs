@@ -31,9 +31,7 @@ public sealed class IcsCalendarService : ICalendarSource
             if (evt.Summary != null && evt.Summary.StartsWith("Declined", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            // Escludi eventi tentative (non accettati)
-            if (IsTentative(evt))
-                continue;
+            var tentative = IsTentative(evt);
 
             // Escludi eventi full-day
             if (IsAllDay(evt))
@@ -60,6 +58,7 @@ public sealed class IcsCalendarService : ICalendarSource
                     DurationHours = Math.Max(0, duration),
                     StartTime     = evtStart,
                     EndTime       = evtEnd,
+                    IsTentative   = tentative,
                 };
                 CalendarEvent.ParseStructuredSubject(calEvent);
                 events.Add(calEvent);

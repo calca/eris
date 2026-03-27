@@ -50,16 +50,28 @@ public sealed class CalendarService : ICalendarSource
         }
 
         return allEvents
-            .Where(IsAcceptedOrOrganizer)
-            .Select(MapToCalendarEvent)
+            .Where(IsNotDeclined)
+            .Select(e =>
+            {
+                var evt = MapToCalendarEvent(e);
+                evt.IsTentative = IsTentative(e);
+                return evt;
+            })
             .ToList();
     }
 
-    private static bool IsAcceptedOrOrganizer(Event e)
+    private static bool IsNotDeclined(Event e)
     {
         if (e.IsAllDay == true) return false;
         var status = e.ResponseStatus?.Response;
-        return status == ResponseType.Accepted || status == ResponseType.Organizer;
+        return status == ResponseType.Accepted
+            || status == ResponseType.Organizer
+            || status == ResponseType.TentativelyAccepted;
+    }
+
+    private static bool IsTentative(Event e)
+    {
+        return e.ResponseStatus?.Response == ResponseType.TentativelyAccepted;
     }
 
     private static CalendarEvent MapToCalendarEvent(Event e)

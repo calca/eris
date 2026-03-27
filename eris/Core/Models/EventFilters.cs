@@ -20,8 +20,12 @@ public class EventFilters
     /// <summary>Topic da escludere (confrontato con CalendarEvent.Topic).</summary>
     public string[] Topics     { get; set; } = [];
 
-    /// <summary>True se tutti e quattro i filtri sono vuoti (nessuna esclusione configurata).</summary>
+    /// <summary>Se true, gli eventi tentative (non accettati) vengono esclusi dal report.</summary>
+    public bool ExcludeTentative { get; set; } = true;
+
+    /// <summary>True se tutti i filtri sono ai valori di default (nessuna esclusione configurata, tentative esclusi).</summary>
     public bool IsEmpty =>
+        ExcludeTentative &&
         Categories.Length == 0 &&
         Clients.Length    == 0 &&
         Projects.Length   == 0 &&

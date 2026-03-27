@@ -117,7 +117,13 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private string _excludedTopics = string.Empty;
 
-    public bool HasActiveFilters => HasFilterValues(ExcludedCategories)
+    /// <summary>Se true, gli eventi tentative vengono esclusi dal report.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
+    private bool _excludeTentative = true;
+
+    public bool HasActiveFilters => ExcludeTentative
+        || HasFilterValues(ExcludedCategories)
         || HasFilterValues(ExcludedClients)
         || HasFilterValues(ExcludedProjects)
         || HasFilterValues(ExcludedTopics);
@@ -151,6 +157,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _dialogExcludedTopics = string.Empty;
+
+    [ObservableProperty]
+    private bool _dialogExcludeTentative = true;
 
     [ObservableProperty]
     private DateTime _dialogStartDate = DateTime.Today;
@@ -268,6 +277,7 @@ public partial class MainViewModel : ObservableObject
         _excludedClients    = Preferences.Default.Get("ExcludedClients",    string.Join(", ", appConfig.Filters.Clients));
         _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
         _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
+        _excludeTentative   = Preferences.Default.Get("ExcludeTentative", true);
         UpdateWeekDisplay();
     }
 
@@ -281,6 +291,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnExcludedClientsChanged(string value)    => Preferences.Default.Set("ExcludedClients",    value);
     partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
     partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
+    partial void OnExcludeTentativeChanged(bool value)       => Preferences.Default.Set("ExcludeTentative",   value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -395,6 +406,7 @@ public partial class MainViewModel : ObservableObject
         DialogExcludedClients = ExcludedClients;
         DialogExcludedProjects = ExcludedProjects;
         DialogExcludedTopics = ExcludedTopics;
+        DialogExcludeTentative = ExcludeTentative;
         IsFiltersDialogOpen = true;
     }
 
@@ -408,6 +420,7 @@ public partial class MainViewModel : ObservableObject
         ExcludedClients = DialogExcludedClients;
         ExcludedProjects = DialogExcludedProjects;
         ExcludedTopics = DialogExcludedTopics;
+        ExcludeTentative = DialogExcludeTentative;
         IsFiltersDialogOpen = false;
     }
 
@@ -500,6 +513,7 @@ public partial class MainViewModel : ObservableObject
 
             var filters = new EventFilters
             {
+                ExcludeTentative = ExcludeTentative,
                 Categories = ParseList(ExcludedCategories),
                 Clients    = ParseList(ExcludedClients),
                 Projects   = ParseList(ExcludedProjects),
