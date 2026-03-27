@@ -64,13 +64,22 @@ public static class ConfigLoader
         }
 
         // ── Filters ───────────────────────────────────────────────────────────
-        var excludedCategories = config.GetSection("Filters:ExcludedCategories")
-                                       .GetChildren()
-                                       .Select(c => c.Value)
-                                       .OfType<string>()
-                                       .ToArray();
-        if (excludedCategories.Length > 0)
-            appConfig.ExcludedCategories = excludedCategories;
+        static string[] ReadList(IConfiguration cfg, string section) =>
+            cfg.GetSection(section)
+               .GetChildren()
+               .Select(c => c.Value)
+               .OfType<string>()
+               .ToArray();
+
+        var cats     = ReadList(config, "Filters:ExcludedCategories");
+        var clients  = ReadList(config, "Filters:ExcludedClients");
+        var projects = ReadList(config, "Filters:ExcludedProjects");
+        var topics   = ReadList(config, "Filters:ExcludedTopics");
+
+        if (cats.Length     > 0) appConfig.Filters.Categories = cats;
+        if (clients.Length  > 0) appConfig.Filters.Clients    = clients;
+        if (projects.Length > 0) appConfig.Filters.Projects   = projects;
+        if (topics.Length   > 0) appConfig.Filters.Topics     = topics;
 
         return appConfig;
     }

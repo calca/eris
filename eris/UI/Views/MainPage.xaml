@@ -570,17 +570,57 @@
                         </Grid>
                 </VerticalStackLayout>
 
-                <!-- ── Categorie escluse ──────────────────────────────── -->
+                <!-- ── Filtri di esclusione ──────────────────────────── -->
                 <VerticalStackLayout Spacing="10" Margin="0,0,0,16" Padding="0,12">
-                        <Label Text="Categorie (tag) degli eventi da escludere dal report, separate da virgola (es. Personale, OOO)."
+                        <Label Text="Eventi da escludere dal report. Inserisci valori separati da virgola per ogni filtro desiderato."
                                Style="{StaticResource MutedLabel}"
                                LineBreakMode="WordWrap"
                                Margin="0,0,0,4" />
+
+                        <Label Text="Categorie (tag)"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="13" FontAttributes="Bold" />
                         <Entry Text="{Binding ExcludedCategories}"
                                TextColor="{StaticResource OnSurface}"
                                BackgroundColor="{StaticResource SurfaceVariant}"
                                PlaceholderColor="{StaticResource OnSurfaceMuted}"
                                Placeholder="Personale, OOO"
+                               Keyboard="Default"
+                               FontSize="13" />
+
+                        <Label Text="Cliente"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="13" FontAttributes="Bold"
+                               Margin="0,6,0,0" />
+                        <Entry Text="{Binding ExcludedClients}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="ClienteX, ClienteY"
+                               Keyboard="Default"
+                               FontSize="13" />
+
+                        <Label Text="Progetto"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="13" FontAttributes="Bold"
+                               Margin="0,6,0,0" />
+                        <Entry Text="{Binding ExcludedProjects}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="ProgettoA, ProgettoB"
+                               Keyboard="Default"
+                               FontSize="13" />
+
+                        <Label Text="Topic"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="13" FontAttributes="Bold"
+                               Margin="0,6,0,0" />
+                        <Entry Text="{Binding ExcludedTopics}"
+                               TextColor="{StaticResource OnSurface}"
+                               BackgroundColor="{StaticResource SurfaceVariant}"
+                               PlaceholderColor="{StaticResource OnSurfaceMuted}"
+                               Placeholder="TopicX, TopicY"
                                Keyboard="Default"
                                FontSize="13" />
                 </VerticalStackLayout>

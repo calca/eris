@@ -24,15 +24,15 @@ public sealed class ReportOrchestrator
     /// <param name="period">Settimana corrente o precedente.</param>
     /// <param name="outputBaseDir">Cartella padre; la sottocartella viene creata automaticamente.</param>
     /// <param name="format">Formato di esportazione (CSV o XLSX).</param>
-    /// <param name="excludedCategories">Categorie di eventi da escludere (confronto case-insensitive).</param>
+    /// <param name="filters">Filtri di esclusione per categoria, cliente, progetto e topic.</param>
     public async Task<ReportResult> GenerateAsync(
         WeekPeriod       period,
         string           outputBaseDir,
-        ExportFormat     format = ExportFormat.Xlsx,
-        IReadOnlyList<string>? excludedCategories = null)
+        ExportFormat     format  = ExportFormat.Xlsx,
+        EventFilters?    filters = null)
     {
         var week   = WeekRange.FromPeriod(period);
-        var events = ApplyExclusions(await _source.GetEventsAsync(week), excludedCategories);
+        var events = ApplyExclusions(await _source.GetEventsAsync(week), filters);
 
         IExportService exporter = format switch
         {
@@ -54,12 +54,12 @@ public sealed class ReportOrchestrator
     }
 
     public async Task<ReportResult> GenerateAsync(
-        WeekRange    range,
-        string       outputBaseDir,
-        ExportFormat format = ExportFormat.Xlsx,
-        IReadOnlyList<string>? excludedCategories = null)
+        WeekRange     range,
+        string        outputBaseDir,
+        ExportFormat  format  = ExportFormat.Xlsx,
+        EventFilters? filters = null)
     {
-        var events = ApplyExclusions(await _source.GetEventsAsync(range), excludedCategories);
+        var events = ApplyExclusions(await _source.GetEventsAsync(range), filters);
 
         IExportService exporter = format switch
         {
@@ -82,12 +82,21 @@ public sealed class ReportOrchestrator
 
     private static List<CalendarEvent> ApplyExclusions(
         List<CalendarEvent> events,
-        IReadOnlyList<string>? excludedCategories)
+        EventFilters?       filters)
     {
-        if (excludedCategories is not { Count: > 0 })
+        if (filters is null || filters.IsEmpty)
             return events;
 
-        var excluded = new HashSet<string>(excludedCategories, StringComparer.OrdinalIgnoreCase);
-        return events.Where(e => e.Category is null || !excluded.Contains(e.Category)).ToList();
+        var cats     = new HashSet<string>(filters.Categories, StringComparer.OrdinalIgnoreCase);
+        var clients  = new HashSet<string>(filters.Clients,    StringComparer.OrdinalIgnoreCase);
+        var projects = new HashSet<string>(filters.Projects,   StringComparer.OrdinalIgnoreCase);
+        var topics   = new HashSet<string>(filters.Topics,     StringComparer.OrdinalIgnoreCase);
+
+        return events.Where(e =>
+            (cats.Count     == 0 || e.Category is null || !cats.Contains(e.Category))  &&
+            (clients.Count  == 0 || e.Client   is null || !clients.Contains(e.Client)) &&
+            (projects.Count == 0 || e.Project  is null || !projects.Contains(e.Project)) &&
+            (topics.Count   == 0 || e.Topic    is null || !topics.Contains(e.Topic))
+        ).ToList();
     }
 }

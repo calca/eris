@@ -101,6 +101,18 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _excludedCategories = string.Empty;
 
+    /// <summary>Clienti da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    private string _excludedClients = string.Empty;
+
+    /// <summary>Progetti da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    private string _excludedProjects = string.Empty;
+
+    /// <summary>Topic da escludere dal report, separati da virgola.</summary>
+    [ObservableProperty]
+    private string _excludedTopics = string.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CustomPeriodDisplay))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
@@ -228,7 +240,10 @@ public partial class MainViewModel : ObservableObject
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
         _isWorkWeek = Preferences.Default.Get("IsWorkWeek", false);
-        _excludedCategories = Preferences.Default.Get("ExcludedCategories", string.Join(", ", appConfig.ExcludedCategories));
+        _excludedCategories = Preferences.Default.Get("ExcludedCategories", string.Join(", ", appConfig.Filters.Categories));
+        _excludedClients    = Preferences.Default.Get("ExcludedClients",    string.Join(", ", appConfig.Filters.Clients));
+        _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
+        _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
         UpdateWeekDisplay();
     }
 
@@ -238,10 +253,10 @@ public partial class MainViewModel : ObservableObject
             Preferences.Default.Set("WeeklyWorkingHours", value);
     }
 
-    partial void OnExcludedCategoriesChanged(string value)
-    {
-        Preferences.Default.Set("ExcludedCategories", value);
-    }
+    partial void OnExcludedCategoriesChanged(string value) => Preferences.Default.Set("ExcludedCategories", value);
+    partial void OnExcludedClientsChanged(string value)    => Preferences.Default.Set("ExcludedClients",    value);
+    partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
+    partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -421,9 +436,18 @@ public partial class MainViewModel : ObservableObject
                 _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
             };
             var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
-            var excludedList = ExcludedCategories
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, excludedList);
+
+            static string[] ParseList(string raw) =>
+                raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var filters = new EventFilters
+            {
+                Categories = ParseList(ExcludedCategories),
+                Clients    = ParseList(ExcludedClients),
+                Projects   = ParseList(ExcludedProjects),
+                Topics     = ParseList(ExcludedTopics),
+            };
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;
