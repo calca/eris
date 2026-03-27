@@ -77,7 +77,7 @@ internal sealed class RingDrawable : IDrawable
 
         var path = new PathF();
         path.AddArc(cx - radius, cy - radius, cx + radius, cy + radius,
-                    startAngle, endAngle, clockwise: true);
+                    startAngle, endAngle, clockwise: false);
         canvas.DrawPath(path);
     }
 }
