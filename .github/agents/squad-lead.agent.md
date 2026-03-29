@@ -1,4 +1,5 @@
 ---
+name: 01. squad-lead
 description: 'Orchestratore principale: analizza la specifica, crea il piano di lavoro e delega ai sub-agent specializzati'
 
 ---
