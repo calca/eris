@@ -1,17 +1,6 @@
 ---
 description: 'Orchestratore principale: analizza la specifica, crea il piano di lavoro e delega ai sub-agent specializzati'
-tools:
-  - read_file
-  - grep_search
-  - semantic_search
-  - file_search
-  - list_dir
-  - manage_todo_list
-  - runSubagent
-  - runTests
-  - get_errors
-  - run_in_terminal
-  - vscode_askQuestions
+
 ---
 
 # Orchestrator Agent — eris

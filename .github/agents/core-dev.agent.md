@@ -1,16 +1,6 @@
 ---
 description: 'Agente specializzato nello sviluppo del Core: modelli, servizi, logica di business'
-tools:
-  - read_file
-  - replace_string_in_file
-  - multi_replace_string_in_file
-  - create_file
-  - grep_search
-  - semantic_search
-  - file_search
-  - run_in_terminal
-  - runTests
-  - get_errors
+tools:vscode, execute, read, agent, browser, edit, search, web, todo
 ---
 
 # Core Developer Agent
