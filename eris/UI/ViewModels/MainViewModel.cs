@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Storage;
@@ -7,6 +8,12 @@ using eris.Core.Services;
 using eris.UI.Resources.Strings;
 
 namespace eris.UI.ViewModels;
+
+/// <summary>Wrapper to allow proper x:DataType in XAML DataTemplate (avoids compiled binding inheritance issues).</summary>
+public sealed class TemplateItem(string value)
+{
+    public string Value { get; } = value;
+}
 
 public partial class MainViewModel : ObservableObject
 {
@@ -137,9 +144,9 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
     private bool _excludeTentative = true;
 
-    /// <summary>Template per il parsing del subject strutturato.</summary>
+    /// <summary>Template per il parsing del subject strutturato (multipli, provati in ordine).</summary>
     [ObservableProperty]
-    private string _subjectTemplate = CalendarEvent.DefaultTemplate;
+    private ObservableCollection<string> _subjectTemplates = new();
 
     public bool HasActiveFilters => ExcludeTentative
         || HasFilterValues(ExcludedCategories)
@@ -169,7 +176,10 @@ public partial class MainViewModel : ObservableObject
     private bool _isTemplateDialogOpen;
 
     [ObservableProperty]
-    private string _dialogSubjectTemplate = CalendarEvent.DefaultTemplate;
+    private ObservableCollection<TemplateItem> _dialogSubjectTemplates = new();
+
+    [ObservableProperty]
+    private string _newDialogTemplate = string.Empty;
 
     [ObservableProperty]
     private string _dialogExcludedCategories = string.Empty;
@@ -303,7 +313,7 @@ public partial class MainViewModel : ObservableObject
         _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
         _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
         _excludeTentative   = Preferences.Default.Get("ExcludeTentative", true);
-        _subjectTemplate    = Preferences.Default.Get("SubjectTemplate", CalendarEvent.DefaultTemplate);
+        _subjectTemplates   = LoadSubjectTemplates();
         UpdateWeekDisplay();
     }
 
@@ -318,7 +328,6 @@ public partial class MainViewModel : ObservableObject
     partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
     partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
     partial void OnExcludeTentativeChanged(bool value)       => Preferences.Default.Set("ExcludeTentative",   value);
-    partial void OnSubjectTemplateChanged(string value)      => Preferences.Default.Set("SubjectTemplate",    value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -430,7 +439,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenTemplateDialog()
     {
-        DialogSubjectTemplate = SubjectTemplate;
+        DialogSubjectTemplates = new ObservableCollection<TemplateItem>(SubjectTemplates.Select(t => new TemplateItem(t)));
+        NewDialogTemplate = string.Empty;
         IsTemplateDialogOpen = true;
     }
 
@@ -440,14 +450,29 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ApplyTemplateDialog()
     {
-        SubjectTemplate = DialogSubjectTemplate;
+        SubjectTemplates = new ObservableCollection<string>(DialogSubjectTemplates.Select(t => t.Value));
+        SaveSubjectTemplates();
         IsTemplateDialogOpen = false;
     }
 
     [RelayCommand]
     private void ResetTemplateDialog()
     {
-        DialogSubjectTemplate = CalendarEvent.DefaultTemplate;
+        DialogSubjectTemplates = new ObservableCollection<TemplateItem>([new TemplateItem(CalendarEvent.DefaultTemplate)]);
+    }
+
+    [RelayCommand]
+    private void AddDialogTemplate()
+    {
+        if (string.IsNullOrWhiteSpace(NewDialogTemplate)) return;
+        DialogSubjectTemplates.Add(new TemplateItem(NewDialogTemplate.Trim()));
+        NewDialogTemplate = string.Empty;
+    }
+
+    [RelayCommand]
+    private void RemoveDialogTemplate(TemplateItem item)
+    {
+        DialogSubjectTemplates.Remove(item);
     }
 
     [RelayCommand]
@@ -570,7 +595,7 @@ public partial class MainViewModel : ObservableObject
                 Projects   = ParseList(ExcludedProjects),
                 Topics     = ParseList(ExcludedTopics),
             };
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplate, WeeklyWorkingHours);
+            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplates.ToList(), WeeklyWorkingHours);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;
@@ -683,5 +708,25 @@ public partial class MainViewModel : ObservableObject
         return raw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Length > 0;
+    }
+
+    private static ObservableCollection<string> LoadSubjectTemplates()
+    {
+        var raw = Preferences.Default.Get("SubjectTemplates", string.Empty);
+        if (!string.IsNullOrEmpty(raw))
+            return new ObservableCollection<string>(
+                raw.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+        // Migration: read legacy single-template preference
+        var legacy = Preferences.Default.Get("SubjectTemplate", string.Empty);
+        if (!string.IsNullOrEmpty(legacy))
+            return new ObservableCollection<string>([legacy]);
+
+        return new ObservableCollection<string>([CalendarEvent.DefaultTemplate]);
+    }
+
+    private void SaveSubjectTemplates()
+    {
+        Preferences.Default.Set("SubjectTemplates", string.Join("\n", SubjectTemplates));
     }
 }

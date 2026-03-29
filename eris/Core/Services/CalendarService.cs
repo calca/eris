@@ -95,7 +95,7 @@ public sealed class CalendarService : ICalendarSource
             StartTime     = startTime,
             EndTime       = endTime,
         };
-        CalendarEvent.ParseStructuredSubject(evt, null);
+        CalendarEvent.ParseStructuredSubject(evt);
         return evt;
     }
 

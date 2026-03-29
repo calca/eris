@@ -866,18 +866,53 @@
                           TextColor="{StaticResource Primary}"
                           HorizontalTextAlignment="Center" />
 
-                      <Label Text="{x:Static strings:AppStrings.TemplateLabel}"
+                      <!-- Lista dei template configurati -->
+                      <CollectionView ItemsSource="{Binding DialogSubjectTemplates}"
+                                      MaximumHeightRequest="160">
+                          <CollectionView.ItemTemplate>
+                              <DataTemplate x:DataType="vm:TemplateItem">
+                                  <Grid ColumnDefinitions="*,Auto" Padding="4,2" ColumnSpacing="8">
+                                      <Label Grid.Column="0"
+                                             Text="{Binding Value}"
+                                             VerticalOptions="Center"
+                                             FontSize="13"
+                                             TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+                                      <Button Grid.Column="1"
+                                              Text="✕"
+                                              WidthRequest="32" HeightRequest="32"
+                                              Padding="0"
+                                              FontSize="12"
+                                              BackgroundColor="Transparent"
+                                              TextColor="{StaticResource Error}"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=RemoveDialogTemplateCommand}"
+                                              CommandParameter="{Binding .}" />
+                                  </Grid>
+                              </DataTemplate>
+                          </CollectionView.ItemTemplate>
+                      </CollectionView>
+
+                      <!-- Aggiungi nuovo template -->
+                      <Label Text="{x:Static strings:AppStrings.AddTemplateLabel}"
                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
                           FontSize="13"
-                          FontAttributes="Bold"
-                          Margin="0,4,0,0" />
-                      <Entry Text="{Binding DialogSubjectTemplate}"
-                          TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
-                          BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
-                          PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
-                          Placeholder="{}&#x7B;Cliente&#x7D; | &#x7B;Progetto&#x7D; | &#x7B;Topic&#x7D;"
-                          Keyboard="Default"
-                          FontSize="13" />
+                          FontAttributes="Bold" />
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                          <Entry Grid.Column="0"
+                              Text="{Binding NewDialogTemplate}"
+                              TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                              BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                              PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                              Placeholder="{}&#x7B;Progetto&#x7D; - &#x7B;Topic&#x7D;"
+                              Keyboard="Default"
+                              FontSize="13" />
+                          <Button Grid.Column="1"
+                              Text="+"
+                              WidthRequest="44" HeightRequest="44"
+                              FontSize="20"
+                              FontAttributes="Bold"
+                              Style="{StaticResource SecondaryBtn}"
+                              Command="{Binding AddDialogTemplateCommand}" />
+                      </Grid>
 
                       <Button Text="{x:Static strings:AppStrings.RestoreDefault}"
                           Style="{StaticResource SecondaryBtn}"

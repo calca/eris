@@ -179,13 +179,16 @@
 
   <!-- Subject Format Dialog -->
   <data name="SubjectFormatDescription" xml:space="preserve">
-    <value>Define how your calendar event titles are structured. Use the placeholders {Client}, {Project} and {Topic} separated by the character you use in the titles.</value>
+    <value>Define one or more templates for your calendar event titles. Use the placeholders {Cliente}, {Progetto} and {Topic} separated by the character you use in the titles. Templates are tried in order; the first match wins.</value>
   </data>
   <data name="SubjectFormatExample" xml:space="preserve">
     <value>Example: if your events are called "Acme | Website | Review", the template is:</value>
   </data>
   <data name="TemplateLabel" xml:space="preserve">
     <value>Template</value>
+  </data>
+  <data name="AddTemplateLabel" xml:space="preserve">
+    <value>Add template</value>
   </data>
   <data name="RestoreDefault" xml:space="preserve">
     <value>Restore Default</value>

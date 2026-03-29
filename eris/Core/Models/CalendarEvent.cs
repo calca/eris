@@ -34,10 +34,17 @@ public class CalendarEvent
     /// usando il template di default "{Cliente} | {Progetto} | {Topic}".
     /// </summary>
     public static void ParseStructuredSubject(CalendarEvent evt)
-        => ParseStructuredSubject(evt, null);
+        => ParseStructuredSubject(evt, (IReadOnlyList<string>?)null);
 
     /// <summary>
-    /// Parsa il Subject secondo un template configurabile.
+    /// Parsa il Subject secondo un singolo template configurabile.
+    /// </summary>
+    public static void ParseStructuredSubject(CalendarEvent evt, string? template)
+        => ParseStructuredSubject(evt, template is null ? null : [template]);
+
+    /// <summary>
+    /// Parsa il Subject provando più template in ordine.
+    /// Il primo template che produce un match (≥ 2 parti) viene utilizzato.
     /// Il template usa placeholder tra graffe: {Cliente}, {Progetto}, {Topic}.
     /// Il separatore è dedotto automaticamente dal testo tra i placeholder.
     /// Esempi di template validi:
@@ -45,10 +52,22 @@ public class CalendarEvent
     ///   "{Cliente} - {Topic}"
     ///   "{Progetto} / {Cliente} / {Topic}"
     /// </summary>
-    public static void ParseStructuredSubject(CalendarEvent evt, string? template)
+    public static void ParseStructuredSubject(CalendarEvent evt, IReadOnlyList<string>? templates)
     {
         if (string.IsNullOrWhiteSpace(evt.Subject)) return;
 
+        templates ??= [DefaultTemplate];
+
+        foreach (var template in templates)
+        {
+            if (!TryApplyTemplate(evt, template))
+                continue;
+            return; // first match wins
+        }
+    }
+
+    private static bool TryApplyTemplate(CalendarEvent evt, string template)
+    {
         var (separator, fieldNames) = ParseTemplate(template);
 
         var parts = evt.Subject
@@ -56,7 +75,7 @@ public class CalendarEvent
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .ToArray();
 
-        if (parts.Length < 2) return;
+        if (parts.Length < 2) return false;
 
         var assignment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -77,6 +96,8 @@ public class CalendarEvent
         if (assignment.TryGetValue("Cliente", out var c)) evt.Client = c;
         if (assignment.TryGetValue("Progetto", out var p)) evt.Project = p;
         if (assignment.TryGetValue("Topic", out var t)) evt.Topic = t;
+
+        return true;
     }
 
     public const string DefaultTemplate = "{Cliente} | {Progetto} | {Topic}";

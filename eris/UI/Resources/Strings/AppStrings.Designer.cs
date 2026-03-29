@@ -72,6 +72,7 @@ public static class AppStrings
     public static string SubjectFormatDescription => ResourceManager.GetString("SubjectFormatDescription", Culture)!;
     public static string SubjectFormatExample => ResourceManager.GetString("SubjectFormatExample", Culture)!;
     public static string TemplateLabel => ResourceManager.GetString("TemplateLabel", Culture)!;
+    public static string AddTemplateLabel => ResourceManager.GetString("AddTemplateLabel", Culture)!;
     public static string RestoreDefault => ResourceManager.GetString("RestoreDefault", Culture)!;
 
     // ── ViewModel strings ─────────────────────────────────────────────────

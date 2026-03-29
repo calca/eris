@@ -48,8 +48,8 @@ public sealed class WeekRange
         var thisMonday   = today.AddDays(-daysToMonday);
         var monday       = period == WeekPeriod.LastWeek ? thisMonday.AddDays(-7) : thisMonday;
 
-        var offset = DateTimeOffset.Now.Offset;
-        var start  = new DateTimeOffset(monday, offset);
+        // Use the offset valid on the target date (DST-safe), not the current one.
+        var start  = new DateTimeOffset(monday.Date, TimeZoneInfo.Local.GetUtcOffset(monday.Date));
         // Work week: Mon–Fri (5 days); solar week: Mon–Sun (7 days)
         var daysInRange = workWeek ? 5 : 7;
         return new WeekRange(start, start.AddDays(daysInRange));
@@ -57,9 +57,10 @@ public sealed class WeekRange
 
     public static WeekRange FromCustom(DateTime start, DateTime end)
     {
-        var offset   = DateTimeOffset.Now.Offset;
-        var startDto = new DateTimeOffset(start.Date, offset);
-        var endDto   = new DateTimeOffset(end.Date.AddDays(1), offset);
+        var startDate = start.Date;
+        var endDateExclusive = end.Date.AddDays(1);
+        var startDto = new DateTimeOffset(startDate, TimeZoneInfo.Local.GetUtcOffset(startDate));
+        var endDto   = new DateTimeOffset(endDateExclusive, TimeZoneInfo.Local.GetUtcOffset(endDateExclusive));
         return new WeekRange(startDto, endDto,
             folderName:  $"custom-{start:yyyyMMdd}-{end:yyyyMMdd}-report",
             displayName: $"{start:dd/MM/yyyy} \u2013 {end:dd/MM/yyyy}");
