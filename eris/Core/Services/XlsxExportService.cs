@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using eris.Core.ExportServices;
 using eris.Core.Models;
 
 namespace eris.Core.Services;
@@ -9,6 +10,8 @@ namespace eris.Core.Services;
 /// </summary>
 public sealed class XlsxExportService : IExportService
 {
+    private static readonly ExportMetricsCalculator MetricsCalculator = new();
+
     public (string DetailPath, string SummaryPath) Export(
         List<CalendarEvent> events,
         string outputFolder,
@@ -19,10 +22,11 @@ public sealed class XlsxExportService : IExportService
 
         var ts       = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var filePath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}.xlsx");
+        var metrics = MetricsCalculator.Compute(events, weeklyHours);
 
         using var wb = new XLWorkbook();
-        WriteSummaryByTag(wb, events, weeklyHours);
-        WriteSummary(wb, events, weeklyHours);
+        WriteSummaryByTag(wb, metrics);
+        WriteSummary(wb, metrics);
         WriteDetail(wb, events);
         wb.SaveAs(filePath);
 
@@ -73,19 +77,14 @@ public sealed class XlsxExportService : IExportService
         ws.Columns().AdjustToContents();
     }
 
-    private static void WriteSummary(XLWorkbook wb, List<CalendarEvent> events, double weeklyHours)
+    private static void WriteSummary(XLWorkbook wb, ExportMetricsSnapshot metrics)
     {
         var ws = wb.Worksheets.Add("Summary");
-
-        double total = events.Sum(e => e.DurationHours);
-        int totalMeetings = events.Count;
-        double percentBase = weeklyHours > 0 ? weeklyHours : total;
-        double internalHoursTotal = Math.Max(0, weeklyHours - total);
 
         // Monte ore
         ws.Cell(1, 1).Value = "Monte ore settimanale";
         ws.Cell(1, 1).Style.Font.Bold = true;
-        ws.Cell(1, 2).Value = weeklyHours;
+        ws.Cell(1, 2).Value = metrics.WeeklyHours;
         ws.Cell(1, 2).Style.NumberFormat.Format = "0";
         ws.Cell(1, 2).Style.Font.Bold = true;
 
@@ -107,39 +106,8 @@ public sealed class XlsxExportService : IExportService
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
 
-        var rows = events
-            .GroupBy(e => new
-            {
-                Cat     = e.Category ?? string.Empty,
-                Client  = e.Client   ?? string.Empty,
-                Project = e.Project  ?? string.Empty,
-                Topic   = e.Category != null ? string.Empty
-                        : e.Project  != null ? string.Empty
-                        : e.Topic    ?? e.Subject,
-                Tag     = e.Tag      ?? string.Empty,
-            })
-            .Select(g =>
-            {
-                var hours = Math.Round(g.Sum(e => e.DurationHours), 2);
-                return new CategorySummary
-                {
-                    Category   = g.Key.Cat,
-                    Client     = g.Key.Client,
-                    Project    = g.Key.Project,
-                    Topic      = g.Key.Topic,
-                    Tag        = g.Key.Tag,
-                    MeetingCount = g.Count(),
-                    TotalHours = hours,
-                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
-                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
-                    Percentage = FormatPercent(hours, percentBase),
-                };
-            })
-            .OrderByDescending(r => r.TotalHours)
-            .ToList();
-
         int row = 4;
-        foreach (var r in rows)
+        foreach (var r in metrics.SummaryRows)
         {
             ws.Cell(row, 1).Value = r.Category;
             ws.Cell(row, 2).Value = r.Client;
@@ -149,8 +117,8 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 6).Value = r.MeetingCount;
             ws.Cell(row, 7).Value = r.TotalHours;
             ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 8).Value = r.Percentage;
-            ws.Cell(row, 9).Value = FormatPercent(r.TotalHours, total);
+            ws.Cell(row, 8).Value = r.ShareOfWeeklyHours;
+            ws.Cell(row, 9).Value = r.ShareOfMeetingHours;
             ws.Cell(row, 10).Value = r.InternalHours;
             ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
             ws.Cell(row, 11).Value = r.TotalSpentHours;
@@ -161,37 +129,32 @@ public sealed class XlsxExportService : IExportService
         // Riga TOTALE
         ws.Cell(row, 5).Value = "TOTALE";
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = totalMeetings;
+        ws.Cell(row, 6).Value = metrics.Totals.MeetingCount;
         ws.Cell(row, 6).Style.Font.Bold = true;
-        ws.Cell(row, 7).Value = Math.Round(total, 2);
+        ws.Cell(row, 7).Value = metrics.Totals.MeetingHours;
         ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 7).Style.Font.Bold = true;
-        ws.Cell(row, 8).Value = FormatPercent(total, percentBase);
+        ws.Cell(row, 8).Value = metrics.Totals.ShareOfWeeklyHours;
         ws.Cell(row, 8).Style.Font.Bold = true;
-        ws.Cell(row, 9).Value = FormatPercent(total, total);
+        ws.Cell(row, 9).Value = metrics.Totals.ShareOfMeetingHours;
         ws.Cell(row, 9).Style.Font.Bold = true;
-        ws.Cell(row, 10).Value = Math.Round(internalHoursTotal, 2);
+        ws.Cell(row, 10).Value = metrics.Totals.InternalHours;
         ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 10).Style.Font.Bold = true;
-        ws.Cell(row, 11).Value = Math.Round(total + internalHoursTotal, 2);
+        ws.Cell(row, 11).Value = metrics.Totals.TotalSpentHours;
         ws.Cell(row, 11).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 11).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();
     }
 
-    private static void WriteSummaryByTag(XLWorkbook wb, List<CalendarEvent> events, double weeklyHours)
+    private static void WriteSummaryByTag(XLWorkbook wb, ExportMetricsSnapshot metrics)
     {
         var ws = wb.Worksheets.Add("Summary by Tag");
 
-        double total = events.Sum(e => e.DurationHours);
-        int totalMeetings = events.Count;
-        double percentBase = weeklyHours > 0 ? weeklyHours : total;
-        double internalHoursTotal = Math.Max(0, weeklyHours - total);
-
         ws.Cell(1, 1).Value = "Monte ore settimanale";
         ws.Cell(1, 1).Style.Font.Bold = true;
-        ws.Cell(1, 2).Value = weeklyHours;
+        ws.Cell(1, 2).Value = metrics.WeeklyHours;
         ws.Cell(1, 2).Style.NumberFormat.Format = "0";
         ws.Cell(1, 2).Style.Font.Bold = true;
 
@@ -208,33 +171,15 @@ public sealed class XlsxExportService : IExportService
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
 
-        var rows = events
-            .GroupBy(e => e.Tag ?? string.Empty)
-            .Select(g =>
-            {
-                var hours = Math.Round(g.Sum(e => e.DurationHours), 2);
-                return new CategorySummary
-                {
-                    Tag = g.Key,
-                    MeetingCount = g.Count(),
-                    TotalHours = hours,
-                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
-                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
-                    Percentage = FormatPercent(hours, percentBase),
-                };
-            })
-            .OrderByDescending(r => r.TotalHours)
-            .ToList();
-
         int row = 4;
-        foreach (var r in rows)
+        foreach (var r in metrics.SummaryByTagRows)
         {
             ws.Cell(row, 1).Value = r.Tag;
             ws.Cell(row, 2).Value = r.MeetingCount;
             ws.Cell(row, 3).Value = r.TotalHours;
             ws.Cell(row, 3).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 4).Value = r.Percentage;
-            ws.Cell(row, 5).Value = FormatPercent(r.TotalHours, total);
+            ws.Cell(row, 4).Value = r.ShareOfWeeklyHours;
+            ws.Cell(row, 5).Value = r.ShareOfMeetingHours;
             ws.Cell(row, 6).Value = r.InternalHours;
             ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
             ws.Cell(row, 7).Value = r.TotalSpentHours;
@@ -244,33 +189,22 @@ public sealed class XlsxExportService : IExportService
 
         ws.Cell(row, 1).Value = "TOTALE";
         ws.Cell(row, 1).Style.Font.Bold = true;
-        ws.Cell(row, 2).Value = totalMeetings;
+        ws.Cell(row, 2).Value = metrics.Totals.MeetingCount;
         ws.Cell(row, 2).Style.Font.Bold = true;
-        ws.Cell(row, 3).Value = Math.Round(total, 2);
+        ws.Cell(row, 3).Value = metrics.Totals.MeetingHours;
         ws.Cell(row, 3).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 3).Style.Font.Bold = true;
-        ws.Cell(row, 4).Value = FormatPercent(total, percentBase);
+        ws.Cell(row, 4).Value = metrics.Totals.ShareOfWeeklyHours;
         ws.Cell(row, 4).Style.Font.Bold = true;
-        ws.Cell(row, 5).Value = FormatPercent(total, total);
+        ws.Cell(row, 5).Value = metrics.Totals.ShareOfMeetingHours;
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = Math.Round(internalHoursTotal, 2);
+        ws.Cell(row, 6).Value = metrics.Totals.InternalHours;
         ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 6).Style.Font.Bold = true;
-        ws.Cell(row, 7).Value = Math.Round(total + internalHoursTotal, 2);
+        ws.Cell(row, 7).Value = metrics.Totals.TotalSpentHours;
         ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 7).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();
-    }
-
-    private static string FormatPercent(double value, double total)
-        => total > 0 ? $"{value / total * 100:F1}%" : "0%";
-
-    private static double AllocateInternalHours(double rowHours, double totalMeetingHours, double internalHoursTotal)
-    {
-        if (rowHours <= 0 || totalMeetingHours <= 0 || internalHoursTotal <= 0)
-            return 0;
-
-        return Math.Round(internalHoursTotal * (rowHours / totalMeetingHours), 2);
     }
 }

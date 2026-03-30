@@ -1,6 +1,7 @@
 using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
+using eris.Core.ExportServices;
 using eris.Core.Models;
 
 namespace eris.Core.Services;
@@ -11,6 +12,8 @@ namespace eris.Core.Services;
 /// </summary>
 public sealed class CsvExportService : IExportService
 {
+    private static readonly ExportMetricsCalculator MetricsCalculator = new();
+
     private static readonly CsvConfiguration SemicolonConfig =
         new(System.Globalization.CultureInfo.InvariantCulture)
         {
@@ -30,10 +33,11 @@ public sealed class CsvExportService : IExportService
         var detailPath  = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-detail.csv");
         var summaryPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary.csv");
         var summaryByTagPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary-by-tag.csv");
+        var metrics = MetricsCalculator.Compute(events, weeklyHours);
 
         WriteDetail(events, detailPath);
-        WriteSummary(events, summaryPath, weeklyHours);
-        WriteSummaryByTag(events, summaryByTagPath, weeklyHours);
+        WriteSummary(summaryPath, metrics);
+        WriteSummaryByTag(summaryByTagPath, metrics);
 
         return (detailPath, summaryPath);
     }
@@ -80,54 +84,14 @@ public sealed class CsvExportService : IExportService
 
     // ── summary.csv ───────────────────────────────────────────────────────────
 
-    private static void WriteSummary(List<CalendarEvent> events, string path, double weeklyHours)
+    private static void WriteSummary(string path, ExportMetricsSnapshot metrics)
     {
-        double total = events.Sum(e => e.DurationHours);
-        int totalMeetings = events.Count;
-        double percentBase = weeklyHours > 0 ? weeklyHours : total;
-        double internalHoursTotal = Math.Max(0, weeklyHours - total);
-
-        // Raggruppa ogni evento per la chiave di aggregazione:
-        //   1. Category (se presente)
-        //   2. Project  (se presente)
-        //   3. Topic / Subject (fallback)
-        var rows = events
-            .GroupBy(e => new
-            {
-                Cat     = e.Category ?? string.Empty,
-                Client  = e.Client   ?? string.Empty,
-                Project = e.Project  ?? string.Empty,
-                Topic   = e.Category != null ? string.Empty     // aggregato per cat → topic vuoto
-                        : e.Project  != null ? string.Empty     // aggregato per progetto → topic vuoto
-                        : e.Topic    ?? e.Subject,              // fallback: aggrega per topic/subject
-                Tag     = e.Tag      ?? string.Empty,
-            })
-            .Select(g =>
-            {
-                var hours = Math.Round(g.Sum(e => e.DurationHours), 2);
-                return new CategorySummary
-                {
-                    Category   = g.Key.Cat,
-                    Client     = g.Key.Client,
-                    Project    = g.Key.Project,
-                    Topic      = g.Key.Topic,
-                    Tag        = g.Key.Tag,
-                    MeetingCount = g.Count(),
-                    TotalHours = hours,
-                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
-                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
-                    Percentage = FormatPercent(hours, percentBase),
-                };
-            })
-            .OrderByDescending(r => r.TotalHours)
-            .ToList();
-
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         using var csv = new CsvWriter(sw, SemicolonConfig);
 
         // Monte ore
         csv.WriteField("Monte ore settimanale");
-        csv.WriteField(weeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.WeeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
         csv.NextRecord();
 
@@ -145,7 +109,7 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Ore Totali");
         csv.NextRecord();
 
-        foreach (var row in rows)
+        foreach (var row in metrics.SummaryRows)
         {
             csv.WriteField(row.Category);
             csv.WriteField(row.Client);
@@ -154,8 +118,8 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.Tag);
             csv.WriteField(row.MeetingCount);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-            csv.WriteField(row.Percentage);
-            csv.WriteField(FormatPercent(row.TotalHours, total));
+            csv.WriteField(row.ShareOfWeeklyHours);
+            csv.WriteField(row.ShareOfMeetingHours);
             csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
@@ -167,41 +131,22 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
         csv.WriteField("TOTALE");
-        csv.WriteField(totalMeetings);
-        csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(FormatPercent(total, percentBase));
-        csv.WriteField(FormatPercent(total, total));
-        csv.WriteField(Math.Round(internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(Math.Round(total + internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.MeetingCount);
+        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.ShareOfWeeklyHours);
+        csv.WriteField(metrics.Totals.ShareOfMeetingHours);
+        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
     }
 
-    private static void WriteSummaryByTag(List<CalendarEvent> events, string path, double weeklyHours)
+    private static void WriteSummaryByTag(string path, ExportMetricsSnapshot metrics)
     {
-        double total = events.Sum(e => e.DurationHours);
-        int totalMeetings = events.Count;
-        double percentBase = weeklyHours > 0 ? weeklyHours : total;
-        double internalHoursTotal = Math.Max(0, weeklyHours - total);
-
-        var rows = events
-            .GroupBy(e => e.Tag ?? string.Empty)
-            .Select(g => new CategorySummary
-            {
-                Tag = g.Key,
-                MeetingCount = g.Count(),
-                TotalHours = Math.Round(g.Sum(e => e.DurationHours), 2),
-                InternalHours = AllocateInternalHours(Math.Round(g.Sum(e => e.DurationHours), 2), total, internalHoursTotal),
-                TotalSpentHours = Math.Round(g.Sum(e => e.DurationHours), 2) + AllocateInternalHours(Math.Round(g.Sum(e => e.DurationHours), 2), total, internalHoursTotal),
-                Percentage = FormatPercent(Math.Round(g.Sum(e => e.DurationHours), 2), percentBase),
-            })
-            .OrderByDescending(r => r.TotalHours)
-            .ToList();
-
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         using var csv = new CsvWriter(sw, SemicolonConfig);
 
         csv.WriteField("Monte ore settimanale");
-        csv.WriteField(weeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.WeeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
         csv.NextRecord();
 
@@ -214,36 +159,25 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Ore Totali");
         csv.NextRecord();
 
-        foreach (var row in rows)
+        foreach (var row in metrics.SummaryByTagRows)
         {
             csv.WriteField(row.Tag);
             csv.WriteField(row.MeetingCount);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-            csv.WriteField(row.Percentage);
-            csv.WriteField(FormatPercent(row.TotalHours, total));
+            csv.WriteField(row.ShareOfWeeklyHours);
+            csv.WriteField(row.ShareOfMeetingHours);
             csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
         }
 
         csv.WriteField("TOTALE");
-        csv.WriteField(totalMeetings);
-        csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(FormatPercent(total, percentBase));
-        csv.WriteField(FormatPercent(total, total));
-        csv.WriteField(Math.Round(internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(Math.Round(total + internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.MeetingCount);
+        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.ShareOfWeeklyHours);
+        csv.WriteField(metrics.Totals.ShareOfMeetingHours);
+        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
     }
-
-    private static double AllocateInternalHours(double rowHours, double totalMeetingHours, double internalHoursTotal)
-    {
-        if (rowHours <= 0 || totalMeetingHours <= 0 || internalHoursTotal <= 0)
-            return 0;
-
-        return Math.Round(internalHoursTotal * (rowHours / totalMeetingHours), 2);
-    }
-
-    private static string FormatPercent(double value, double total)
-        => total > 0 ? $"{value / total * 100:F1}%" : "0%";
 }
