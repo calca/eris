@@ -28,6 +28,7 @@ public static class AppStrings
     public static string CustomPeriod => ResourceManager.GetString("CustomPeriod", Culture)!;
     public static string GenerateReport => ResourceManager.GetString("GenerateReport", Culture)!;
     public static string GenerateReportWithMapping => ResourceManager.GetString("GenerateReportWithMapping", Culture)!;
+    public static string MappingEnabledLabel => ResourceManager.GetString("MappingEnabledLabel", Culture)!;
     public static string MappingPageTitle => ResourceManager.GetString("MappingPageTitle", Culture)!;
     public static string MappingIncludeHeader => ResourceManager.GetString("MappingIncludeHeader", Culture)!;
     public static string MappingSubjectHeader => ResourceManager.GetString("MappingSubjectHeader", Culture)!;

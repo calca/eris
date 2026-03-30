@@ -273,17 +273,14 @@
                 </Border>
 
                 <!-- ── Pulsante Genera ────────────────────────────────────── -->
-                <Grid HeightRequest="52"
-                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
-                      Margin="40,0,40,12">
-                      <Button Style="{StaticResource SecondaryBtn}"
-                            FontSize="14"
-                            HeightRequest="52"
-                            Command="{Binding GenerateReportWithMappingCommand}"
-                            HorizontalOptions="Fill"
-                            Margin="0,0,0,10"
-                            Text="{x:Static strings:AppStrings.GenerateReportWithMapping}" />
-                    </Grid>
+                    <HorizontalStackLayout Spacing="8"
+                                   Margin="40,0,40,8"
+                                   IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                      <CheckBox IsChecked="{Binding IsMappingEnabled}" VerticalOptions="Center" />
+                      <Label Text="{x:Static strings:AppStrings.MappingEnabledLabel}"
+                           VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+                    </HorizontalStackLayout>
 
                     <Grid HeightRequest="52"
                         IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"

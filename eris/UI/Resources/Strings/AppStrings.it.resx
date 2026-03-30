@@ -71,6 +71,9 @@
   <data name="GenerateReportWithMapping" xml:space="preserve">
     <value>Genera report con mapping</value>
   </data>
+  <data name="MappingEnabledLabel" xml:space="preserve">
+    <value>Abilita mapping (apri pagina solo se ci sono subject senza tag)</value>
+  </data>
   <data name="MappingPageTitle" xml:space="preserve">
     <value>Rivedi la mappatura meeting</value>
   </data>

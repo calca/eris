@@ -259,7 +259,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
-    [NotifyCanExecuteChangedFor(nameof(GenerateReportWithMappingCommand))]
     [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
     [NotifyCanExecuteChangedFor(nameof(SelectFolderCommand))]
     private bool _isBusy;
@@ -270,6 +269,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<MeetingMappingItemViewModel> _mappingItems = new();
+
+    [ObservableProperty]
+    private bool _isMappingEnabled;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
@@ -334,6 +336,7 @@ public partial class MainViewModel : ObservableObject
         _excludedProjects   = Preferences.Default.Get("ExcludedProjects",   string.Join(", ", appConfig.Filters.Projects));
         _excludedTopics     = Preferences.Default.Get("ExcludedTopics",     string.Join(", ", appConfig.Filters.Topics));
         _excludeTentative   = Preferences.Default.Get("ExcludeTentative", true);
+        _isMappingEnabled   = Preferences.Default.Get("IsMappingEnabled", false);
         _subjectTemplates   = LoadSubjectTemplates();
         UpdateWeekDisplay();
     }
@@ -349,6 +352,7 @@ public partial class MainViewModel : ObservableObject
     partial void OnExcludedProjectsChanged(string value)   => Preferences.Default.Set("ExcludedProjects",   value);
     partial void OnExcludedTopicsChanged(string value)     => Preferences.Default.Set("ExcludedTopics",     value);
     partial void OnExcludeTentativeChanged(bool value)       => Preferences.Default.Set("ExcludeTentative",   value);
+    partial void OnIsMappingEnabledChanged(bool value)       => Preferences.Default.Set("IsMappingEnabled", value);
 
     partial void OnIsWorkWeekChanged(bool value)
     {
@@ -577,47 +581,46 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            ICalendarSource calendarSource;
+            var (orchestrator, events, range, format, filters, sourceKey) = await ExtractGenerationContextAsync();
 
-            if (IsGraphSelected)
+            foreach (var evt in events)
+                CalendarEvent.ParseStructuredSubject(evt, SubjectTemplates.ToList());
+
+            var filteredForMapping = ApplyExclusionsForMapping(events, filters);
+
+            if (IsMappingEnabled)
             {
-                var token = await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
-                calendarSource = new CalendarService(token);
+                var missingSubjects = GetSubjectsWithoutTag(filteredForMapping, sourceKey);
+                if (missingSubjects.Count > 0)
+                {
+                    var allFilteredSubjects = filteredForMapping
+                        .Select(x => (x.Subject ?? string.Empty).Trim())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    _pendingOrchestrator = orchestrator;
+                    _pendingExtractedEvents = events;
+                    _pendingRange = range;
+                    _pendingFormat = format;
+                    _pendingFilters = filters;
+                    _pendingSourceKey = sourceKey;
+
+                    MappingItems = BuildMappingItems(allFilteredSubjects, sourceKey);
+                    IsMappingPageOpen = true;
+                    return;
+                }
             }
-            else
-            {
-                // Persist URL for next launch
-                Preferences.Default.Set("IcsUrl", IcsUrl);
-                Preferences.Default.Set("SourceGraph", false);
 
-                var downloader = new IcsDownloadService();
-                var localPath  = await downloader.DownloadAsync(IcsUrl);
-                calendarSource = new IcsCalendarService(localPath);
-            }
-
-            var orchestrator = new ReportOrchestrator(calendarSource);
-            var today = DateTime.Today;
-            var range  = PeriodSelection switch
-            {
-                1 => WeekRange.FromPeriod(WeekPeriod.LastWeek, IsWorkWeek),
-                // Custom period: user sets exact dates, so IsWorkWeek does not restrict them.
-                2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
-                _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
-            };
-            var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
-
-            static string[] ParseList(string raw) =>
-                raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            var filters = new EventFilters
-            {
-                ExcludeTentative = ExcludeTentative,
-                Categories = ParseList(ExcludedCategories),
-                Clients    = ParseList(ExcludedClients),
-                Projects   = ParseList(ExcludedProjects),
-                Topics     = ParseList(ExcludedTopics),
-            };
-            var result = await orchestrator.GenerateAsync(range, OutputFolder, format, filters, SubjectTemplates.ToList(), WeeklyWorkingHours);
+            var result = await orchestrator.GenerateAsync(
+                range,
+                OutputFolder,
+                format,
+                filters,
+                SubjectTemplates.ToList(),
+                WeeklyWorkingHours,
+                IsMappingEnabled ? _subjectMappings : null,
+                IsMappingEnabled ? sourceKey : null);
 
             MeetingCount       = result.EventCount;
             TotalHours         = result.TotalHours;
@@ -628,41 +631,6 @@ public partial class MainViewModel : ObservableObject
             ResultPeriodEnd    = result.Week.End.AddDays(-1).ToString("dd/MM/yyyy");
             ShowResult         = true;
             ErrorMessage       = string.Empty;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = string.Format(AppStrings.GenericErrorFormat, ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand(CanExecute = nameof(CanGenerate))]
-    private async Task GenerateReportWithMappingAsync()
-    {
-        IsBusy = true;
-        ShowResult = false;
-        ErrorMessage = string.Empty;
-
-        try
-        {
-            var (orchestrator, events, range, format, filters, sourceKey) = await ExtractGenerationContextAsync();
-            foreach (var evt in events)
-                CalendarEvent.ParseStructuredSubject(evt, SubjectTemplates.ToList());
-
-            var filteredForMapping = ApplyExclusionsForMapping(events, filters);
-
-            _pendingOrchestrator = orchestrator;
-            _pendingExtractedEvents = events;
-            _pendingRange = range;
-            _pendingFormat = format;
-            _pendingFilters = filters;
-            _pendingSourceKey = sourceKey;
-
-            MappingItems = BuildMappingItems(filteredForMapping, sourceKey);
-            IsMappingPageOpen = true;
         }
         catch (Exception ex)
         {
@@ -927,7 +895,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     private ObservableCollection<MeetingMappingItemViewModel> BuildMappingItems(
-        IEnumerable<CalendarEvent> events,
+        IEnumerable<string> subjects,
         string sourceKey)
     {
         var existing = _subjectMappings
@@ -935,13 +903,13 @@ public partial class MainViewModel : ObservableObject
             .GroupBy(x => x.Subject.Trim(), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(x => x.Key, x => x.Last(), StringComparer.OrdinalIgnoreCase);
 
-        var subjects = events
-            .Select(x => (x.Subject ?? string.Empty).Trim())
+        var normalizedSubjects = subjects
             .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
 
-        var rows = subjects.Select(subject =>
+        var rows = normalizedSubjects.Select(subject =>
         {
             if (existing.TryGetValue(subject, out var mapped))
             {
@@ -962,6 +930,31 @@ public partial class MainViewModel : ObservableObject
         });
 
         return new ObservableCollection<MeetingMappingItemViewModel>(rows);
+    }
+
+    private List<string> GetSubjectsWithoutTag(IEnumerable<CalendarEvent> events, string sourceKey)
+    {
+        var existing = _subjectMappings
+            .GetForSourceKey(sourceKey)
+            .GroupBy(x => x.Subject.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Last(), StringComparer.OrdinalIgnoreCase);
+
+        return events
+            .Select(x => (x.Subject ?? string.Empty).Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(subject =>
+            {
+                if (!existing.TryGetValue(subject, out var mapped))
+                    return true;
+
+                if (!mapped.Include)
+                    return false;
+
+                return string.IsNullOrWhiteSpace(mapped.Tag);
+            })
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static List<CalendarEvent> ApplyExclusionsForMapping(
