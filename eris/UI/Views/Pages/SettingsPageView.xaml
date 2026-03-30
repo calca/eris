@@ -213,7 +213,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="10" Margin="0,0,0,32" Padding="0,4">
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="14">
                     <VerticalStackLayout Grid.Column="0" Spacing="8">
                         <Label Text="{x:Static strings:AppStrings.ExportFormatDescription}"
                                Style="{StaticResource MutedLabel}"
@@ -296,6 +296,7 @@
                                     HeightRequest="46"
                                     FontSize="13"
                                     Padding="16,8"
+                                    HorizontalOptions="Fill"
                                     Command="{Binding OpenFiltersDialogCommand}" />
 
                             <Border IsVisible="{Binding HasActiveFilters}"
@@ -311,6 +312,21 @@
                                 </Border.StrokeShape>
                             </Border>
                         </Grid>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="3" Spacing="8">
+                        <Label Text="{x:Static strings:AppStrings.TagsDescription}"
+                               Style="{StaticResource MutedLabel}"
+                               LineBreakMode="WordWrap"
+                               HeightRequest="36"
+                               Margin="0,0,0,4" />
+                        <Button Text="{x:Static strings:AppStrings.Tags}"
+                                Style="{StaticResource SecondaryBtn}"
+                                HeightRequest="46"
+                                FontSize="13"
+                                Padding="12,8"
+                                HorizontalOptions="Fill"
+                                Command="{Binding OpenTagEditorCommand}" />
                     </VerticalStackLayout>
                 </Grid>
             </VerticalStackLayout>

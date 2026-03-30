@@ -28,6 +28,7 @@ public partial class MainViewModel : ObservableObject
     private ExportFormat _pendingFormat;
     private EventFilters? _pendingFilters;
     private string? _pendingSourceKey;
+    private string? _editOnlySourceKey;
 
     // ── Tab ───────────────────────────────────────────────────────────────
 
@@ -266,6 +267,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
     private bool _isMappingPageOpen;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MappingPrimaryButtonLabel))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
+    private bool _isMappingEditOnly;
+
+    public string MappingPrimaryButtonLabel => IsMappingEditOnly ? AppStrings.Save : AppStrings.GenerateReport;
 
     [ObservableProperty]
     private ObservableCollection<MeetingMappingItemViewModel> _mappingItems = new();
@@ -605,6 +613,8 @@ public partial class MainViewModel : ObservableObject
                     _pendingFormat = format;
                     _pendingFilters = filters;
                     _pendingSourceKey = sourceKey;
+                    _editOnlySourceKey = null;
+                    IsMappingEditOnly = false;
 
                     MappingItems = BuildMappingItems(allFilteredSubjects, sourceKey);
                     IsMappingPageOpen = true;
@@ -646,11 +656,66 @@ public partial class MainViewModel : ObservableObject
     private void BackFromMapping()
     {
         IsMappingPageOpen = false;
+        IsMappingEditOnly = false;
+        _editOnlySourceKey = null;
+    }
+
+    [RelayCommand]
+    private async Task OpenTagEditorAsync()
+    {
+        ErrorMessage = string.Empty;
+
+        var sourceKey = await ResolveCurrentSourceKeyAsync();
+        if (string.IsNullOrWhiteSpace(sourceKey))
+            return;
+
+        var existingSubjects = _subjectMappings
+            .GetForSourceKey(sourceKey)
+            .Select(x => x.Subject)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (existingSubjects.Count == 0)
+        {
+            ErrorMessage = AppStrings.NoMappedTagsToEdit;
+            return;
+        }
+
+        MappingItems = BuildMappingItems(existingSubjects, sourceKey);
+        _editOnlySourceKey = sourceKey;
+        IsMappingEditOnly = true;
+        IsMappingPageOpen = true;
+        IsGenerateTab = true;
     }
 
     [RelayCommand(CanExecute = nameof(CanGenerateMappedReport))]
     private async Task GenerateMappedReportAsync()
     {
+        if (IsMappingEditOnly)
+        {
+            var editSourceKey = _editOnlySourceKey;
+            if (string.IsNullOrWhiteSpace(editSourceKey))
+                return;
+
+            var mappingsToSave = MappingItems
+                .Where(x => !string.IsNullOrWhiteSpace(x.Subject))
+                .Select(x => new SubjectMappingEntry
+                {
+                    Subject = x.Subject.Trim(),
+                    Include = x.Include,
+                    Tag = string.IsNullOrWhiteSpace(x.Tag) ? null : x.Tag.Trim(),
+                })
+                .ToList();
+
+            _subjectMappings.SetForSourceKey(editSourceKey, mappingsToSave);
+            SaveSubjectMappings();
+            IsMappingPageOpen = false;
+            IsMappingEditOnly = false;
+            _editOnlySourceKey = null;
+            return;
+        }
+
         if (_pendingOrchestrator is null
             || _pendingExtractedEvents is null
             || _pendingRange is null
@@ -698,6 +763,7 @@ public partial class MainViewModel : ObservableObject
             ResultPeriodEnd    = result.Week.End.AddDays(-1).ToString("dd/MM/yyyy");
             ShowResult         = true;
             IsMappingPageOpen  = false;
+            IsMappingEditOnly  = false;
             ErrorMessage       = string.Empty;
         }
         catch (Exception ex)
@@ -717,11 +783,16 @@ public partial class MainViewModel : ObservableObject
 
     private bool CanGenerateMappedReport() => !IsBusy
         && IsMappingPageOpen
-        && _pendingOrchestrator is not null
-        && _pendingExtractedEvents is not null
-        && _pendingRange is not null
-        && _pendingFilters is not null
-        && !string.IsNullOrWhiteSpace(_pendingSourceKey);
+        && (
+            (IsMappingEditOnly && !string.IsNullOrWhiteSpace(_editOnlySourceKey))
+            || (
+                _pendingOrchestrator is not null
+                && _pendingExtractedEvents is not null
+                && _pendingRange is not null
+                && _pendingFilters is not null
+                && !string.IsNullOrWhiteSpace(_pendingSourceKey)
+            )
+        );
 
     [RelayCommand]
     private void NuovoReport()
@@ -1022,5 +1093,38 @@ public partial class MainViewModel : ObservableObject
     {
         var raw = JsonSerializer.Serialize(_subjectMappings);
         Preferences.Default.Set(SubjectMappingsPreferenceKey, raw);
+    }
+
+    private async Task<string?> ResolveCurrentSourceKeyAsync()
+    {
+        if (IsGraphSelected)
+        {
+            if (!IsAuthenticated)
+            {
+                ErrorMessage = AppStrings.AuthenticateToEditTags;
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
+            {
+                UserDisplayName = await _authService.GetUserDisplayNameAsync();
+            }
+
+            if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
+            {
+                ErrorMessage = AppStrings.AuthenticateToEditTags;
+                return null;
+            }
+
+            return SourceKeyHasher.Compute(ReportSourceType.Graph, UserDisplayName);
+        }
+
+        if (string.IsNullOrWhiteSpace(IcsUrl))
+        {
+            ErrorMessage = AppStrings.ConfigureIcsToEditTags;
+            return null;
+        }
+
+        return SourceKeyHasher.Compute(ReportSourceType.Ics, IcsUrl);
     }
 }

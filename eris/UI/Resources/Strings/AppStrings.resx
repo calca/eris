@@ -157,6 +157,15 @@
   <data name="Filters" xml:space="preserve">
     <value>Filters</value>
   </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="TagsDescription" xml:space="preserve">
+    <value>Edit saved tags for the selected source.</value>
+  </data>
+  <data name="EditTags" xml:space="preserve">
+    <value>Edit tags</value>
+  </data>
   <data name="CloseGoHome" xml:space="preserve">
     <value>Close and go home</value>
   </data>
@@ -255,6 +264,15 @@
   </data>
   <data name="GenericErrorFormat" xml:space="preserve">
     <value>Error: {0}</value>
+  </data>
+  <data name="NoMappedTagsToEdit" xml:space="preserve">
+    <value>No mapped tags found for the selected source.</value>
+  </data>
+  <data name="AuthenticateToEditTags" xml:space="preserve">
+    <value>Authenticate with Outlook before editing tags.</value>
+  </data>
+  <data name="ConfigureIcsToEditTags" xml:space="preserve">
+    <value>Configure an ICS URL before editing tags.</value>
   </data>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>

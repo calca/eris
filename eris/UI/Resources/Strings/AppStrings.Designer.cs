@@ -58,6 +58,9 @@ public static class AppStrings
     public static string WeeklyHoursDescription => ResourceManager.GetString("WeeklyHoursDescription", Culture)!;
     public static string FiltersActivityDescription => ResourceManager.GetString("FiltersActivityDescription", Culture)!;
     public static string Filters => ResourceManager.GetString("Filters", Culture)!;
+    public static string Tags => ResourceManager.GetString("Tags", Culture)!;
+    public static string TagsDescription => ResourceManager.GetString("TagsDescription", Culture)!;
+    public static string EditTags => ResourceManager.GetString("EditTags", Culture)!;
     public static string CloseGoHome => ResourceManager.GetString("CloseGoHome", Culture)!;
 
     // ── Date Picker Dialog ────────────────────────────────────────────────
@@ -95,5 +98,8 @@ public static class AppStrings
     public static string IcsHelpBody => ResourceManager.GetString("IcsHelpBody", Culture)!;
     public static string AuthErrorFormat => ResourceManager.GetString("AuthErrorFormat", Culture)!;
     public static string GenericErrorFormat => ResourceManager.GetString("GenericErrorFormat", Culture)!;
+    public static string NoMappedTagsToEdit => ResourceManager.GetString("NoMappedTagsToEdit", Culture)!;
+    public static string AuthenticateToEditTags => ResourceManager.GetString("AuthenticateToEditTags", Culture)!;
+    public static string ConfigureIcsToEditTags => ResourceManager.GetString("ConfigureIcsToEditTags", Culture)!;
     public static string Ok => ResourceManager.GetString("Ok", Culture)!;
 }

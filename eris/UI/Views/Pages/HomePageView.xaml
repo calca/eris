@@ -108,7 +108,7 @@
                                 HeightRequest="50"
                             HorizontalOptions="Fill"
                                 Command="{Binding BackFromMappingCommand}" />
-                        <Button Text="{x:Static strings:AppStrings.GenerateReport}"
+                        <Button Text="{Binding MappingPrimaryButtonLabel}"
                                 Style="{StaticResource PrimaryBtn}"
                                 HeightRequest="50"
                             HorizontalOptions="Fill"

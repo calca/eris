@@ -157,6 +157,15 @@
   <data name="Filters" xml:space="preserve">
     <value>Filtri</value>
   </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="TagsDescription" xml:space="preserve">
+    <value>Modifica i tag salvati per la sorgente selezionata.</value>
+  </data>
+  <data name="EditTags" xml:space="preserve">
+    <value>Modifica tag</value>
+  </data>
   <data name="CloseGoHome" xml:space="preserve">
     <value>Chiudi e torna in home</value>
   </data>
@@ -255,6 +264,15 @@
   </data>
   <data name="GenericErrorFormat" xml:space="preserve">
     <value>Errore: {0}</value>
+  </data>
+  <data name="NoMappedTagsToEdit" xml:space="preserve">
+    <value>Nessun tag mappato trovato per la sorgente selezionata.</value>
+  </data>
+  <data name="AuthenticateToEditTags" xml:space="preserve">
+    <value>Autenticati con Outlook prima di modificare i tag.</value>
+  </data>
+  <data name="ConfigureIcsToEditTags" xml:space="preserve">
+    <value>Configura un URL ICS prima di modificare i tag.</value>
   </data>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
