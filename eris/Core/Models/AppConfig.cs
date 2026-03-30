@@ -28,4 +28,10 @@ public class AppConfig
 
     /// <summary>Filtri di esclusione applicati agli eventi prima dell'esportazione.</summary>
     public EventFilters Filters { get; set; } = new();
+
+    /// <summary>
+    /// Mapping manuali per subject, raggruppati per chiave sorgente hash stabile.
+    /// La chiave è calcolata da tipo sorgente + identificatore (URL ICS o account Graph).
+    /// </summary>
+    public SubjectMappingCollection SubjectMappings { get; set; } = new();
 }

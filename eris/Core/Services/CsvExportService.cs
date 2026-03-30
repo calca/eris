@@ -51,6 +51,7 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Cliente");
         csv.WriteField("Progetto");
         csv.WriteField("Topic");
+        csv.WriteField("Tag");
         csv.WriteField("Ore");
         csv.NextRecord();
 
@@ -68,6 +69,7 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(e.Client ?? string.Empty);
             csv.WriteField(e.Project ?? string.Empty);
             csv.WriteField(e.Topic ?? e.Subject);
+            csv.WriteField(e.Tag ?? string.Empty);
             csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2",
                 System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
@@ -94,6 +96,7 @@ public sealed class CsvExportService : IExportService
                 Topic   = e.Category != null ? string.Empty     // aggregato per cat → topic vuoto
                         : e.Project  != null ? string.Empty     // aggregato per progetto → topic vuoto
                         : e.Topic    ?? e.Subject,              // fallback: aggrega per topic/subject
+                Tag     = e.Tag      ?? string.Empty,
             })
             .Select(g =>
             {
@@ -104,6 +107,7 @@ public sealed class CsvExportService : IExportService
                     Client     = g.Key.Client,
                     Project    = g.Key.Project,
                     Topic      = g.Key.Topic,
+                    Tag        = g.Key.Tag,
                     TotalHours = hours,
                     Percentage = FormatPercent(hours, percentBase),
                 };
@@ -125,6 +129,7 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Cliente");
         csv.WriteField("Progetto");
         csv.WriteField("Topic");
+        csv.WriteField("Tag");
         csv.WriteField("Ore");
         csv.WriteField("%");
         csv.NextRecord();
@@ -135,12 +140,14 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.Client);
             csv.WriteField(row.Project);
             csv.WriteField(row.Topic);
+            csv.WriteField(row.Tag);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.Percentage);
             csv.NextRecord();
         }
 
         // Riga TOTALE
+        csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);

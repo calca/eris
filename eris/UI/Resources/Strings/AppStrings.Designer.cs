@@ -27,6 +27,13 @@ public static class AppStrings
     public static string PreviousWeek => ResourceManager.GetString("PreviousWeek", Culture)!;
     public static string CustomPeriod => ResourceManager.GetString("CustomPeriod", Culture)!;
     public static string GenerateReport => ResourceManager.GetString("GenerateReport", Culture)!;
+    public static string GenerateReportWithMapping => ResourceManager.GetString("GenerateReportWithMapping", Culture)!;
+    public static string MappingPageTitle => ResourceManager.GetString("MappingPageTitle", Culture)!;
+    public static string MappingIncludeHeader => ResourceManager.GetString("MappingIncludeHeader", Culture)!;
+    public static string MappingSubjectHeader => ResourceManager.GetString("MappingSubjectHeader", Culture)!;
+    public static string MappingTagHeader => ResourceManager.GetString("MappingTagHeader", Culture)!;
+    public static string MappingTagPlaceholder => ResourceManager.GetString("MappingTagPlaceholder", Culture)!;
+    public static string MappingBack => ResourceManager.GetString("MappingBack", Culture)!;
     public static string Copy => ResourceManager.GetString("Copy", Culture)!;
     public static string PeriodLabel => ResourceManager.GetString("PeriodLabel", Culture)!;
     public static string HoursLabel => ResourceManager.GetString("HoursLabel", Culture)!;

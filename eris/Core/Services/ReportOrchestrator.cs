@@ -32,31 +32,23 @@ public sealed class ReportOrchestrator
         ExportFormat     format  = ExportFormat.Xlsx,
         EventFilters?    filters = null,
         IReadOnlyList<string>? subjectTemplates = null,
-        double           weeklyHours = 40)
+        double           weeklyHours = 40,
+        SubjectMappingCollection? subjectMappings = null,
+        string?          sourceKey = null)
     {
         var week      = WeekRange.FromPeriod(period);
         var rawEvents = await _source.GetEventsAsync(week);
-        foreach (var e in rawEvents)
-            CalendarEvent.ParseStructuredSubject(e, subjectTemplates);
-        var events = ApplyExclusions(rawEvents, filters);
+        var sourceMappings = subjectMappings?.GetForSourceKey(sourceKey);
 
-        IExportService exporter = format switch
-        {
-            ExportFormat.Xlsx => new XlsxExportService(),
-            _                => new CsvExportService(),
-        };
-
-        var reportDir = Path.Combine(outputBaseDir, week.FolderName);
-        var (detail, summary) = exporter.Export(events, reportDir, week, weeklyHours);
-
-        return new ReportResult
-        {
-            EventCount  = events.Count,
-            TotalHours  = Math.Round(events.Sum(e => e.DurationHours), 2),
-            DetailPath  = detail,
-            SummaryPath = summary,
-            Week        = week,
-        };
+        return GenerateFromEvents(
+            rawEvents,
+            week,
+            outputBaseDir,
+            format,
+            filters,
+            subjectTemplates,
+            sourceMappings,
+            weeklyHours);
     }
 
     public async Task<ReportResult> GenerateAsync(
@@ -65,12 +57,64 @@ public sealed class ReportOrchestrator
         ExportFormat  format  = ExportFormat.Xlsx,
         EventFilters? filters = null,
         IReadOnlyList<string>? subjectTemplates = null,
-        double        weeklyHours = 40)
+        double        weeklyHours = 40,
+        SubjectMappingCollection? subjectMappings = null,
+        string?       sourceKey = null)
     {
         var rawEvents = await _source.GetEventsAsync(range);
+        var sourceMappings = subjectMappings?.GetForSourceKey(sourceKey);
+
+        return GenerateFromEvents(
+            rawEvents,
+            range,
+            outputBaseDir,
+            format,
+            filters,
+            subjectTemplates,
+            sourceMappings,
+            weeklyHours);
+    }
+
+    public Task<ReportResult> GenerateAsync(
+        List<CalendarEvent> extractedEvents,
+        WeekRange range,
+        string outputBaseDir,
+        ExportFormat format = ExportFormat.Xlsx,
+        EventFilters? filters = null,
+        IReadOnlyList<string>? subjectTemplates = null,
+        IReadOnlyList<SubjectMappingEntry>? subjectMappings = null,
+        double weeklyHours = 40)
+    {
+        ArgumentNullException.ThrowIfNull(extractedEvents);
+
+        var result = GenerateFromEvents(
+            extractedEvents,
+            range,
+            outputBaseDir,
+            format,
+            filters,
+            subjectTemplates,
+            subjectMappings,
+            weeklyHours);
+
+        return Task.FromResult(result);
+    }
+
+    private static ReportResult GenerateFromEvents(
+        List<CalendarEvent> rawEvents,
+        WeekRange range,
+        string outputBaseDir,
+        ExportFormat format,
+        EventFilters? filters,
+        IReadOnlyList<string>? subjectTemplates,
+        IReadOnlyList<SubjectMappingEntry>? subjectMappings,
+        double weeklyHours)
+    {
         foreach (var e in rawEvents)
             CalendarEvent.ParseStructuredSubject(e, subjectTemplates);
-        var events = ApplyExclusions(rawEvents, filters);
+
+        var mappedEvents = ApplySubjectMappings(rawEvents, subjectMappings);
+        var events = ApplyExclusions(mappedEvents, filters);
 
         IExportService exporter = format switch
         {
@@ -83,12 +127,38 @@ public sealed class ReportOrchestrator
 
         return new ReportResult
         {
-            EventCount  = events.Count,
-            TotalHours  = Math.Round(events.Sum(e => e.DurationHours), 2),
-            DetailPath  = detail,
+            EventCount = events.Count,
+            TotalHours = Math.Round(events.Sum(e => e.DurationHours), 2),
+            DetailPath = detail,
             SummaryPath = summary,
-            Week        = range,
+            Week = range,
         };
+    }
+
+    private static List<CalendarEvent> ApplySubjectMappings(
+        List<CalendarEvent> events,
+        IReadOnlyList<SubjectMappingEntry>? mappings)
+    {
+        if (mappings is null || mappings.Count == 0)
+            return events;
+
+        var bySubject = mappings
+            .Where(m => !string.IsNullOrWhiteSpace(m.Subject))
+            .GroupBy(m => m.Subject.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Last(), StringComparer.OrdinalIgnoreCase);
+
+        return events.Where(e =>
+        {
+            var subject = (e.Subject ?? string.Empty).Trim();
+
+            if (!bySubject.TryGetValue(subject, out var mapping))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(mapping.Tag))
+                e.Tag = mapping.Tag;
+
+            return mapping.Include;
+        }).ToList();
     }
 
     private static List<CalendarEvent> ApplyExclusions(

@@ -40,9 +40,10 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(1, 5).Value = "Cliente";
         ws.Cell(1, 6).Value = "Progetto";
         ws.Cell(1, 7).Value = "Topic";
-        ws.Cell(1, 8).Value = "Ore";
+        ws.Cell(1, 8).Value = "Tag";
+        ws.Cell(1, 9).Value = "Ore";
 
-        var headerRange = ws.Range(1, 1, 1, 8);
+        var headerRange = ws.Range(1, 1, 1, 9);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -62,8 +63,9 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 5).Value = e.Client ?? string.Empty;
             ws.Cell(row, 6).Value = e.Project ?? string.Empty;
             ws.Cell(row, 7).Value = e.Topic ?? e.Subject;
-            ws.Cell(row, 8).Value = Math.Round(e.DurationHours, 2);
-            ws.Cell(row, 8).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 8).Value = e.Tag ?? string.Empty;
+            ws.Cell(row, 9).Value = Math.Round(e.DurationHours, 2);
+            ws.Cell(row, 9).Style.NumberFormat.Format = "0.00";
             row++;
         }
 
@@ -89,10 +91,11 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(3, 2).Value = "Cliente";
         ws.Cell(3, 3).Value = "Progetto";
         ws.Cell(3, 4).Value = "Topic";
-        ws.Cell(3, 5).Value = "Ore";
-        ws.Cell(3, 6).Value = "%";
+        ws.Cell(3, 5).Value = "Tag";
+        ws.Cell(3, 6).Value = "Ore";
+        ws.Cell(3, 7).Value = "%";
 
-        var headerRange = ws.Range(3, 1, 3, 6);
+        var headerRange = ws.Range(3, 1, 3, 7);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -106,6 +109,7 @@ public sealed class XlsxExportService : IExportService
                 Topic   = e.Category != null ? string.Empty
                         : e.Project  != null ? string.Empty
                         : e.Topic    ?? e.Subject,
+                Tag     = e.Tag      ?? string.Empty,
             })
             .Select(g =>
             {
@@ -116,6 +120,7 @@ public sealed class XlsxExportService : IExportService
                     Client     = g.Key.Client,
                     Project    = g.Key.Project,
                     Topic      = g.Key.Topic,
+                    Tag        = g.Key.Tag,
                     TotalHours = hours,
                     Percentage = FormatPercent(hours, percentBase),
                 };
@@ -130,20 +135,21 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 2).Value = r.Client;
             ws.Cell(row, 3).Value = r.Project;
             ws.Cell(row, 4).Value = r.Topic;
-            ws.Cell(row, 5).Value = r.TotalHours;
-            ws.Cell(row, 5).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 6).Value = r.Percentage;
+            ws.Cell(row, 5).Value = r.Tag;
+            ws.Cell(row, 6).Value = r.TotalHours;
+            ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 7).Value = r.Percentage;
             row++;
         }
 
         // Riga TOTALE
-        ws.Cell(row, 4).Value = "TOTALE";
-        ws.Cell(row, 4).Style.Font.Bold = true;
-        ws.Cell(row, 5).Value = Math.Round(total, 2);
-        ws.Cell(row, 5).Style.NumberFormat.Format = "0.00";
+        ws.Cell(row, 5).Value = "TOTALE";
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = FormatPercent(total, percentBase);
+        ws.Cell(row, 6).Value = Math.Round(total, 2);
+        ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 6).Style.Font.Bold = true;
+        ws.Cell(row, 7).Value = FormatPercent(total, percentBase);
+        ws.Cell(row, 7).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();
     }

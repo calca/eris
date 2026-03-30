@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Storage;
@@ -17,7 +18,17 @@ public sealed class TemplateItem(string value)
 
 public partial class MainViewModel : ObservableObject
 {
+    private const string SubjectMappingsPreferenceKey = "SubjectMappingsBySource";
+
     private readonly GraphAuthService _authService;
+    private SubjectMappingCollection _subjectMappings = new();
+    private ReportOrchestrator? _pendingOrchestrator;
+    private List<CalendarEvent>? _pendingExtractedEvents;
+    private WeekRange? _pendingRange;
+    private ExportFormat _pendingFormat;
+    private EventFilters? _pendingFilters;
+    private string? _pendingSourceKey;
+
     // ── Tab ───────────────────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -248,8 +259,17 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
     [NotifyCanExecuteChangedFor(nameof(GenerateReportCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateReportWithMappingCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
     [NotifyCanExecuteChangedFor(nameof(SelectFolderCommand))]
     private bool _isBusy;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
+    private bool _isMappingPageOpen;
+
+    [ObservableProperty]
+    private ObservableCollection<MeetingMappingItemViewModel> _mappingItems = new();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]
@@ -304,6 +324,7 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(GraphAuthService authService, AppConfig appConfig)
     {
         _authService = authService;
+        _subjectMappings = LoadSubjectMappings();
         _icsUrl = Preferences.Default.Get("IcsUrl", string.Empty);
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
         _weeklyWorkingHours = Preferences.Default.Get("WeeklyWorkingHours", appConfig.WeeklyWorkingHours);
@@ -551,6 +572,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsBusy     = true;
         ShowResult = false;
+        IsMappingPageOpen = false;
         ErrorMessage = string.Empty;
 
         try
@@ -617,15 +639,127 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanGenerate))]
+    private async Task GenerateReportWithMappingAsync()
+    {
+        IsBusy = true;
+        ShowResult = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var (orchestrator, events, range, format, filters, sourceKey) = await ExtractGenerationContextAsync();
+            foreach (var evt in events)
+                CalendarEvent.ParseStructuredSubject(evt, SubjectTemplates.ToList());
+
+            var filteredForMapping = ApplyExclusionsForMapping(events, filters);
+
+            _pendingOrchestrator = orchestrator;
+            _pendingExtractedEvents = events;
+            _pendingRange = range;
+            _pendingFormat = format;
+            _pendingFilters = filters;
+            _pendingSourceKey = sourceKey;
+
+            MappingItems = BuildMappingItems(filteredForMapping, sourceKey);
+            IsMappingPageOpen = true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = string.Format(AppStrings.GenericErrorFormat, ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void BackFromMapping()
+    {
+        IsMappingPageOpen = false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGenerateMappedReport))]
+    private async Task GenerateMappedReportAsync()
+    {
+        if (_pendingOrchestrator is null
+            || _pendingExtractedEvents is null
+            || _pendingRange is null
+            || _pendingFilters is null
+            || string.IsNullOrWhiteSpace(_pendingSourceKey))
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ShowResult = false;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var mappings = MappingItems
+                .Where(x => !string.IsNullOrWhiteSpace(x.Subject))
+                .Select(x => new SubjectMappingEntry
+                {
+                    Subject = x.Subject.Trim(),
+                    Include = x.Include,
+                    Tag = string.IsNullOrWhiteSpace(x.Tag) ? null : x.Tag.Trim(),
+                })
+                .ToList();
+
+            _subjectMappings.SetForSourceKey(_pendingSourceKey, mappings);
+            SaveSubjectMappings();
+
+            var result = await _pendingOrchestrator.GenerateAsync(
+                _pendingExtractedEvents,
+                _pendingRange,
+                OutputFolder,
+                _pendingFormat,
+                _pendingFilters,
+                SubjectTemplates.ToList(),
+                mappings,
+                WeeklyWorkingHours);
+
+            MeetingCount       = result.EventCount;
+            TotalHours         = result.TotalHours;
+            WeekNumber         = result.Week.WeekNumber;
+            DetailPath         = result.DetailPath;
+            SummaryPath        = result.SummaryPath;
+            ResultPeriodStart  = result.Week.Start.ToString("dd/MM/yyyy");
+            ResultPeriodEnd    = result.Week.End.AddDays(-1).ToString("dd/MM/yyyy");
+            ShowResult         = true;
+            IsMappingPageOpen  = false;
+            ErrorMessage       = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = string.Format(AppStrings.GenericErrorFormat, ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private bool CanGenerate() => !IsBusy
         && !string.IsNullOrWhiteSpace(OutputFolder)
         && (IsGraphSelected ? IsAuthenticated : !string.IsNullOrWhiteSpace(IcsUrl))
         && (!IsCustomPeriodSelected || CustomEndDate >= CustomStartDate);
 
+    private bool CanGenerateMappedReport() => !IsBusy
+        && IsMappingPageOpen
+        && _pendingOrchestrator is not null
+        && _pendingExtractedEvents is not null
+        && _pendingRange is not null
+        && _pendingFilters is not null
+        && !string.IsNullOrWhiteSpace(_pendingSourceKey);
+
     [RelayCommand]
     private void NuovoReport()
     {
         ShowResult   = false;
+        IsMappingPageOpen = false;
         ErrorMessage = string.Empty;
     }
 
@@ -728,5 +862,172 @@ public partial class MainViewModel : ObservableObject
     private void SaveSubjectTemplates()
     {
         Preferences.Default.Set("SubjectTemplates", string.Join("\n", SubjectTemplates));
+    }
+
+    private async Task<(ReportOrchestrator Orchestrator, List<CalendarEvent> Events, WeekRange Range, ExportFormat Format, EventFilters Filters, string SourceKey)> ExtractGenerationContextAsync()
+    {
+        ICalendarSource calendarSource;
+        string sourceIdentifier;
+        ReportSourceType sourceType;
+
+        if (IsGraphSelected)
+        {
+            var token = await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
+            calendarSource = new CalendarService(token);
+            sourceType = ReportSourceType.Graph;
+
+            if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
+                UserDisplayName = await _authService.GetUserDisplayNameAsync();
+
+            sourceIdentifier = string.IsNullOrWhiteSpace(UserDisplayName)
+                ? "graph-account"
+                : UserDisplayName;
+        }
+        else
+        {
+            Preferences.Default.Set("IcsUrl", IcsUrl);
+            Preferences.Default.Set("SourceGraph", false);
+
+            var downloader = new IcsDownloadService();
+            var localPath  = await downloader.DownloadAsync(IcsUrl);
+            calendarSource = new IcsCalendarService(localPath);
+            sourceType = ReportSourceType.Ics;
+            sourceIdentifier = IcsUrl;
+        }
+
+        var sourceKey = SourceKeyHasher.Compute(sourceType, sourceIdentifier);
+        var range = PeriodSelection switch
+        {
+            1 => WeekRange.FromPeriod(WeekPeriod.LastWeek, IsWorkWeek),
+            2 => WeekRange.FromCustom(CustomStartDate, CustomEndDate),
+            _ => WeekRange.FromPeriod(WeekPeriod.ThisWeek, IsWorkWeek),
+        };
+
+        var format = IsXlsxSelected ? ExportFormat.Xlsx : ExportFormat.Csv;
+        var filters = BuildFilters();
+        var events = await calendarSource.GetEventsAsync(range);
+        var orchestrator = new ReportOrchestrator(calendarSource);
+
+        return (orchestrator, events, range, format, filters, sourceKey);
+    }
+
+    private EventFilters BuildFilters()
+    {
+        static string[] ParseList(string raw) =>
+            raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return new EventFilters
+        {
+            ExcludeTentative = ExcludeTentative,
+            Categories = ParseList(ExcludedCategories),
+            Clients    = ParseList(ExcludedClients),
+            Projects   = ParseList(ExcludedProjects),
+            Topics     = ParseList(ExcludedTopics),
+        };
+    }
+
+    private ObservableCollection<MeetingMappingItemViewModel> BuildMappingItems(
+        IEnumerable<CalendarEvent> events,
+        string sourceKey)
+    {
+        var existing = _subjectMappings
+            .GetForSourceKey(sourceKey)
+            .GroupBy(x => x.Subject.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Last(), StringComparer.OrdinalIgnoreCase);
+
+        var subjects = events
+            .Select(x => (x.Subject ?? string.Empty).Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
+
+        var rows = subjects.Select(subject =>
+        {
+            if (existing.TryGetValue(subject, out var mapped))
+            {
+                return new MeetingMappingItemViewModel
+                {
+                    Subject = subject,
+                    Include = mapped.Include,
+                    Tag = mapped.Tag ?? string.Empty,
+                };
+            }
+
+            return new MeetingMappingItemViewModel
+            {
+                Subject = subject,
+                Include = true,
+                Tag = string.Empty,
+            };
+        });
+
+        return new ObservableCollection<MeetingMappingItemViewModel>(rows);
+    }
+
+    private static List<CalendarEvent> ApplyExclusionsForMapping(
+        IEnumerable<CalendarEvent> events,
+        EventFilters filters)
+    {
+        if (filters.IsEmpty)
+            return events.ToList();
+
+        var excludeTentative = filters.ExcludeTentative;
+        var categories = filters.Categories
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
+        var clients = filters.Clients
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
+        var projects = filters.Projects
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
+        var topics = filters.Topics
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
+
+        return events.Where(e =>
+            (!excludeTentative || !e.IsTentative) &&
+            (categories.Length == 0 || !MatchesAnyFilter(e.Category, categories)) &&
+            (clients.Length == 0 || !MatchesAnyFilter(e.Client, clients)) &&
+            (projects.Length == 0 || !MatchesAnyFilter(e.Project, projects)) &&
+            (topics.Length == 0 || !MatchesAnyFilter(e.Topic ?? e.Subject, topics))
+        ).ToList();
+    }
+
+    private static bool MatchesAnyFilter(string? value, string[] filters)
+    {
+        if (string.IsNullOrWhiteSpace(value) || filters.Length == 0)
+            return false;
+
+        var normalized = value.Trim();
+        return filters.Any(filter =>
+            normalized.Equals(filter, StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains(filter, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private SubjectMappingCollection LoadSubjectMappings()
+    {
+        var raw = Preferences.Default.Get(SubjectMappingsPreferenceKey, string.Empty);
+        if (string.IsNullOrWhiteSpace(raw))
+            return new SubjectMappingCollection();
+
+        try
+        {
+            return JsonSerializer.Deserialize<SubjectMappingCollection>(raw) ?? new SubjectMappingCollection();
+        }
+        catch
+        {
+            return new SubjectMappingCollection();
+        }
+    }
+
+    private void SaveSubjectMappings()
+    {
+        var raw = JsonSerializer.Serialize(_subjectMappings);
+        Preferences.Default.Set(SubjectMappingsPreferenceKey, raw);
     }
 }

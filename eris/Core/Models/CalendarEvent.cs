@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 public class CalendarEvent
 {
     public string Subject      { get; set; } = string.Empty;
+    /// <summary>Tag manuale opzionale applicato tramite mapping subject-based.</summary>
+    public string? Tag         { get; set; }
     /// <summary>Prima categoria assegnata all'evento (può essere null).</summary>
     public string? Category    { get; set; }
     /// <summary>Durata in ore (calcolata da start/end UTC restituiti da Graph o DTSTART/DTEND ICS).</summary>

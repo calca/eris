@@ -68,6 +68,27 @@
   <data name="GenerateReport" xml:space="preserve">
     <value>▶  Generate Report</value>
   </data>
+  <data name="GenerateReportWithMapping" xml:space="preserve">
+    <value>Generate report with mapping</value>
+  </data>
+  <data name="MappingPageTitle" xml:space="preserve">
+    <value>Review meetings mapping</value>
+  </data>
+  <data name="MappingIncludeHeader" xml:space="preserve">
+    <value>Include</value>
+  </data>
+  <data name="MappingSubjectHeader" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="MappingTagHeader" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="MappingTagPlaceholder" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="MappingBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
   <data name="Copy" xml:space="preserve">
     <value>Copy</value>
   </data>
