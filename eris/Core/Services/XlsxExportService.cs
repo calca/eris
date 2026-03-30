@@ -80,6 +80,7 @@ public sealed class XlsxExportService : IExportService
         double total = events.Sum(e => e.DurationHours);
         int totalMeetings = events.Count;
         double percentBase = weeklyHours > 0 ? weeklyHours : total;
+        double internalHoursTotal = Math.Max(0, weeklyHours - total);
 
         // Monte ore
         ws.Cell(1, 1).Value = "Monte ore settimanale";
@@ -97,8 +98,11 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(3, 6).Value = "Meeting";
         ws.Cell(3, 7).Value = "Ore";
         ws.Cell(3, 8).Value = "%";
+        ws.Cell(3, 9).Value = "% Meeting";
+        ws.Cell(3, 10).Value = "Ore Interne";
+        ws.Cell(3, 11).Value = "Ore Totali";
 
-        var headerRange = ws.Range(3, 1, 3, 8);
+        var headerRange = ws.Range(3, 1, 3, 11);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -126,6 +130,8 @@ public sealed class XlsxExportService : IExportService
                     Tag        = g.Key.Tag,
                     MeetingCount = g.Count(),
                     TotalHours = hours,
+                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
+                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
                     Percentage = FormatPercent(hours, percentBase),
                 };
             })
@@ -144,6 +150,11 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 7).Value = r.TotalHours;
             ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
             ws.Cell(row, 8).Value = r.Percentage;
+            ws.Cell(row, 9).Value = FormatPercent(r.TotalHours, total);
+            ws.Cell(row, 10).Value = r.InternalHours;
+            ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 11).Value = r.TotalSpentHours;
+            ws.Cell(row, 11).Style.NumberFormat.Format = "0.00";
             row++;
         }
 
@@ -157,6 +168,14 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(row, 7).Style.Font.Bold = true;
         ws.Cell(row, 8).Value = FormatPercent(total, percentBase);
         ws.Cell(row, 8).Style.Font.Bold = true;
+        ws.Cell(row, 9).Value = FormatPercent(total, total);
+        ws.Cell(row, 9).Style.Font.Bold = true;
+        ws.Cell(row, 10).Value = Math.Round(internalHoursTotal, 2);
+        ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
+        ws.Cell(row, 10).Style.Font.Bold = true;
+        ws.Cell(row, 11).Value = Math.Round(total + internalHoursTotal, 2);
+        ws.Cell(row, 11).Style.NumberFormat.Format = "0.00";
+        ws.Cell(row, 11).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();
     }
@@ -168,6 +187,7 @@ public sealed class XlsxExportService : IExportService
         double total = events.Sum(e => e.DurationHours);
         int totalMeetings = events.Count;
         double percentBase = weeklyHours > 0 ? weeklyHours : total;
+        double internalHoursTotal = Math.Max(0, weeklyHours - total);
 
         ws.Cell(1, 1).Value = "Monte ore settimanale";
         ws.Cell(1, 1).Style.Font.Bold = true;
@@ -179,8 +199,11 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(3, 2).Value = "Meeting";
         ws.Cell(3, 3).Value = "Ore";
         ws.Cell(3, 4).Value = "%";
+        ws.Cell(3, 5).Value = "% Meeting";
+        ws.Cell(3, 6).Value = "Ore Interne";
+        ws.Cell(3, 7).Value = "Ore Totali";
 
-        var headerRange = ws.Range(3, 1, 3, 4);
+        var headerRange = ws.Range(3, 1, 3, 7);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -195,6 +218,8 @@ public sealed class XlsxExportService : IExportService
                     Tag = g.Key,
                     MeetingCount = g.Count(),
                     TotalHours = hours,
+                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
+                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
                     Percentage = FormatPercent(hours, percentBase),
                 };
             })
@@ -209,6 +234,11 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 3).Value = r.TotalHours;
             ws.Cell(row, 3).Style.NumberFormat.Format = "0.00";
             ws.Cell(row, 4).Value = r.Percentage;
+            ws.Cell(row, 5).Value = FormatPercent(r.TotalHours, total);
+            ws.Cell(row, 6).Value = r.InternalHours;
+            ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 7).Value = r.TotalSpentHours;
+            ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
             row++;
         }
 
@@ -221,10 +251,26 @@ public sealed class XlsxExportService : IExportService
         ws.Cell(row, 3).Style.Font.Bold = true;
         ws.Cell(row, 4).Value = FormatPercent(total, percentBase);
         ws.Cell(row, 4).Style.Font.Bold = true;
+        ws.Cell(row, 5).Value = FormatPercent(total, total);
+        ws.Cell(row, 5).Style.Font.Bold = true;
+        ws.Cell(row, 6).Value = Math.Round(internalHoursTotal, 2);
+        ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
+        ws.Cell(row, 6).Style.Font.Bold = true;
+        ws.Cell(row, 7).Value = Math.Round(total + internalHoursTotal, 2);
+        ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
+        ws.Cell(row, 7).Style.Font.Bold = true;
 
         ws.Columns().AdjustToContents();
     }
 
     private static string FormatPercent(double value, double total)
         => total > 0 ? $"{value / total * 100:F1}%" : "0%";
+
+    private static double AllocateInternalHours(double rowHours, double totalMeetingHours, double internalHoursTotal)
+    {
+        if (rowHours <= 0 || totalMeetingHours <= 0 || internalHoursTotal <= 0)
+            return 0;
+
+        return Math.Round(internalHoursTotal * (rowHours / totalMeetingHours), 2);
+    }
 }

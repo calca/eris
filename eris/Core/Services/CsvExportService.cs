@@ -85,6 +85,7 @@ public sealed class CsvExportService : IExportService
         double total = events.Sum(e => e.DurationHours);
         int totalMeetings = events.Count;
         double percentBase = weeklyHours > 0 ? weeklyHours : total;
+        double internalHoursTotal = Math.Max(0, weeklyHours - total);
 
         // Raggruppa ogni evento per la chiave di aggregazione:
         //   1. Category (se presente)
@@ -113,6 +114,8 @@ public sealed class CsvExportService : IExportService
                     Tag        = g.Key.Tag,
                     MeetingCount = g.Count(),
                     TotalHours = hours,
+                    InternalHours = AllocateInternalHours(hours, total, internalHoursTotal),
+                    TotalSpentHours = hours + AllocateInternalHours(hours, total, internalHoursTotal),
                     Percentage = FormatPercent(hours, percentBase),
                 };
             })
@@ -137,6 +140,9 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Meeting");
         csv.WriteField("Ore");
         csv.WriteField("%");
+        csv.WriteField("% Meeting");
+        csv.WriteField("Ore Interne");
+        csv.WriteField("Ore Totali");
         csv.NextRecord();
 
         foreach (var row in rows)
@@ -149,6 +155,9 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.MeetingCount);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.Percentage);
+            csv.WriteField(FormatPercent(row.TotalHours, total));
+            csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
         }
 
@@ -161,6 +170,9 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(totalMeetings);
         csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.WriteField(FormatPercent(total, percentBase));
+        csv.WriteField(FormatPercent(total, total));
+        csv.WriteField(Math.Round(internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(Math.Round(total + internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
     }
 
@@ -169,6 +181,7 @@ public sealed class CsvExportService : IExportService
         double total = events.Sum(e => e.DurationHours);
         int totalMeetings = events.Count;
         double percentBase = weeklyHours > 0 ? weeklyHours : total;
+        double internalHoursTotal = Math.Max(0, weeklyHours - total);
 
         var rows = events
             .GroupBy(e => e.Tag ?? string.Empty)
@@ -177,6 +190,8 @@ public sealed class CsvExportService : IExportService
                 Tag = g.Key,
                 MeetingCount = g.Count(),
                 TotalHours = Math.Round(g.Sum(e => e.DurationHours), 2),
+                InternalHours = AllocateInternalHours(Math.Round(g.Sum(e => e.DurationHours), 2), total, internalHoursTotal),
+                TotalSpentHours = Math.Round(g.Sum(e => e.DurationHours), 2) + AllocateInternalHours(Math.Round(g.Sum(e => e.DurationHours), 2), total, internalHoursTotal),
                 Percentage = FormatPercent(Math.Round(g.Sum(e => e.DurationHours), 2), percentBase),
             })
             .OrderByDescending(r => r.TotalHours)
@@ -194,6 +209,9 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Meeting");
         csv.WriteField("Ore");
         csv.WriteField("%");
+        csv.WriteField("% Meeting");
+        csv.WriteField("Ore Interne");
+        csv.WriteField("Ore Totali");
         csv.NextRecord();
 
         foreach (var row in rows)
@@ -202,6 +220,9 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.MeetingCount);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.Percentage);
+            csv.WriteField(FormatPercent(row.TotalHours, total));
+            csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.NextRecord();
         }
 
@@ -209,7 +230,18 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(totalMeetings);
         csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.WriteField(FormatPercent(total, percentBase));
+        csv.WriteField(FormatPercent(total, total));
+        csv.WriteField(Math.Round(internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(Math.Round(total + internalHoursTotal, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.NextRecord();
+    }
+
+    private static double AllocateInternalHours(double rowHours, double totalMeetingHours, double internalHoursTotal)
+    {
+        if (rowHours <= 0 || totalMeetingHours <= 0 || internalHoursTotal <= 0)
+            return 0;
+
+        return Math.Round(internalHoursTotal * (rowHours / totalMeetingHours), 2);
     }
 
     private static string FormatPercent(double value, double total)

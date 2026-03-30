@@ -10,5 +10,7 @@ public class CategorySummary
     public string Tag        { get; set; } = string.Empty;
     public int MeetingCount  { get; set; }
     public double TotalHours { get; set; }
+    public double InternalHours { get; set; }
+    public double TotalSpentHours { get; set; }
     public string Percentage { get; set; } = string.Empty;
 }
