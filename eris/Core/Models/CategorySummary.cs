@@ -8,6 +8,7 @@ public class CategorySummary
     public string Project    { get; set; } = string.Empty;
     public string Topic      { get; set; } = string.Empty;
     public string Tag        { get; set; } = string.Empty;
+    public int MeetingCount  { get; set; }
     public double TotalHours { get; set; }
     public string Percentage { get; set; } = string.Empty;
 }

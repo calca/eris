@@ -29,9 +29,11 @@ public sealed class CsvExportService : IExportService
         var ts          = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var detailPath  = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-detail.csv");
         var summaryPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary.csv");
+        var summaryByTagPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary-by-tag.csv");
 
         WriteDetail(events, detailPath);
         WriteSummary(events, summaryPath, weeklyHours);
+        WriteSummaryByTag(events, summaryByTagPath, weeklyHours);
 
         return (detailPath, summaryPath);
     }
@@ -81,6 +83,7 @@ public sealed class CsvExportService : IExportService
     private static void WriteSummary(List<CalendarEvent> events, string path, double weeklyHours)
     {
         double total = events.Sum(e => e.DurationHours);
+        int totalMeetings = events.Count;
         double percentBase = weeklyHours > 0 ? weeklyHours : total;
 
         // Raggruppa ogni evento per la chiave di aggregazione:
@@ -108,6 +111,7 @@ public sealed class CsvExportService : IExportService
                     Project    = g.Key.Project,
                     Topic      = g.Key.Topic,
                     Tag        = g.Key.Tag,
+                    MeetingCount = g.Count(),
                     TotalHours = hours,
                     Percentage = FormatPercent(hours, percentBase),
                 };
@@ -130,6 +134,7 @@ public sealed class CsvExportService : IExportService
         csv.WriteField("Progetto");
         csv.WriteField("Topic");
         csv.WriteField("Tag");
+        csv.WriteField("Meeting");
         csv.WriteField("Ore");
         csv.WriteField("%");
         csv.NextRecord();
@@ -141,6 +146,7 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.Project);
             csv.WriteField(row.Topic);
             csv.WriteField(row.Tag);
+            csv.WriteField(row.MeetingCount);
             csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
             csv.WriteField(row.Percentage);
             csv.NextRecord();
@@ -152,6 +158,55 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
         csv.WriteField("TOTALE");
+        csv.WriteField(totalMeetings);
+        csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(FormatPercent(total, percentBase));
+        csv.NextRecord();
+    }
+
+    private static void WriteSummaryByTag(List<CalendarEvent> events, string path, double weeklyHours)
+    {
+        double total = events.Sum(e => e.DurationHours);
+        int totalMeetings = events.Count;
+        double percentBase = weeklyHours > 0 ? weeklyHours : total;
+
+        var rows = events
+            .GroupBy(e => e.Tag ?? string.Empty)
+            .Select(g => new CategorySummary
+            {
+                Tag = g.Key,
+                MeetingCount = g.Count(),
+                TotalHours = Math.Round(g.Sum(e => e.DurationHours), 2),
+                Percentage = FormatPercent(Math.Round(g.Sum(e => e.DurationHours), 2), percentBase),
+            })
+            .OrderByDescending(r => r.TotalHours)
+            .ToList();
+
+        using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+        using var csv = new CsvWriter(sw, SemicolonConfig);
+
+        csv.WriteField("Monte ore settimanale");
+        csv.WriteField(weeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.NextRecord();
+        csv.NextRecord();
+
+        csv.WriteField("Tag");
+        csv.WriteField("Meeting");
+        csv.WriteField("Ore");
+        csv.WriteField("%");
+        csv.NextRecord();
+
+        foreach (var row in rows)
+        {
+            csv.WriteField(row.Tag);
+            csv.WriteField(row.MeetingCount);
+            csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.Percentage);
+            csv.NextRecord();
+        }
+
+        csv.WriteField("TOTALE");
+        csv.WriteField(totalMeetings);
         csv.WriteField(Math.Round(total, 2).ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
         csv.WriteField(FormatPercent(total, percentBase));
         csv.NextRecord();
