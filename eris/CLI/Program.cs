@@ -1,5 +1,4 @@
 using System.CommandLine;
-using Microsoft.Identity.Client;
 using eris.Core.Models;
 using eris.Core.Services;
 using Spectre.Console;
@@ -134,31 +133,24 @@ return await rootCommand.InvokeAsync(args);
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-PublicClientApplicationBuilder ConfigureAuthority(PublicClientApplicationBuilder builder, string tenantId)
-{
-    if (string.IsNullOrWhiteSpace(tenantId) ||
-        tenantId.Equals("organizations", StringComparison.OrdinalIgnoreCase))
-        return builder.WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs);
-
-    if (tenantId.Equals("common", StringComparison.OrdinalIgnoreCase))
-        return builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount);
-
-    if (tenantId.Equals("consumers", StringComparison.OrdinalIgnoreCase))
-        return builder.WithAuthority(AadAuthorityAudience.PersonalMicrosoftAccount);
-
-    return builder.WithAuthority(AzureCloudInstance.AzurePublic, tenantId);
-}
-
 (AppConfig Config, GraphAuthService Auth) BuildAuthService(string? configPath)
 {
     var appConfig = ConfigLoader.Load(configPath);
-    var pca = ConfigureAuthority(
-            PublicClientApplicationBuilder.Create(appConfig.ClientId),
-            appConfig.TenantId)
-        .WithRedirectUri("http://localhost")
-        .Build();
 
-    return (appConfig, new GraphAuthService(pca, appConfig.Scopes));
+    try
+    {
+        var pca = new GraphAuthClientFactory().Create(appConfig);
+        return (appConfig, new GraphAuthService(pca, appConfig.Scopes));
+    }
+    catch (InvalidOperationException ex) when (
+        ex.Message.Contains("AzureAd:ClientId", StringComparison.OrdinalIgnoreCase) ||
+        ex.Message.Contains("AzureAd:TenantId", StringComparison.OrdinalIgnoreCase))
+    {
+        var configSource = string.IsNullOrWhiteSpace(configPath) ? "appsettings.json" : configPath;
+        throw new InvalidOperationException(
+            $"Configurazione Azure AD non valida in '{configSource}'. {ex.Message}",
+            ex);
+    }
 }
 
 async Task<int> RunInteractiveAsync()

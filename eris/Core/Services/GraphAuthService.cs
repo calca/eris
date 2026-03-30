@@ -14,6 +14,12 @@ public sealed class GraphAuthService
 
     public GraphAuthService(IPublicClientApplication app, string[] scopes)
     {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(scopes);
+
+        if (scopes.Length == 0)
+            throw new ArgumentException("At least one Graph scope is required.", nameof(scopes));
+
         _app = app;
         _scopes = scopes;
 
@@ -55,33 +61,15 @@ public sealed class GraphAuthService
     }
 
     /// <summary>
-    /// Tenta login silenzioso/interattivo; su Mac Catalyst, in caso di errore interattivo,
-    /// esegue fallback al device code flow.
+    /// Mantiene la compatibilita con il vecchio punto di ingresso, ma usa solo
+    /// silent + interactive (nessun device code flow).
     /// </summary>
     public async Task<string> GetAccessTokenWithMacCatalystFallbackAsync(
         object? parentWindow = null,
         Func<string, Task>? onDeviceCode = null)
     {
-        try
-        {
-            return await GetAccessTokenAsync(parentWindow);
-        }
-        catch (MsalClientException) when (OperatingSystem.IsMacCatalyst())
-        {
-            var result = await _app
-                .AcquireTokenWithDeviceCode(_scopes, deviceCodeResult =>
-                {
-                    if (onDeviceCode is null)
-                        return Task.CompletedTask;
-
-                    var message =
-                        $"Apri {deviceCodeResult.VerificationUrl} e inserisci il codice: {deviceCodeResult.UserCode}";
-                    return onDeviceCode(message);
-                })
-                .ExecuteAsync();
-
-            return result.AccessToken;
-        }
+        _ = onDeviceCode;
+        return await GetAccessTokenAsync(parentWindow);
     }
 
     /// <summary>Restituisce lo username dell'account autenticato (o stringa vuota).</summary>

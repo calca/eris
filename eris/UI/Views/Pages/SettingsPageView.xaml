@@ -145,21 +145,6 @@
                     </HorizontalStackLayout>
                 </Grid>
 
-                <Frame IsVisible="{Binding HasDeviceCode}"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource DeviceCodeBgLight}, Dark={StaticResource DeviceCodeBgDark}}"
-                       BorderColor="#0284c7"
-                       CornerRadius="8"
-                       Padding="12">
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="{x:Static strings:AppStrings.DeviceCodeAuthLabel}"
-                               Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding DeviceCodeMessage}"
-                               TextColor="{StaticResource PrimaryLight}"
-                               FontSize="12"
-                               LineBreakMode="WordWrap" />
-                    </VerticalStackLayout>
-                </Frame>
-
                 <ActivityIndicator IsRunning="{Binding IsBusy}"
                                    IsVisible="{Binding IsBusy}"
                                    Color="{StaticResource Primary}"

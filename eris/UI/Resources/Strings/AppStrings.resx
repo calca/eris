@@ -136,9 +136,6 @@
   <data name="MicrosoftAccountDescription" xml:space="preserve">
     <value>Sign in with your Microsoft 365 account to read events from the Outlook calendar.</value>
   </data>
-  <data name="DeviceCodeAuthLabel" xml:space="preserve">
-    <value>Device code authentication:</value>
-  </data>
   <data name="OutputFolderDescription" xml:space="preserve">
     <value>Report files will be saved in this folder.</value>
   </data>

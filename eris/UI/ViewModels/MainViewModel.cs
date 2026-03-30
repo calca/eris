@@ -20,7 +20,9 @@ public partial class MainViewModel : ObservableObject
 {
     private const string SubjectMappingsPreferenceKey = "SubjectMappingsBySource";
 
-    private readonly GraphAuthService _authService;
+    private readonly IGraphAuthClientFactory _authClientFactory;
+    private readonly AppConfig _appConfig;
+    private GraphAuthService? _authService;
     private SubjectMappingCollection _subjectMappings = new();
     private ReportOrchestrator? _pendingOrchestrator;
     private List<CalendarEvent>? _pendingExtractedEvents;
@@ -102,12 +104,6 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _userDisplayName = AppStrings.NotAuthenticated;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasDeviceCode))]
-    private string? _deviceCodeMessage;
-
-    public bool HasDeviceCode => DeviceCodeMessage != null;
 
     public bool IsNotAuthenticated => !IsAuthenticated;
 
@@ -265,6 +261,10 @@ public partial class MainViewModel : ObservableObject
     private bool _isBusy;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
+    private bool _hasAuthConfigurationIssue;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(GenerateMappedReportCommand))]
     private bool _isMappingPageOpen;
 
@@ -331,9 +331,10 @@ public partial class MainViewModel : ObservableObject
     private string _resultPeriodEnd = string.Empty;
     // ─────────────────────────────────────────────────────────────────────────
 
-    public MainViewModel(GraphAuthService authService, AppConfig appConfig)
+    public MainViewModel(IGraphAuthClientFactory authClientFactory, AppConfig appConfig)
     {
-        _authService = authService;
+        _authClientFactory = authClientFactory;
+        _appConfig = appConfig;
         _subjectMappings = LoadSubjectMappings();
         _icsUrl = Preferences.Default.Get("IcsUrl", string.Empty);
         _isGraphSelected = Preferences.Default.Get("SourceGraph", false);
@@ -347,6 +348,9 @@ public partial class MainViewModel : ObservableObject
         _isMappingEnabled   = Preferences.Default.Get("IsMappingEnabled", false);
         _subjectTemplates   = LoadSubjectTemplates();
         UpdateWeekDisplay();
+
+        if (IsGraphSelected)
+            ValidateGraphAuthConfiguration();
     }
 
     partial void OnWeeklyWorkingHoursChanged(double value)
@@ -392,21 +396,20 @@ public partial class MainViewModel : ObservableObject
     private async Task LoginAsync()
     {
         IsBusy = true;
-        DeviceCodeMessage = null;
+
+        if (!ValidateGraphAuthConfiguration())
+        {
+            IsBusy = false;
+            return;
+        }
 
         try
         {
-            await _authService.GetAccessTokenWithMacCatalystFallbackAsync(
-                GetPlatformParentWindow(),
-                message =>
-                {
-                    MainThread.BeginInvokeOnMainThread(() => DeviceCodeMessage = message);
-                    return Task.CompletedTask;
-                });
+            var authService = GetAuthService();
+            await authService.GetAccessTokenAsync(GetPlatformParentWindow());
 
-            UserDisplayName  = await _authService.GetUserDisplayNameAsync();
+            UserDisplayName  = await authService.GetUserDisplayNameAsync();
             IsAuthenticated  = true;
-            DeviceCodeMessage = null;
             AuthErrorMessage = string.Empty;
             ErrorMessage     = string.Empty;
         }
@@ -420,7 +423,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool CanLogin() => !IsBusy;
+    private bool CanLogin() => !IsBusy && !HasAuthConfigurationIssue;
 
     [RelayCommand]
     private async Task LogoutAsync()
@@ -430,7 +433,6 @@ public partial class MainViewModel : ObservableObject
 
         IsAuthenticated   = false;
         UserDisplayName   = AppStrings.NotAuthenticated;
-        DeviceCodeMessage = null;
         AuthErrorMessage  = string.Empty;
         ShowResult        = false;
         ErrorMessage      = string.Empty;
@@ -537,8 +539,8 @@ public partial class MainViewModel : ObservableObject
     private void SelectSourceGraph()
     {
         IsGraphSelected = true;
-        AuthErrorMessage = string.Empty;
         Preferences.Default.Set("SourceGraph", true);
+        ValidateGraphAuthConfiguration();
     }
 
     [RelayCommand]
@@ -546,6 +548,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsGraphSelected = false;
         AuthErrorMessage = string.Empty;
+        HasAuthConfigurationIssue = false;
         Preferences.Default.Set("SourceGraph", false);
     }
 
@@ -911,12 +914,16 @@ public partial class MainViewModel : ObservableObject
 
         if (IsGraphSelected)
         {
-            var token = await _authService.GetAccessTokenAsync(GetPlatformParentWindow());
+            if (!ValidateGraphAuthConfiguration())
+                throw new InvalidOperationException(AuthErrorMessage);
+
+            var authService = GetAuthService();
+            var token = await authService.GetAccessTokenAsync(GetPlatformParentWindow());
             calendarSource = new CalendarService(token);
             sourceType = ReportSourceType.Graph;
 
             if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
-                UserDisplayName = await _authService.GetUserDisplayNameAsync();
+                UserDisplayName = await authService.GetUserDisplayNameAsync();
 
             sourceIdentifier = string.IsNullOrWhiteSpace(UserDisplayName)
                 ? "graph-account"
@@ -1099,6 +1106,12 @@ public partial class MainViewModel : ObservableObject
     {
         if (IsGraphSelected)
         {
+            if (!ValidateGraphAuthConfiguration())
+            {
+                ErrorMessage = AuthErrorMessage;
+                return null;
+            }
+
             if (!IsAuthenticated)
             {
                 ErrorMessage = AppStrings.AuthenticateToEditTags;
@@ -1107,7 +1120,7 @@ public partial class MainViewModel : ObservableObject
 
             if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
             {
-                UserDisplayName = await _authService.GetUserDisplayNameAsync();
+                UserDisplayName = await GetAuthService().GetUserDisplayNameAsync();
             }
 
             if (string.IsNullOrWhiteSpace(UserDisplayName) || UserDisplayName == AppStrings.NotAuthenticated)
@@ -1126,5 +1139,34 @@ public partial class MainViewModel : ObservableObject
         }
 
         return SourceKeyHasher.Compute(ReportSourceType.Ics, IcsUrl);
+    }
+
+    private bool ValidateGraphAuthConfiguration()
+    {
+        try
+        {
+            _ = _authClientFactory.Create(_appConfig);
+            HasAuthConfigurationIssue = false;
+            AuthErrorMessage = string.Empty;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            HasAuthConfigurationIssue = true;
+            IsAuthenticated = false;
+            UserDisplayName = AppStrings.NotAuthenticated;
+            AuthErrorMessage = string.Format(AppStrings.AuthErrorFormat, ex.Message);
+            _authService = null;
+            return false;
+        }
+    }
+
+    private GraphAuthService GetAuthService()
+    {
+        if (_authService is not null)
+            return _authService;
+
+        _authService = new GraphAuthService(_authClientFactory.Create(_appConfig), _appConfig.Scopes);
+        return _authService;
     }
 }

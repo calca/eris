@@ -5,7 +5,8 @@ namespace eris.Core.Services;
 
 /// <summary>
 /// Carica la configurazione da appsettings.json e/o variabili d'ambiente ERIS_*.
-/// Funziona senza file di config: in quel caso vengono usati i valori di default (Azure CLI public client).
+/// Funziona senza file di config: in quel caso vengono usati i valori di default del Core.
+/// Per autenticazione Graph e necessario fornire un ClientId valido tramite config o environment.
 /// </summary>
 public static class ConfigLoader
 {
@@ -31,15 +32,17 @@ public static class ConfigLoader
         var appConfig = new AppConfig();   // valori di default già impostati
 
         if (config["AzureAd:ClientId"] is { } clientId && !string.IsNullOrWhiteSpace(clientId))
-            appConfig.ClientId = clientId;
+            appConfig.ClientId = clientId.Trim();
 
         if (config["AzureAd:TenantId"] is { } tenantId && !string.IsNullOrWhiteSpace(tenantId))
-            appConfig.TenantId = tenantId;
+            appConfig.TenantId = tenantId.Trim();
 
         var scopes = config.GetSection("AzureAd:Scopes")
                            .GetChildren()
                            .Select(c => c.Value)
                            .OfType<string>()
+                           .Select(scope => scope.Trim())
+                           .Where(scope => scope.Length > 0)
                            .ToArray();
         if (scopes.Length > 0)
             appConfig.Scopes = scopes;

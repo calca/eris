@@ -129,15 +129,29 @@ dotnet run -f net10.0-windows10.0.19041.0
 
 ## Autenticazione
 
-L'app usa un Client ID registrato (`14d82eec-...`) con permessi solo `Calendars.Read` e `User.Read`.  
-**Nessuna App Registration richiesta da parte dell'utente.** Funziona con account personali (Outlook.com) e aziendali (M365).
+Per usare Microsoft Graph con eris devi configurare una **App Registration dedicata** in Microsoft Entra ID.
+
+- Account supportati: personali Outlook + aziendali/scolastici M365
+- Flusso: MSAL interactive login (browser) + silent token cache
+- Permessi minimi: `Calendars.Read`, `User.Read`
+- Redirect URI richiesto: `http://localhost` (Mobile and desktop applications)
 
 ### Flusso
 
 1. Prima apertura → si apre il browser con la pagina di login Microsoft
 2. Accetta i permessi `Calendars.Read` e `User.Read`
 3. Il token viene salvato localmente (MSAL token cache) — i login successivi sono silenziosi
-4. Fallback headless (SSH/WSL): viene mostrato un codice dispositivo da usare su qualsiasi browser
+
+Guida completa setup Azure Entra ID: [docs/azure-entra-setup.md](docs/azure-entra-setup.md)
+
+### Onboarding rapido
+
+1. Copia il template CLI da [eris/CLI/appsettings.template.json](eris/CLI/appsettings.template.json) in `eris/CLI/appsettings.json`.
+2. Inserisci il tuo `AzureAd:ClientId` (App Registration dedicata).
+3. Lascia `TenantId` su `common` se vuoi supportare account personali + aziendali.
+4. (Opzionale) prepara anche la configurazione UI partendo da [eris/UI/appsettings.template.json](eris/UI/appsettings.template.json).
+
+Per i dettagli completi dei passaggi Azure, usa [docs/azure-entra-setup.md](docs/azure-entra-setup.md).
 
 ### Override configurazione
 
@@ -146,7 +160,7 @@ L'app usa un Client ID registrato (`14d82eec-...`) con permessi solo `Calendars.
 {
   "AzureAd": {
     "ClientId": "IL-TUO-CLIENT-ID",
-    "TenantId": "IL-TUO-TENANT-ID"
+    "TenantId": "common"
   }
 }
 ```
@@ -154,8 +168,8 @@ L'app usa un Client ID registrato (`14d82eec-...`) con permessi solo `Calendars.
 Oppure tramite variabili d'ambiente:
 
 ```bash
-export OWREPORT_AzureAd__ClientId="xxxx"
-export OWREPORT_AzureAd__TenantId="yyyy"
+export ERIS_AzureAd__ClientId="xxxx"
+export ERIS_AzureAd__TenantId="common"
 ```
 
 ---
