@@ -81,6 +81,7 @@ public sealed class XlsxExportService : IExportService
     private static void WriteSummary(XLWorkbook wb, ExportMetricsSnapshot metrics, ExportLocalization localization)
     {
         var ws = wb.Worksheets.Add(localization.Get("SummarySheetName"));
+        const int dataStartRow = 4;
 
         // Monte ore
         ws.Cell(1, 1).Value = localization.Get("WeeklyHours");
@@ -107,7 +108,7 @@ public sealed class XlsxExportService : IExportService
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
 
-        int row = 4;
+        int row = dataStartRow;
         foreach (var r in metrics.SummaryRows)
         {
             ws.Cell(row, 1).Value = r.Category;
@@ -118,31 +119,45 @@ public sealed class XlsxExportService : IExportService
             ws.Cell(row, 6).Value = r.MeetingCount;
             ws.Cell(row, 7).Value = r.TotalHours;
             ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 8).Value = r.ShareOfWeeklyHours;
-            ws.Cell(row, 9).Value = r.ShareOfMeetingHours;
-            ws.Cell(row, 10).Value = r.InternalHours;
+            ws.Cell(row, 8).FormulaA1 = $"IF($B$1>0,G{row}/$B$1,IFERROR(G{row}/SUM($G${dataStartRow}:$G${row - 1}),0))";
+            ws.Cell(row, 8).Style.NumberFormat.Format = "0.0%";
+            ws.Cell(row, 9).FormulaA1 = $"IFERROR(G{row}/SUM($G${dataStartRow}:$G${row - 1}),0)";
+            ws.Cell(row, 9).Style.NumberFormat.Format = "0.0%";
+            ws.Cell(row, 10).FormulaA1 = $"MAX($B$1-SUM($G${dataStartRow}:$G${row - 1}),0)*IFERROR(G{row}/SUM($G${dataStartRow}:$G${row - 1}),0)";
             ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 11).Value = r.TotalSpentHours;
+            ws.Cell(row, 11).FormulaA1 = $"G{row}+J{row}";
             ws.Cell(row, 11).Style.NumberFormat.Format = "0.00";
             row++;
         }
 
+        var dataEndRow = row - 1;
+        var hasDataRows = dataEndRow >= dataStartRow;
+
+        if (hasDataRows)
+            ws.Range(3, 1, dataEndRow, 11).SetAutoFilter();
+        else
+            ws.Range(3, 1, 3, 11).SetAutoFilter();
+
         // Riga TOTALE
         ws.Cell(row, 5).Value = localization.Get("Total");
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = metrics.Totals.MeetingCount;
+        ws.Cell(row, 6).FormulaA1 = hasDataRows ? $"SUBTOTAL(109,$F${dataStartRow}:$F${dataEndRow})" : "0";
         ws.Cell(row, 6).Style.Font.Bold = true;
-        ws.Cell(row, 7).Value = metrics.Totals.MeetingHours;
+        ws.Cell(row, 7).FormulaA1 = hasDataRows ? $"SUBTOTAL(109,$G${dataStartRow}:$G${dataEndRow})" : "0";
         ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 7).Style.Font.Bold = true;
-        ws.Cell(row, 8).Value = metrics.Totals.ShareOfWeeklyHours;
+        ws.Cell(row, 8).FormulaA1 = hasDataRows
+            ? $"IF($B$1>0,G{row}/$B$1,IFERROR(G{row}/SUBTOTAL(109,$G${dataStartRow}:$G${dataEndRow}),0))"
+            : "0";
+        ws.Cell(row, 8).Style.NumberFormat.Format = "0.0%";
         ws.Cell(row, 8).Style.Font.Bold = true;
-        ws.Cell(row, 9).Value = metrics.Totals.ShareOfMeetingHours;
+        ws.Cell(row, 9).FormulaA1 = hasDataRows ? $"IFERROR(G{row}/SUBTOTAL(109,$G${dataStartRow}:$G${dataEndRow}),0)" : "0";
+        ws.Cell(row, 9).Style.NumberFormat.Format = "0.0%";
         ws.Cell(row, 9).Style.Font.Bold = true;
-        ws.Cell(row, 10).Value = metrics.Totals.InternalHours;
+        ws.Cell(row, 10).FormulaA1 = hasDataRows ? $"MAX($B$1-SUBTOTAL(109,$G${dataStartRow}:$G${dataEndRow}),0)" : "MAX($B$1,0)";
         ws.Cell(row, 10).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 10).Style.Font.Bold = true;
-        ws.Cell(row, 11).Value = metrics.Totals.TotalSpentHours;
+        ws.Cell(row, 11).FormulaA1 = $"G{row}+J{row}";
         ws.Cell(row, 11).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 11).Style.Font.Bold = true;
 
@@ -152,6 +167,7 @@ public sealed class XlsxExportService : IExportService
     private static void WriteSummaryByTag(XLWorkbook wb, ExportMetricsSnapshot metrics, ExportLocalization localization)
     {
         var ws = wb.Worksheets.Add(localization.Get("SummaryByTagSheetName"));
+        const int dataStartRow = 4;
 
         ws.Cell(1, 1).Value = localization.Get("WeeklyHours");
         ws.Cell(1, 1).Style.Font.Bold = true;
@@ -172,37 +188,51 @@ public sealed class XlsxExportService : IExportService
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
         headerRange.Style.Font.FontColor = XLColor.White;
 
-        int row = 4;
+        int row = dataStartRow;
         foreach (var r in metrics.SummaryByTagRows)
         {
             ws.Cell(row, 1).Value = r.Tag;
             ws.Cell(row, 2).Value = r.MeetingCount;
             ws.Cell(row, 3).Value = r.TotalHours;
             ws.Cell(row, 3).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 4).Value = r.ShareOfWeeklyHours;
-            ws.Cell(row, 5).Value = r.ShareOfMeetingHours;
-            ws.Cell(row, 6).Value = r.InternalHours;
+            ws.Cell(row, 4).FormulaA1 = $"IF($B$1>0,C{row}/$B$1,IFERROR(C{row}/SUM($C${dataStartRow}:$C${row - 1}),0))";
+            ws.Cell(row, 4).Style.NumberFormat.Format = "0.0%";
+            ws.Cell(row, 5).FormulaA1 = $"IFERROR(C{row}/SUM($C${dataStartRow}:$C${row - 1}),0)";
+            ws.Cell(row, 5).Style.NumberFormat.Format = "0.0%";
+            ws.Cell(row, 6).FormulaA1 = $"MAX($B$1-SUM($C${dataStartRow}:$C${row - 1}),0)*IFERROR(C{row}/SUM($C${dataStartRow}:$C${row - 1}),0)";
             ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 7).Value = r.TotalSpentHours;
+            ws.Cell(row, 7).FormulaA1 = $"C{row}+F{row}";
             ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
             row++;
         }
 
+        var dataEndRow = row - 1;
+        var hasDataRows = dataEndRow >= dataStartRow;
+
+        if (hasDataRows)
+            ws.Range(3, 1, dataEndRow, 7).SetAutoFilter();
+        else
+            ws.Range(3, 1, 3, 7).SetAutoFilter();
+
         ws.Cell(row, 1).Value = localization.Get("Total");
         ws.Cell(row, 1).Style.Font.Bold = true;
-        ws.Cell(row, 2).Value = metrics.Totals.MeetingCount;
+        ws.Cell(row, 2).FormulaA1 = hasDataRows ? $"SUBTOTAL(109,$B${dataStartRow}:$B${dataEndRow})" : "0";
         ws.Cell(row, 2).Style.Font.Bold = true;
-        ws.Cell(row, 3).Value = metrics.Totals.MeetingHours;
+        ws.Cell(row, 3).FormulaA1 = hasDataRows ? $"SUBTOTAL(109,$C${dataStartRow}:$C${dataEndRow})" : "0";
         ws.Cell(row, 3).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 3).Style.Font.Bold = true;
-        ws.Cell(row, 4).Value = metrics.Totals.ShareOfWeeklyHours;
+        ws.Cell(row, 4).FormulaA1 = hasDataRows
+            ? $"IF($B$1>0,C{row}/$B$1,IFERROR(C{row}/SUBTOTAL(109,$C${dataStartRow}:$C${dataEndRow}),0))"
+            : "0";
+        ws.Cell(row, 4).Style.NumberFormat.Format = "0.0%";
         ws.Cell(row, 4).Style.Font.Bold = true;
-        ws.Cell(row, 5).Value = metrics.Totals.ShareOfMeetingHours;
+        ws.Cell(row, 5).FormulaA1 = hasDataRows ? $"IFERROR(C{row}/SUBTOTAL(109,$C${dataStartRow}:$C${dataEndRow}),0)" : "0";
+        ws.Cell(row, 5).Style.NumberFormat.Format = "0.0%";
         ws.Cell(row, 5).Style.Font.Bold = true;
-        ws.Cell(row, 6).Value = metrics.Totals.InternalHours;
+        ws.Cell(row, 6).FormulaA1 = hasDataRows ? $"MAX($B$1-SUBTOTAL(109,$C${dataStartRow}:$C${dataEndRow}),0)" : "MAX($B$1,0)";
         ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 6).Style.Font.Bold = true;
-        ws.Cell(row, 7).Value = metrics.Totals.TotalSpentHours;
+        ws.Cell(row, 7).FormulaA1 = $"C{row}+F{row}";
         ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
         ws.Cell(row, 7).Style.Font.Bold = true;
 
