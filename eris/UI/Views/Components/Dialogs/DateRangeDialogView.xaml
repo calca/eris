@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:eris.UI.ViewModels"
+             xmlns:strings="clr-namespace:eris.UI.Resources.Strings"
+             x:Class="eris.UI.Views.Components.Dialogs.DateRangeDialogView"
+             x:DataType="vm:MainViewModel">
+
+    <Grid IsVisible="{Binding IsDatePickerOpen}"
+          BackgroundColor="{AppThemeBinding Light=#88000000, Dark=#CC000000}">
+        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+               BorderColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+               CornerRadius="16"
+               HasShadow="False"
+               Padding="28"
+               WidthRequest="320"
+               HorizontalOptions="Center"
+               VerticalOptions="Center">
+            <VerticalStackLayout Spacing="16">
+                <Label Text="{x:Static strings:AppStrings.SelectPeriodTitle}"
+                       FontSize="17"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                       HorizontalOptions="Center" />
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{x:Static strings:AppStrings.FromLabel}"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                    <DatePicker Date="{Binding DialogStartDate}"
+                                Format="dd/MM/yyyy"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                                HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{x:Static strings:AppStrings.ToLabel}"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                    <DatePicker Date="{Binding DialogEndDate}"
+                                Format="dd/MM/yyyy"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                                HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="12"
+                      Margin="0,8,0,0">
+                    <Button Grid.Column="0"
+                            Text="{x:Static strings:AppStrings.Cancel}"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding CancelDatePickerCommand}" />
+                    <Button Grid.Column="1"
+                            Text="{x:Static strings:AppStrings.Confirm}"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding ConfirmDatePickerCommand}" />
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentView>

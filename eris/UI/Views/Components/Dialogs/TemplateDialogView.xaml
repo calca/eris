@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:eris.UI.ViewModels"
+             xmlns:strings="clr-namespace:eris.UI.Resources.Strings"
+             x:Class="eris.UI.Views.Components.Dialogs.TemplateDialogView"
+             x:DataType="vm:MainViewModel">
+
+    <Grid IsVisible="{Binding IsTemplateDialogOpen}"
+          BackgroundColor="{AppThemeBinding Light=#88000000, Dark=#CC000000}">
+        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"
+               BorderColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+               CornerRadius="16"
+               HasShadow="False"
+               Padding="24"
+               WidthRequest="420"
+               HorizontalOptions="Center"
+               VerticalOptions="Center">
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{x:Static strings:AppStrings.SubjectFormat}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                       HorizontalOptions="Center" />
+
+                <Label Text="{x:Static strings:AppStrings.SubjectFormatDescription}"
+                       Style="{StaticResource MutedLabel}"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap" />
+
+                <Label Text="{x:Static strings:AppStrings.SubjectFormatExample}"
+                       Style="{StaticResource MutedLabel}"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap" />
+
+                <Label Text="{}&#x7B;Cliente&#x7D; | &#x7B;Progetto&#x7D; | &#x7B;Topic&#x7D;"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalTextAlignment="Center" />
+
+                <CollectionView ItemsSource="{Binding DialogSubjectTemplates}"
+                                MaximumHeightRequest="160">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TemplateItem">
+                            <Grid ColumnDefinitions="*,Auto"
+                                  Padding="4,2"
+                                  ColumnSpacing="8">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Value}"
+                                       VerticalOptions="Center"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Button Grid.Column="1"
+                                        Text="✕"
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        Padding="0"
+                                        FontSize="12"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{StaticResource Error}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentView}}, Path=BindingContext.RemoveDialogTemplateCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Label Text="{x:Static strings:AppStrings.AddTemplateLabel}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                       FontSize="13"
+                       FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto"
+                      ColumnSpacing="8">
+                    <Entry Grid.Column="0"
+                           Text="{Binding NewDialogTemplate}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                           PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                           Placeholder="{}&#x7B;Progetto&#x7D; - &#x7B;Topic&#x7D;"
+                           Keyboard="Default"
+                           FontSize="13" />
+                    <Button Grid.Column="1"
+                            Text="+"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            FontSize="20"
+                            FontAttributes="Bold"
+                            Style="{StaticResource SecondaryBtn}"
+                            Command="{Binding AddDialogTemplateCommand}" />
+                </Grid>
+
+                <Button Text="{x:Static strings:AppStrings.RestoreDefault}"
+                        Style="{StaticResource SecondaryBtn}"
+                        HeightRequest="36"
+                        FontSize="12"
+                        Padding="10,0"
+                        HorizontalOptions="End"
+                        Command="{Binding ResetTemplateDialogCommand}" />
+
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="12"
+                      Margin="0,6,0,0">
+                    <Button Grid.Column="0"
+                            Text="{x:Static strings:AppStrings.Cancel}"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding CancelTemplateDialogCommand}" />
+                    <Button Grid.Column="1"
+                            Text="{x:Static strings:AppStrings.Save}"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="44"
+                            Command="{Binding ApplyTemplateDialogCommand}" />
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentView>

@@ -1,4 +1,4 @@
-namespace eris.UI.Views;
+namespace eris.UI.Views.Components;
 
 public partial class CircularStatView : ContentView
 {

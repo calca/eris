@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "CLI (Debug)",
+            "name": "Eris - CLI (Debug)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build-cli",
@@ -17,7 +17,7 @@
             }
         },
         {
-            "name": "UI (Mac Catalyst)",
+            "name": "Eris - UI (Mac Catalyst)",
             "type": "coreclr",
             "request": "attach",
             "processName": "Eris",

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:eris.UI.ViewModels"
+             xmlns:components="clr-namespace:eris.UI.Views.Components"
+             xmlns:strings="clr-namespace:eris.UI.Resources.Strings"
+             x:Class="eris.UI.Views.Pages.HomePageView"
+             x:DataType="vm:MainViewModel">
+
+    <ScrollView IsVisible="{Binding IsGenerateTab}">
+        <VerticalStackLayout Padding="20,20,20,32" Spacing="0">
+
+            <!-- Banner configurazione mancante -->
+            <Label IsVisible="{Binding IsConfigIncomplete}"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,16">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{x:Static strings:AppStrings.ConfigureBannerText}" />
+                        <Span Text="&#x2197;" FontSize="18" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+            <!-- Logo -->
+            <Image Source="eris_logo.png"
+                   HeightRequest="240"
+                   HorizontalOptions="Center"
+                   Margin="0,12,0,16" />
+
+            <!-- Messaggio benvenuto (visibile solo se config incompleta) -->
+            <VerticalStackLayout IsVisible="{Binding IsConfigIncomplete}" Spacing="8" Margin="0,0,0,24">
+                <Label Text="{x:Static strings:AppStrings.Welcome}"
+                       FontSize="34"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"
+                       Margin="0,12,0,12" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.2*" />
+                        <ColumnDefinition Width="0.6*" />
+                        <ColumnDefinition Width="0.2*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="1"
+                           Text="{x:Static strings:AppStrings.WelcomeDescription}"
+                           FontSize="18"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- Contenuto principale (nascosto se config incompleta) -->
+            <VerticalStackLayout Spacing="0"
+                                 IsVisible="{Binding IsConfigIncomplete, Converter={StaticResource InvertBool}}">
+
+                <!-- Intestazione -->
+                <Label Text="{x:Static strings:AppStrings.ExportMeetingsTitle}"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                       HorizontalTextAlignment="Center"
+                      HorizontalOptions="Fill"
+                       IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                       Margin="0,12,0,24" />
+
+                <Label Text="{x:Static strings:AppStrings.HereIsYourReport}"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                       HorizontalTextAlignment="Center"
+                      HorizontalOptions="Fill"
+                       IsVisible="{Binding ShowResult}"
+                       Margin="0,12,0,24" />
+
+                <!-- ── Periodo (slider) ────────────────────────────────── -->
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0"
+                        HeightRequest="46"
+                    HorizontalOptions="Fill"
+                        Margin="40,0,40,16"
+                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="23" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,*,*">
+                        <Button Grid.Column="0"
+                                Text="{x:Static strings:AppStrings.ThisWeek}"
+                                Command="{Binding SelectThisWeekCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsThisWeekSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Text="{x:Static strings:AppStrings.PreviousWeek}"
+                                Command="{Binding SelectCurrentMonthCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonthSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="2"
+                                Text="{x:Static strings:AppStrings.CustomPeriod}"
+                                Command="{Binding SelectCustomPeriodCommand}"
+                                Margin="4" CornerRadius="19"
+                                FontSize="13" Padding="0">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter Property="TextColor" Value="White" />
+                                    <Setter Property="FontAttributes" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsCustomPeriodSelected}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}" />
+                                    <Setter Property="FontAttributes" Value="None" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Periodo selezionato -->
+                <Border BackgroundColor="Transparent"
+                        Stroke="{AppThemeBinding Light={StaticResource SurfaceVariantLight}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="1.5"
+                    HorizontalOptions="Fill"
+                        Margin="40,4,40,20"
+                        Padding="16,12"
+                        IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="10">
+                        <!-- Riga Lun-Ven -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <ImageButton WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Padding="0"
+                                         VerticalOptions="Center"
+                                         Command="{Binding ToggleWorkWeekCommand}">
+                                <ImageButton.Triggers>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsWorkWeek}" Value="True">
+                                        <Setter Property="Source" Value="week_fading.png" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsWorkWeek}" Value="False">
+                                        <Setter Property="Source" Value="week.png" />
+                                    </DataTrigger>
+                                </ImageButton.Triggers>
+                            </ImageButton>
+                            <Label Text="{Binding WorkWeekLabel}"
+                                   FontSize="15"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleWorkWeekCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+                        <!-- Riga Date -->
+                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <ImageButton WidthRequest="24" HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Padding="0"
+                                         VerticalOptions="Center"
+                                         Command="{Binding OpenDatePickerCommand}"
+                                         IsEnabled="{Binding IsCustomPeriodSelected}">
+                                <ImageButton.Triggers>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsCustomPeriodSelected}" Value="True">
+                                        <Setter Property="Source" Value="calendar_clock.png" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsCustomPeriodSelected}" Value="False">
+                                        <Setter Property="Source" Value="calendar.png" />
+                                    </DataTrigger>
+                                </ImageButton.Triggers>
+                            </ImageButton>
+                            <Label Text="{Binding WeekRangeDisplay}"
+                                   FontSize="15"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceLight}, Dark={StaticResource OnSurfaceDark}}"
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenDatePickerCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ── Pulsante Genera ────────────────────────────────────── -->
+                <Grid HeightRequest="52"
+                      IsVisible="{Binding ShowResult, Converter={StaticResource InvertBool}}"
+                      Margin="40,0,40,12">
+                    <Button Style="{StaticResource PrimaryBtn}"
+                            FontSize="15"
+                            HeightRequest="52"
+                            Command="{Binding GenerateReportCommand}"
+                            HorizontalOptions="Fill">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="False">
+                                <Setter Property="Text" Value="{x:Static strings:AppStrings.GenerateReport}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
+                                <Setter Property="Text" Value="" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                       IsVisible="{Binding IsBusy}"
+                                       Color="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       HeightRequest="26"
+                                       WidthRequest="26" />
+                </Grid>
+
+                <!-- ── Errore ─────────────────────────────────────────────── -->
+                  <components:StatusMessageWithCopyView IsVisible="{Binding HasError}"
+                                         Message="{Binding ErrorMessage}"
+                                         MessageFontSize="17"
+                                         MessageHorizontalTextAlignment="Center"
+                                         Margin="0,0,0,12"
+                                         CopyCommand="{Binding CopyStatusCommand}" />
+
+                <!-- ── Risultato: cerchi statistiche ──────────────────────────── -->
+                <HorizontalStackLayout IsVisible="{Binding ShowResult}"
+                                       HorizontalOptions="Center"
+                                       Spacing="20"
+                                       Margin="0,0,0,8">
+
+                    <!-- Periodo -->
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center"
+                                         WidthRequest="150">
+                        <Label Text="{x:Static strings:AppStrings.PeriodLabel}"
+                               FontSize="11" FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="{Binding ResultPeriodStart}"
+                               FontSize="20" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="–"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceMutedLight}, Dark={StaticResource OnSurfaceMutedDark}}"
+                               HorizontalOptions="Center" />
+                        <Label Text="{Binding ResultPeriodEnd}"
+                               FontSize="20" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource OnBackgroundLight}, Dark={StaticResource OnBackgroundDark}}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <components:CircularStatView IconSource="report_hours.png"
+                                                 StatLabel="{x:Static strings:AppStrings.HoursLabel}"
+                                                 Value="{Binding TotalHours, StringFormat='{0:F1}h'}"
+                                                 Progress="{Binding HoursProgress}" />
+
+                    <components:CircularStatView IconSource="report_meetings.png"
+                                                 StatLabel="{x:Static strings:AppStrings.MeetingsLabel}"
+                                                 Value="{Binding MeetingCount, StringFormat='{0}'}"
+                                                 Progress="{Binding MeetingProgress}" />
+
+                </HorizontalStackLayout>
+
+                <!-- Bottoni post-risultato -->
+                <VerticalStackLayout IsVisible="{Binding ShowResult}" Spacing="8" Margin="0,12,0,12">
+                    <Button Text="{x:Static strings:AppStrings.NewReport}"
+                            Style="{StaticResource SecondaryBtn}"
+                            HeightRequest="52"
+                            FontSize="15"
+                            HorizontalOptions="Fill"
+                            Command="{Binding NuovoReportCommand}" />
+                    <Button Text="{x:Static strings:AppStrings.OpenReport}"
+                            Style="{StaticResource PrimaryBtn}"
+                            HeightRequest="52"
+                            FontSize="15"
+                            HorizontalOptions="Fill"
+                            Command="{Binding OpenResultCommand}" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+            <!-- fine: Contenuto principale -->
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

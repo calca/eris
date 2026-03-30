@@ -74,7 +74,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowIcsHelp()
     {
-        await Application.Current!.Windows[0].Page!.DisplayAlert(
+        await Application.Current!.Windows[0].Page!.DisplayAlertAsync(
             AppStrings.IcsHelpTitle,
             AppStrings.IcsHelpBody,
             AppStrings.Ok);
