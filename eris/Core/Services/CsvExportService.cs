@@ -14,13 +14,6 @@ public sealed class CsvExportService : IExportService
 {
     private static readonly ExportMetricsCalculator MetricsCalculator = new();
 
-    private static readonly CsvConfiguration SemicolonConfig =
-        new(System.Globalization.CultureInfo.InvariantCulture)
-        {
-            Delimiter       = ";",
-            HasHeaderRecord = false,
-        };
-
     public (string DetailPath, string SummaryPath) Export(
         List<CalendarEvent> events,
         string outputFolder,
@@ -33,32 +26,45 @@ public sealed class CsvExportService : IExportService
         var detailPath  = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-detail.csv");
         var summaryPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary.csv");
         var summaryByTagPath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}-summary-by-tag.csv");
-        var metrics = MetricsCalculator.Compute(events, weeklyHours);
+        var localization = ExportLocalization.Current();
+        var metrics = MetricsCalculator.Compute(events, weeklyHours, localization.FormatCulture);
+        var csvConfig = CreateConfiguration(localization);
 
-        WriteDetail(events, detailPath);
-        WriteSummary(summaryPath, metrics);
-        WriteSummaryByTag(summaryByTagPath, metrics);
+        WriteDetail(events, detailPath, csvConfig, localization);
+        WriteSummary(summaryPath, csvConfig, metrics, localization);
+        WriteSummaryByTag(summaryByTagPath, csvConfig, metrics, localization);
 
         return (detailPath, summaryPath);
     }
 
     // ── detail.csv ────────────────────────────────────────────────────────────
 
-    private static void WriteDetail(List<CalendarEvent> events, string path)
+    private static CsvConfiguration CreateConfiguration(ExportLocalization localization)
+        => new(localization.FormatCulture)
+        {
+            Delimiter = localization.CsvDelimiter,
+            HasHeaderRecord = false,
+        };
+
+    private static void WriteDetail(
+        List<CalendarEvent> events,
+        string path,
+        CsvConfiguration config,
+        ExportLocalization localization)
     {
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-        using var csv = new CsvWriter(sw, SemicolonConfig);
+        using var csv = new CsvWriter(sw, config);
 
         // Intestazione
-        csv.WriteField("Data");
-        csv.WriteField("Inizio");
-        csv.WriteField("Fine");
-        csv.WriteField("Categoria");
-        csv.WriteField("Cliente");
-        csv.WriteField("Progetto");
-        csv.WriteField("Topic");
-        csv.WriteField("Tag");
-        csv.WriteField("Ore");
+        csv.WriteField(localization.Get("Date"));
+        csv.WriteField(localization.Get("Start"));
+        csv.WriteField(localization.Get("End"));
+        csv.WriteField(localization.Get("Category"));
+        csv.WriteField(localization.Get("Client"));
+        csv.WriteField(localization.Get("Project"));
+        csv.WriteField(localization.Get("Topic"));
+        csv.WriteField(localization.Get("Tag"));
+        csv.WriteField(localization.Get("Hours"));
         csv.NextRecord();
 
         foreach (var e in events
@@ -68,45 +74,48 @@ public sealed class CsvExportService : IExportService
             .ThenBy(e => e.Project ?? "\uFFFF")
             .ThenBy(e => e.Topic ?? e.Subject))
         {
-            csv.WriteField(e.StartTime?.ToString("dd/MM/yyyy") ?? string.Empty);
-            csv.WriteField(e.StartTime?.ToString("HH:mm") ?? string.Empty);
-            csv.WriteField(e.EndTime?.ToString("HH:mm") ?? string.Empty);
+            csv.WriteField(e.StartTime?.ToString("d", localization.FormatCulture) ?? string.Empty);
+            csv.WriteField(e.StartTime?.ToString("t", localization.FormatCulture) ?? string.Empty);
+            csv.WriteField(e.EndTime?.ToString("t", localization.FormatCulture) ?? string.Empty);
             csv.WriteField(e.Category ?? string.Empty);
             csv.WriteField(e.Client ?? string.Empty);
             csv.WriteField(e.Project ?? string.Empty);
             csv.WriteField(e.Topic ?? e.Subject);
             csv.WriteField(e.Tag ?? string.Empty);
-            csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2",
-                System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(Math.Round(e.DurationHours, 2).ToString("F2", localization.FormatCulture));
             csv.NextRecord();
         }
     }
 
     // ── summary.csv ───────────────────────────────────────────────────────────
 
-    private static void WriteSummary(string path, ExportMetricsSnapshot metrics)
+    private static void WriteSummary(
+        string path,
+        CsvConfiguration config,
+        ExportMetricsSnapshot metrics,
+        ExportLocalization localization)
     {
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-        using var csv = new CsvWriter(sw, SemicolonConfig);
+        using var csv = new CsvWriter(sw, config);
 
         // Monte ore
-        csv.WriteField("Monte ore settimanale");
-        csv.WriteField(metrics.WeeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(localization.Get("WeeklyHours"));
+        csv.WriteField(metrics.WeeklyHours.ToString("F0", localization.FormatCulture));
         csv.NextRecord();
         csv.NextRecord();
 
         // Intestazione
-        csv.WriteField("Categoria");
-        csv.WriteField("Cliente");
-        csv.WriteField("Progetto");
-        csv.WriteField("Topic");
-        csv.WriteField("Tag");
-        csv.WriteField("Meeting");
-        csv.WriteField("Ore");
-        csv.WriteField("%");
-        csv.WriteField("% Meeting");
-        csv.WriteField("Ore Interne");
-        csv.WriteField("Ore Totali");
+        csv.WriteField(localization.Get("Category"));
+        csv.WriteField(localization.Get("Client"));
+        csv.WriteField(localization.Get("Project"));
+        csv.WriteField(localization.Get("Topic"));
+        csv.WriteField(localization.Get("Tag"));
+        csv.WriteField(localization.Get("Meetings"));
+        csv.WriteField(localization.Get("Hours"));
+        csv.WriteField(localization.Get("Percent"));
+        csv.WriteField(localization.Get("MeetingPercent"));
+        csv.WriteField(localization.Get("InternalHours"));
+        csv.WriteField(localization.Get("TotalHours"));
         csv.NextRecord();
 
         foreach (var row in metrics.SummaryRows)
@@ -117,11 +126,11 @@ public sealed class CsvExportService : IExportService
             csv.WriteField(row.Topic);
             csv.WriteField(row.Tag);
             csv.WriteField(row.MeetingCount);
-            csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.TotalHours.ToString("F2", localization.FormatCulture));
             csv.WriteField(row.ShareOfWeeklyHours);
             csv.WriteField(row.ShareOfMeetingHours);
-            csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-            csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.InternalHours.ToString("F2", localization.FormatCulture));
+            csv.WriteField(row.TotalSpentHours.ToString("F2", localization.FormatCulture));
             csv.NextRecord();
         }
 
@@ -130,54 +139,58 @@ public sealed class CsvExportService : IExportService
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
         csv.WriteField(string.Empty);
-        csv.WriteField("TOTALE");
+        csv.WriteField(localization.Get("Total"));
         csv.WriteField(metrics.Totals.MeetingCount);
-        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", localization.FormatCulture));
         csv.WriteField(metrics.Totals.ShareOfWeeklyHours);
         csv.WriteField(metrics.Totals.ShareOfMeetingHours);
-        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", localization.FormatCulture));
+        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", localization.FormatCulture));
         csv.NextRecord();
     }
 
-    private static void WriteSummaryByTag(string path, ExportMetricsSnapshot metrics)
+    private static void WriteSummaryByTag(
+        string path,
+        CsvConfiguration config,
+        ExportMetricsSnapshot metrics,
+        ExportLocalization localization)
     {
         using var sw  = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-        using var csv = new CsvWriter(sw, SemicolonConfig);
+        using var csv = new CsvWriter(sw, config);
 
-        csv.WriteField("Monte ore settimanale");
-        csv.WriteField(metrics.WeeklyHours.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(localization.Get("WeeklyHours"));
+        csv.WriteField(metrics.WeeklyHours.ToString("F0", localization.FormatCulture));
         csv.NextRecord();
         csv.NextRecord();
 
-        csv.WriteField("Tag");
-        csv.WriteField("Meeting");
-        csv.WriteField("Ore");
-        csv.WriteField("%");
-        csv.WriteField("% Meeting");
-        csv.WriteField("Ore Interne");
-        csv.WriteField("Ore Totali");
+        csv.WriteField(localization.Get("Tag"));
+        csv.WriteField(localization.Get("Meetings"));
+        csv.WriteField(localization.Get("Hours"));
+        csv.WriteField(localization.Get("Percent"));
+        csv.WriteField(localization.Get("MeetingPercent"));
+        csv.WriteField(localization.Get("InternalHours"));
+        csv.WriteField(localization.Get("TotalHours"));
         csv.NextRecord();
 
         foreach (var row in metrics.SummaryByTagRows)
         {
             csv.WriteField(row.Tag);
             csv.WriteField(row.MeetingCount);
-            csv.WriteField(row.TotalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.TotalHours.ToString("F2", localization.FormatCulture));
             csv.WriteField(row.ShareOfWeeklyHours);
             csv.WriteField(row.ShareOfMeetingHours);
-            csv.WriteField(row.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-            csv.WriteField(row.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(row.InternalHours.ToString("F2", localization.FormatCulture));
+            csv.WriteField(row.TotalSpentHours.ToString("F2", localization.FormatCulture));
             csv.NextRecord();
         }
 
-        csv.WriteField("TOTALE");
+        csv.WriteField(localization.Get("Total"));
         csv.WriteField(metrics.Totals.MeetingCount);
-        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.MeetingHours.ToString("F2", localization.FormatCulture));
         csv.WriteField(metrics.Totals.ShareOfWeeklyHours);
         csv.WriteField(metrics.Totals.ShareOfMeetingHours);
-        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
-        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+        csv.WriteField(metrics.Totals.InternalHours.ToString("F2", localization.FormatCulture));
+        csv.WriteField(metrics.Totals.TotalSpentHours.ToString("F2", localization.FormatCulture));
         csv.NextRecord();
     }
 }

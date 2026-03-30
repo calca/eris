@@ -5,9 +5,14 @@ namespace eris.Core.ExportServices;
 
 public sealed class ExportMetricsCalculator
 {
-    public ExportMetricsSnapshot Compute(IReadOnlyCollection<CalendarEvent> events, double weeklyHours = 40)
+    public ExportMetricsSnapshot Compute(
+        IReadOnlyCollection<CalendarEvent> events,
+        double weeklyHours = 40,
+        CultureInfo? culture = null)
     {
         ArgumentNullException.ThrowIfNull(events);
+
+        culture ??= CultureInfo.CurrentCulture;
 
         var totalMeetingHours = events.Sum(e => e.DurationHours);
         var totalMeetings = events.Count;
@@ -40,8 +45,8 @@ public sealed class ExportMetricsCalculator
                     Tag: g.Key.Tag,
                     MeetingCount: g.Count(),
                     TotalHours: hours,
-                    ShareOfWeeklyHours: FormatPercent(hours, percentBase),
-                    ShareOfMeetingHours: FormatPercent(hours, totalMeetingHours),
+                        ShareOfWeeklyHours: FormatPercent(hours, percentBase, culture),
+                        ShareOfMeetingHours: FormatPercent(hours, totalMeetingHours, culture),
                     InternalHours: internalHours,
                     TotalSpentHours: hours + internalHours);
             })
@@ -59,8 +64,8 @@ public sealed class ExportMetricsCalculator
                     Tag: g.Key,
                     MeetingCount: g.Count(),
                     TotalHours: hours,
-                    ShareOfWeeklyHours: FormatPercent(hours, percentBase),
-                    ShareOfMeetingHours: FormatPercent(hours, totalMeetingHours),
+                        ShareOfWeeklyHours: FormatPercent(hours, percentBase, culture),
+                        ShareOfMeetingHours: FormatPercent(hours, totalMeetingHours, culture),
                     InternalHours: internalHours,
                     TotalSpentHours: hours + internalHours);
             })
@@ -70,8 +75,8 @@ public sealed class ExportMetricsCalculator
         var totals = new ExportSummaryTotals(
             MeetingCount: totalMeetings,
             MeetingHours: Math.Round(totalMeetingHours, 2),
-            ShareOfWeeklyHours: FormatPercent(totalMeetingHours, percentBase),
-            ShareOfMeetingHours: FormatPercent(totalMeetingHours, totalMeetingHours),
+            ShareOfWeeklyHours: FormatPercent(totalMeetingHours, percentBase, culture),
+            ShareOfMeetingHours: FormatPercent(totalMeetingHours, totalMeetingHours, culture),
             InternalHours: Math.Round(internalHoursTotal, 2),
             TotalSpentHours: Math.Round(totalMeetingHours + internalHoursTotal, 2));
 
@@ -91,8 +96,8 @@ public sealed class ExportMetricsCalculator
         return Math.Round(internalHoursTotal * (rowHours / totalMeetingHours), 2);
     }
 
-    private static string FormatPercent(double value, double total)
+    private static string FormatPercent(double value, double total, CultureInfo culture)
         => total > 0
-            ? string.Create(CultureInfo.InvariantCulture, $"{value / total * 100:F1}%")
+            ? string.Create(culture, $"{value / total * 100:F1}%")
             : "0%";
 }

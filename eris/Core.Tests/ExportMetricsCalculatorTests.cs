@@ -1,5 +1,6 @@
 using eris.Core.ExportServices;
 using eris.Core.Models;
+using System.Globalization;
 
 namespace Core.Tests;
 
@@ -20,7 +21,8 @@ public sealed class ExportMetricsCalculatorTests
         };
 
         // Act
-        var result = calculator.Compute(events, weeklyHours: 10);
+        var culture = CultureInfo.GetCultureInfo("en-US");
+        var result = calculator.Compute(events, weeklyHours: 10, culture: culture);
 
         // Assert
         Assert.Equal(3, result.SummaryRows.Count);
@@ -88,19 +90,20 @@ public sealed class ExportMetricsCalculatorTests
         };
 
         // Act
-        var result = calculator.Compute(events, weeklyHours: 10);
+        var culture = CultureInfo.GetCultureInfo("en-US");
+        var result = calculator.Compute(events, weeklyHours: 10, culture: culture);
 
         // Assert
         var rowA = result.SummaryByTagRows.Single(r => r.Tag == "TagA");
-        Assert.Equal("30.0%", rowA.ShareOfWeeklyHours);
-        Assert.Equal("54.5%", rowA.ShareOfMeetingHours);
+        Assert.Equal(FormatPercent(30.0, culture), rowA.ShareOfWeeklyHours);
+        Assert.Equal(FormatPercent(54.5, culture), rowA.ShareOfMeetingHours);
         Assert.Equal(2.45, rowA.InternalHours, 2);
         Assert.Equal(5.45, rowA.TotalSpentHours, 2);
 
         Assert.Equal(3, result.Totals.MeetingCount);
         Assert.Equal(5.5, result.Totals.MeetingHours, 3);
-        Assert.Equal("55.0%", result.Totals.ShareOfWeeklyHours);
-        Assert.Equal("100.0%", result.Totals.ShareOfMeetingHours);
+        Assert.Equal(FormatPercent(55.0, culture), result.Totals.ShareOfWeeklyHours);
+        Assert.Equal(FormatPercent(100.0, culture), result.Totals.ShareOfMeetingHours);
         Assert.Equal(4.5, result.Totals.InternalHours, 3);
         Assert.Equal(10.0, result.Totals.TotalSpentHours, 3);
     }
@@ -116,17 +119,18 @@ public sealed class ExportMetricsCalculatorTests
         };
 
         // Act
-        var result = calculator.Compute(events, weeklyHours: 0);
+        var culture = CultureInfo.GetCultureInfo("en-US");
+        var result = calculator.Compute(events, weeklyHours: 0, culture: culture);
 
         // Assert
         var row = Assert.Single(result.SummaryByTagRows);
-        Assert.Equal("100.0%", row.ShareOfWeeklyHours);
-        Assert.Equal("100.0%", row.ShareOfMeetingHours);
+        Assert.Equal(FormatPercent(100.0, culture), row.ShareOfWeeklyHours);
+        Assert.Equal(FormatPercent(100.0, culture), row.ShareOfMeetingHours);
         Assert.Equal(0, row.InternalHours);
         Assert.Equal(2.0, row.TotalSpentHours, 3);
 
-        Assert.Equal("100.0%", result.Totals.ShareOfWeeklyHours);
-        Assert.Equal("100.0%", result.Totals.ShareOfMeetingHours);
+        Assert.Equal(FormatPercent(100.0, culture), result.Totals.ShareOfWeeklyHours);
+        Assert.Equal(FormatPercent(100.0, culture), result.Totals.ShareOfMeetingHours);
         Assert.Equal(0, result.Totals.InternalHours);
     }
 
@@ -137,16 +141,42 @@ public sealed class ExportMetricsCalculatorTests
         var calculator = new ExportMetricsCalculator();
 
         // Act
-        var result = calculator.Compute([], weeklyHours: 40);
+        var culture = CultureInfo.GetCultureInfo("en-US");
+        var result = calculator.Compute([], weeklyHours: 40, culture: culture);
 
         // Assert
         Assert.Empty(result.SummaryRows);
         Assert.Empty(result.SummaryByTagRows);
         Assert.Equal(0, result.Totals.MeetingCount);
         Assert.Equal(0, result.Totals.MeetingHours, 3);
-        Assert.Equal("0.0%", result.Totals.ShareOfWeeklyHours);
+        Assert.Equal(FormatPercent(0.0, culture), result.Totals.ShareOfWeeklyHours);
         Assert.Equal("0%", result.Totals.ShareOfMeetingHours);
         Assert.Equal(40, result.Totals.InternalHours, 3);
         Assert.Equal(40, result.Totals.TotalSpentHours, 3);
     }
+
+    [Theory]
+    [InlineData("en-US", "30.0%")]
+    [InlineData("it-IT", "30,0%")]
+    public void Compute_WithDifferentCultures_FormatsPercentagesByCulture(string cultureName, string expectedPercent)
+    {
+        // Arrange
+        var calculator = new ExportMetricsCalculator();
+        var culture = CultureInfo.GetCultureInfo(cultureName);
+        var events = new List<CalendarEvent>
+        {
+            new() { Subject = "A", Tag = "TagA", DurationHours = 3.0 },
+            new() { Subject = "B", Tag = "TagB", DurationHours = 7.0 },
+        };
+
+        // Act
+        var result = calculator.Compute(events, weeklyHours: 10, culture: culture);
+
+        // Assert
+        var rowA = result.SummaryByTagRows.Single(r => r.Tag == "TagA");
+        Assert.Equal(expectedPercent, rowA.ShareOfWeeklyHours);
+    }
+
+    private static string FormatPercent(double value, CultureInfo culture)
+        => string.Create(culture, $"{value:F1}%");
 }

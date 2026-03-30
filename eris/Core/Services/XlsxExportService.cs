@@ -22,31 +22,32 @@ public sealed class XlsxExportService : IExportService
 
         var ts       = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var filePath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}.xlsx");
-        var metrics = MetricsCalculator.Compute(events, weeklyHours);
+        var localization = ExportLocalization.Current();
+        var metrics = MetricsCalculator.Compute(events, weeklyHours, localization.FormatCulture);
 
         using var wb = new XLWorkbook();
-        WriteSummaryByTag(wb, metrics);
-        WriteSummary(wb, metrics);
-        WriteDetail(wb, events);
+        WriteSummaryByTag(wb, metrics, localization);
+        WriteSummary(wb, metrics, localization);
+        WriteDetail(wb, events, localization);
         wb.SaveAs(filePath);
 
         return (filePath, filePath);
     }
 
-    private static void WriteDetail(XLWorkbook wb, List<CalendarEvent> events)
+    private static void WriteDetail(XLWorkbook wb, List<CalendarEvent> events, ExportLocalization localization)
     {
-        var ws = wb.Worksheets.Add("Detail");
+        var ws = wb.Worksheets.Add(localization.Get("DetailSheetName"));
 
         // Intestazione
-        ws.Cell(1, 1).Value = "Data";
-        ws.Cell(1, 2).Value = "Inizio";
-        ws.Cell(1, 3).Value = "Fine";
-        ws.Cell(1, 4).Value = "Categoria";
-        ws.Cell(1, 5).Value = "Cliente";
-        ws.Cell(1, 6).Value = "Progetto";
-        ws.Cell(1, 7).Value = "Topic";
-        ws.Cell(1, 8).Value = "Tag";
-        ws.Cell(1, 9).Value = "Ore";
+        ws.Cell(1, 1).Value = localization.Get("Date");
+        ws.Cell(1, 2).Value = localization.Get("Start");
+        ws.Cell(1, 3).Value = localization.Get("End");
+        ws.Cell(1, 4).Value = localization.Get("Category");
+        ws.Cell(1, 5).Value = localization.Get("Client");
+        ws.Cell(1, 6).Value = localization.Get("Project");
+        ws.Cell(1, 7).Value = localization.Get("Topic");
+        ws.Cell(1, 8).Value = localization.Get("Tag");
+        ws.Cell(1, 9).Value = localization.Get("Hours");
 
         var headerRange = ws.Range(1, 1, 1, 9);
         headerRange.Style.Font.Bold = true;
@@ -61,9 +62,9 @@ public sealed class XlsxExportService : IExportService
             .ThenBy(e => e.Project ?? "\uFFFF")
             .ThenBy(e => e.Topic ?? e.Subject))
         {
-            ws.Cell(row, 1).Value = e.StartTime?.ToString("dd/MM/yyyy") ?? string.Empty;
-            ws.Cell(row, 2).Value = e.StartTime?.ToString("HH:mm") ?? string.Empty;
-            ws.Cell(row, 3).Value = e.EndTime?.ToString("HH:mm") ?? string.Empty;
+            ws.Cell(row, 1).Value = e.StartTime?.ToString("d", localization.FormatCulture) ?? string.Empty;
+            ws.Cell(row, 2).Value = e.StartTime?.ToString("t", localization.FormatCulture) ?? string.Empty;
+            ws.Cell(row, 3).Value = e.EndTime?.ToString("t", localization.FormatCulture) ?? string.Empty;
             ws.Cell(row, 4).Value = e.Category ?? string.Empty;
             ws.Cell(row, 5).Value = e.Client ?? string.Empty;
             ws.Cell(row, 6).Value = e.Project ?? string.Empty;
@@ -77,29 +78,29 @@ public sealed class XlsxExportService : IExportService
         ws.Columns().AdjustToContents();
     }
 
-    private static void WriteSummary(XLWorkbook wb, ExportMetricsSnapshot metrics)
+    private static void WriteSummary(XLWorkbook wb, ExportMetricsSnapshot metrics, ExportLocalization localization)
     {
-        var ws = wb.Worksheets.Add("Summary");
+        var ws = wb.Worksheets.Add(localization.Get("SummarySheetName"));
 
         // Monte ore
-        ws.Cell(1, 1).Value = "Monte ore settimanale";
+        ws.Cell(1, 1).Value = localization.Get("WeeklyHours");
         ws.Cell(1, 1).Style.Font.Bold = true;
         ws.Cell(1, 2).Value = metrics.WeeklyHours;
         ws.Cell(1, 2).Style.NumberFormat.Format = "0";
         ws.Cell(1, 2).Style.Font.Bold = true;
 
         // Intestazione
-        ws.Cell(3, 1).Value = "Categoria";
-        ws.Cell(3, 2).Value = "Cliente";
-        ws.Cell(3, 3).Value = "Progetto";
-        ws.Cell(3, 4).Value = "Topic";
-        ws.Cell(3, 5).Value = "Tag";
-        ws.Cell(3, 6).Value = "Meeting";
-        ws.Cell(3, 7).Value = "Ore";
-        ws.Cell(3, 8).Value = "%";
-        ws.Cell(3, 9).Value = "% Meeting";
-        ws.Cell(3, 10).Value = "Ore Interne";
-        ws.Cell(3, 11).Value = "Ore Totali";
+        ws.Cell(3, 1).Value = localization.Get("Category");
+        ws.Cell(3, 2).Value = localization.Get("Client");
+        ws.Cell(3, 3).Value = localization.Get("Project");
+        ws.Cell(3, 4).Value = localization.Get("Topic");
+        ws.Cell(3, 5).Value = localization.Get("Tag");
+        ws.Cell(3, 6).Value = localization.Get("Meetings");
+        ws.Cell(3, 7).Value = localization.Get("Hours");
+        ws.Cell(3, 8).Value = localization.Get("Percent");
+        ws.Cell(3, 9).Value = localization.Get("MeetingPercent");
+        ws.Cell(3, 10).Value = localization.Get("InternalHours");
+        ws.Cell(3, 11).Value = localization.Get("TotalHours");
 
         var headerRange = ws.Range(3, 1, 3, 11);
         headerRange.Style.Font.Bold = true;
@@ -127,7 +128,7 @@ public sealed class XlsxExportService : IExportService
         }
 
         // Riga TOTALE
-        ws.Cell(row, 5).Value = "TOTALE";
+        ws.Cell(row, 5).Value = localization.Get("Total");
         ws.Cell(row, 5).Style.Font.Bold = true;
         ws.Cell(row, 6).Value = metrics.Totals.MeetingCount;
         ws.Cell(row, 6).Style.Font.Bold = true;
@@ -148,23 +149,23 @@ public sealed class XlsxExportService : IExportService
         ws.Columns().AdjustToContents();
     }
 
-    private static void WriteSummaryByTag(XLWorkbook wb, ExportMetricsSnapshot metrics)
+    private static void WriteSummaryByTag(XLWorkbook wb, ExportMetricsSnapshot metrics, ExportLocalization localization)
     {
-        var ws = wb.Worksheets.Add("Summary by Tag");
+        var ws = wb.Worksheets.Add(localization.Get("SummaryByTagSheetName"));
 
-        ws.Cell(1, 1).Value = "Monte ore settimanale";
+        ws.Cell(1, 1).Value = localization.Get("WeeklyHours");
         ws.Cell(1, 1).Style.Font.Bold = true;
         ws.Cell(1, 2).Value = metrics.WeeklyHours;
         ws.Cell(1, 2).Style.NumberFormat.Format = "0";
         ws.Cell(1, 2).Style.Font.Bold = true;
 
-        ws.Cell(3, 1).Value = "Tag";
-        ws.Cell(3, 2).Value = "Meeting";
-        ws.Cell(3, 3).Value = "Ore";
-        ws.Cell(3, 4).Value = "%";
-        ws.Cell(3, 5).Value = "% Meeting";
-        ws.Cell(3, 6).Value = "Ore Interne";
-        ws.Cell(3, 7).Value = "Ore Totali";
+        ws.Cell(3, 1).Value = localization.Get("Tag");
+        ws.Cell(3, 2).Value = localization.Get("Meetings");
+        ws.Cell(3, 3).Value = localization.Get("Hours");
+        ws.Cell(3, 4).Value = localization.Get("Percent");
+        ws.Cell(3, 5).Value = localization.Get("MeetingPercent");
+        ws.Cell(3, 6).Value = localization.Get("InternalHours");
+        ws.Cell(3, 7).Value = localization.Get("TotalHours");
 
         var headerRange = ws.Range(3, 1, 3, 7);
         headerRange.Style.Font.Bold = true;
@@ -187,7 +188,7 @@ public sealed class XlsxExportService : IExportService
             row++;
         }
 
-        ws.Cell(row, 1).Value = "TOTALE";
+        ws.Cell(row, 1).Value = localization.Get("Total");
         ws.Cell(row, 1).Style.Font.Bold = true;
         ws.Cell(row, 2).Value = metrics.Totals.MeetingCount;
         ws.Cell(row, 2).Style.Font.Bold = true;
