@@ -21,8 +21,8 @@ public sealed class XlsxExportService : IExportService
         var filePath = Path.Combine(outputFolder, $"{week.FolderName}_{ts}.xlsx");
 
         using var wb = new XLWorkbook();
-        WriteSummary(wb, events, weeklyHours);
         WriteSummaryByTag(wb, events, weeklyHours);
+        WriteSummary(wb, events, weeklyHours);
         WriteDetail(wb, events);
         wb.SaveAs(filePath);
 
